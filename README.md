@@ -4,7 +4,7 @@ Recreación formativa de la mítica red social tuenti.es en el dominio **tuentid
 
 ## Objetivo del proyecto
 
-Construir un ejemplo real y didáctico de producto social clásico, documentando tanto el resultado como el proceso de trabajo con IA para reutilizarlo en futuros desarrollos.
+Construir un ejemplo real y didáctico de la cásica red social, documentando tanto el resultado como el proceso de trabajo con IA para reutilizarlo en futuros desarrollos.
 
 ## Alcance funcional
 
