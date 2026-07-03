@@ -1,0 +1,30 @@
+# Variables de entorno (nunca subir al repositorio)
+.env
+.env.local
+.env.*.local
+
+# Dependencias
+node_modules/
+vendor/
+
+# Build
+dist/
+build/
+/public/hot
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Uploads / storage local
+storage/uploads/
