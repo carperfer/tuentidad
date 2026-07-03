@@ -1,0 +1,51 @@
+{
+  "name": "tuentidad — Entorno de desarrollo",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/php:1": {
+      "version": "8.3"
+    },
+    "ghcr.io/devcontainers/features/mysql-server:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "bmewburn.vscode-intelephense-client",
+        "felixfbecker.php-debug",
+        "formulahendry.auto-rename-tag",
+        "bradlc.vscode-tailwindcss",
+        "streetsidesoftware.code-spell-checker-spanish",
+        "cweijan.vscode-mysql-client2",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[php]": {
+          "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+        },
+        "editor.tabSize": 2,
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  "postCreateCommand": "if [ -f package.json ]; then npm install; fi",
+
+  "forwardPorts": [3000, 8080, 3306],
+  "portsAttributes": {
+    "3000": { "label": "Frontend (React)", "onAutoForward": "notify" },
+    "8080": { "label": "Backend (PHP)", "onAutoForward": "notify" },
+    "3306": { "label": "MySQL", "onAutoForward": "silent" }
+  },
+
+  "remoteEnv": {
+    "APP_ENV": "development"
+  }
+}
