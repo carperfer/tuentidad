@@ -86,7 +86,14 @@ Qué se publica lo decide la variable del repositorio `DESPLIEGUE`:
 | `landing` (por defecto) | Solo la página de [`landing/`](landing/index.html) |
 | `app` | El paquete de `scripts/build-release.sh` (backend con `vendor/`, SPA compilada) y el `.env` generado a partir de los secrets |
 
-El código fuente, la documentación y la configuración de desarrollo nunca se suben. Las credenciales viven solo en los secrets de GitHub; el `.env` se genera en cada despliegue y nunca pasa por git.
+En OVH la carpeta web del dominio principal es fija (`www/`), así que el despliegue usa dos carpetas del alojamiento:
+
+```
+~/www/          ← solo lo público: la landing, o public/ de la app (SPA, index.php, .htaccess, .ovhconfig)
+~/tuentidad/    ← la aplicación: app/, vendor/, writable/, .env — fuera de la web
+```
+
+En modo `app`, [`scripts/separar-publico.sh`](scripts/separar-publico.sh) divide el paquete y ajusta `index.php` para cargar la aplicación desde `../tuentidad/`. El código fuente, la documentación y la configuración de desarrollo nunca se suben. Las credenciales viven solo en los secrets de GitHub; el `.env` se genera en cada despliegue y nunca pasa por git.
 
 ### Configuración en GitHub
 
@@ -120,25 +127,27 @@ En *Settings › Secrets and variables › Actions*:
 | Variable | Por defecto | Uso |
 |---|---|---|
 | `DESPLIEGUE` | `landing` | `landing` o `app` |
-| `FTP_SERVER_DIR` | `tuentidad/` | Carpeta del alojamiento donde se sube |
+| `FTP_PUBLIC_DIR` | `www/` | Carpeta web del alojamiento |
+| `FTP_SERVER_DIR` | `tuentidad/` | Carpeta de la aplicación, junto a `www/` (nombre simple) |
 | `FTP_PROTOCOL` | `ftps` | `ftps` (cifrado) o `ftp` si el servidor no admite TLS |
 
 Si faltan los secrets de FTP, el workflow avisa y no despliega. Si falta o es inválido algún secret de la aplicación, falla antes de subir nada.
 
 ### Configuración en OVH
 
-- La carpeta raíz del dominio (*Multisitio*) debe ser `tuentidad/public` (o `<FTP_SERVER_DIR>/public`). Así `.env`, `vendor/` y `writable/` quedan fuera de la web.
+- La carpeta raíz del dominio se mantiene en `www/` (no se puede cambiar en el dominio principal).
+- La integración Git de OVH debe estar desactivada para que no compita con el despliegue por FTP.
 - Certificado SSL activado: en producción las cookies son `Secure` y el sitio debe servirse por HTTPS.
-- Si existía una integración Git con el repositorio, hay que desasociarla para que no compita con el despliegue por FTP.
-- OVH lee `.ovhconfig` (PHP 8.3) de la raíz del alojamiento o de la carpeta de primer nivel del multisitio. Si el diagnóstico no muestra PHP 8.3, copia el archivo a la raíz del alojamiento.
+- `.ovhconfig` (PHP 8.3) se sube a `www/` junto con la app. Si el diagnóstico no muestra PHP 8.3, revisa el `.ovhconfig` de la raíz del alojamiento.
+- Los archivos ocultos (`.env`, `.ovhconfig`, estado del FTP) están bloqueados por OVH y por `public/.htaccess`.
 
 ### Diagnóstico del alojamiento
 
-Sube `scripts/ovh-check.php` a `tuentidad/public/` con un cliente FTP (FileZilla) y ábrelo en `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, `.env`, base de datos y SMTP, y se borra solo al terminar.
+Sube `scripts/ovh-check.php` a `www/` con un cliente FTP (FileZilla) y ábrelo en `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, `.env`, base de datos y SMTP, y se borra solo al terminar.
 
 ### Paquete de la aplicación
 
-`scripts/build-release.sh` genera en `release/` el mismo paquete que publica el workflow en modo `app`:
+`scripts/build-release.sh` genera en `release/` el paquete que el workflow publica en modo `app` (después de separarlo con `separar-publico.sh`):
 
 ```
 release/

@@ -7,8 +7,10 @@ name: Deploy
 #   - app: el paquete completo de scripts/build-release.sh con el .env
 #     generado a partir de los secrets (nunca pasa por git)
 #
-# En ambos casos se sube a FTP_SERVER_DIR con la misma estructura, y la carpeta
-# raíz del dominio en OVH debe apuntar a <FTP_SERVER_DIR>/public.
+# La carpeta web de OVH es fija (www/), así que se separa en dos destinos:
+#   - FTP_PUBLIC_DIR (www/): solo lo público (landing, o public/ de la app)
+#   - FTP_SERVER_DIR (tuentidad/): la aplicación (app, vendor, writable, .env),
+#     fuera de la web; index.php se ajusta para cargarla desde ahí
 # Configuración completa en el README (sección Despliegue).
 
 on:
@@ -29,6 +31,8 @@ jobs:
     environment: produccion
     env:
       DESPLIEGUE: ${{ vars.DESPLIEGUE || 'landing' }}
+      FTP_PUBLIC_DIR: ${{ vars.FTP_PUBLIC_DIR || 'www/' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || 'tuentidad/' }}
     steps:
       - name: Comprobar configuración FTP
         id: ftp
@@ -50,8 +54,8 @@ jobs:
       - name: Preparar landing
         if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'landing'
         run: |
-          mkdir -p sitio/public
-          cp -r landing/. sitio/public/
+          mkdir -p sitio/www
+          cp -r landing/. sitio/www/
 
       - uses: shivammathur/setup-php@v2
         if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
@@ -88,9 +92,21 @@ jobs:
         run: |
           ./scripts/build-release.sh
           ./scripts/configurar-env.sh --desde-entorno
-          mv release sitio
+          ./scripts/separar-publico.sh release sitio "$FTP_SERVER_DIR"
 
-      - name: Subir por FTP
+      # Primero la aplicación, para que el nuevo index.php no apunte a código que aún no está
+      - name: Subir aplicación por FTP
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./sitio/app/
+          server-dir: ${{ env.FTP_SERVER_DIR }}
+
+      - name: Subir web pública por FTP
         if: steps.ftp.outputs.configurado == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
@@ -98,5 +114,5 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
-          local-dir: ./sitio/
-          server-dir: ${{ vars.FTP_SERVER_DIR || 'tuentidad/' }}
+          local-dir: ./sitio/www/
+          server-dir: ${{ env.FTP_PUBLIC_DIR }}
