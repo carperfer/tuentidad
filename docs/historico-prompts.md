@@ -105,3 +105,12 @@ Para cada entrada registrar:
   - En modo `app`, el `.env` se genera en el workflow con `configurar-env.sh --desde-entorno` a partir de los secrets, validando cada valor.
   - Sustituye a la integración Git de OVH y a la rama `produccion`, que deja de usarse.
 - **Decisión:** Las credenciales viven solo en GitHub Secrets. Nunca se versiona un `.env` con valores reales.
+
+### 2026-10-01 — Carpeta web fija `www/` en OVH
+
+- **Objetivo:** Adaptar el despliegue a que OVH no permite cambiar la carpeta raíz del dominio principal (`www/`).
+- **Prompt utilizado:** "OVH indica que no puedo cambiar la carpeta principal de www, pero si puedo desactivar el despliegue de git."
+- **Resultado esperado:** Publicar en `www/` sin exponer el código ni el `.env`.
+- **Resultado obtenido:** El workflow sube lo público a `www/` y la aplicación a `tuentidad/` (fuera de la web); `separar-publico.sh` ajusta `index.php` para cargarla desde `../tuentidad/`. Se bloquean los archivos ocultos en `.htaccess`. Probado simulando la estructura de OVH en Apache con MySQL.
+- **Decisión:** Desactivar la integración Git de OVH y desplegar solo por FTP.
+- **Incidencia:** Dos commits se subieron por error directamente a `main` al no comprobar la rama local tras la fusión del PR #4; la web mostró el listado del repositorio hasta que se cambió la rama de OVH a `produccion`. Desde entonces se trabaja siempre en rama y PR.

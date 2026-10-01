@@ -1,6 +1,11 @@
 # Disable directory browsing
 Options -Indexes
 
+# Bloquea archivos ocultos (.env, .ovhconfig, estado del despliegue FTP…)
+<FilesMatch "^\.">
+	Require all denied
+</FilesMatch>
+
 # La SPA es la portada; index.php solo atiende /api
 DirectoryIndex index.html
 
