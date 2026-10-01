@@ -94,3 +94,14 @@ Para cada entrada registrar:
 - **Resultado esperado:** Que al fusionar el Sprint 0 no se publique el código fuente en la web.
 - **Resultado obtenido:** La landing pasa a `landing/`; el workflow `deploy.yml` genera en cada push a `main` la rama `produccion` solo con el contenido publicable. Se crea la rama `produccion` inicial con la landing.
 - **Decisión:** OVH debe desplegar la rama `produccion` en lugar de `main` (cambio en el panel de OVH antes de fusionar el PR del Sprint 0).
+
+### 2026-10-01 — Despliegue por FTP con GitHub Secrets
+
+- **Objetivo:** Desplegar sin SSH y sin guardar credenciales en el repositorio (que es público).
+- **Prompt utilizado:** "parece que no hay SSH y tendre que meter las variables de entorno directamente en el repositorio" → se propone usar GitHub Secrets + FTP → "si".
+- **Resultado esperado:** Despliegue automático en cada push a `main` con las credenciales fuera de git.
+- **Resultado obtenido:**
+  - `deploy.yml` sube por FTP (FTPS por defecto) en cada push a `main`. La variable `DESPLIEGUE` elige entre publicar solo la landing (`landing`, por defecto) o la aplicación completa (`app`).
+  - En modo `app`, el `.env` se genera en el workflow con `configurar-env.sh --desde-entorno` a partir de los secrets, validando cada valor.
+  - Sustituye a la integración Git de OVH y a la rama `produccion`, que deja de usarse.
+- **Decisión:** Las credenciales viven solo en GitHub Secrets. Nunca se versiona un `.env` con valores reales.

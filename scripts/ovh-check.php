@@ -3,7 +3,7 @@
 /**
  * Diagnóstico de un solo uso del alojamiento OVH para tuentidad.
  *
- * 1. Copia este archivo a public/ (cp ovh-check.php public/).
+ * 1. Sube este archivo a public/ por FTP (FileZilla o el explorador FTP de OVH).
  * 2. Ábrelo en el navegador: https://tuentidad.es/ovh-check.php
  * 3. El archivo se borra solo al terminar; si no pudiera, bórralo a mano.
  *
@@ -54,7 +54,7 @@ if (is_file("{$root}/.env") && is_file("{$root}/vendor/codeigniter4/framework/sy
     require_once "{$root}/vendor/codeigniter4/framework/system/Config/DotEnv.php";
     $env = (new CodeIgniter\Config\DotEnv($root))->parse() ?? [];
 }
-check($results, 'Aplicación', '.env', $env !== null, $env !== null ? 'presente' : 'falta: ejecuta ./configurar-env.sh por SSH');
+check($results, 'Aplicación', '.env', $env !== null, $env !== null ? 'presente' : 'falta: se genera al desplegar con DESPLIEGUE=app (secrets de GitHub)');
 
 if ($env !== null) {
     check($results, 'Aplicación', 'CI_ENVIRONMENT', ($env['CI_ENVIRONMENT'] ?? '') === 'production', $env['CI_ENVIRONMENT'] ?? 'sin definir');
@@ -129,7 +129,7 @@ header('Cache-Control: no-store');
 <body>
 <h1>Diagnóstico del alojamiento OVH</h1>
 <p class="resumen"><?= $failures === 0 ? 'Todo correcto.' : $e("{$failures} comprobación(es) fallida(s).") ?></p>
-<p class="aviso"><?= $deleted ? 'Este archivo se ha borrado del servidor. Para repetir el diagnóstico vuelve a copiarlo a public/.' : '⚠ No se pudo borrar este archivo: bórralo a mano de public/.' ?></p>
+<p class="aviso"><?= $deleted ? 'Este archivo se ha borrado del servidor. Para repetir el diagnóstico vuelve a subirlo a public/.' : '⚠ No se pudo borrar este archivo: bórralo a mano de public/.' ?></p>
 <?php foreach ($results as $group => $items): ?>
 <h2><?= $e($group) ?></h2>
 <table>

@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# Crea o actualiza el .env de producción de tuentidad en el servidor.
+# Crea o actualiza el .env de producción de tuentidad.
 #
-# Uso (desde la consola SSH, en la carpeta donde está desplegada la aplicación):
+# Uso:
 #   ./configurar-env.sh                 pregunta todas las variables; Enter mantiene el valor actual
 #   ./configurar-env.sh CLAVE [CLAVE…]  pregunta solo esas variables (p. ej. database.default.password)
+#   ./configurar-env.sh --desde-entorno genera el .env sin preguntar, a partir de variables de
+#                                       entorno (lo usa el despliegue con los secrets de GitHub)
+#   ./configurar-env.sh --variables     lista las variables de entorno que usa --desde-entorno
 #   ./configurar-env.sh --listar        muestra la configuración actual con los secretos ocultos
 #   ./configurar-env.sh --ayuda         muestra esta ayuda
 #
@@ -15,23 +18,26 @@ set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 ENV_FILE="${ENV_FILE:-$DIR/.env}"
 
-# Variables que se preguntan: clave|descripción|valor por defecto|tipo
+# Variables que se preguntan: clave|descripción|valor por defecto|tipo|variable de entorno
 # Tipos: texto, secreto, url, numero, email, opcion:a,b
 PREGUNTAS=(
-  "app.baseURL|URL pública del sitio|https://tuentidad.es/|url"
-  "database.default.hostname|Servidor MySQL (panel OVH › Bases de datos)||texto"
-  "database.default.database|Nombre de la base de datos||texto"
-  "database.default.username|Usuario de la base de datos||texto"
-  "database.default.password|Contraseña de la base de datos||secreto"
-  "database.default.port|Puerto MySQL|3306|numero"
-  "email.fromEmail|Email remitente|no-reply@tuentidad.es|email"
-  "email.fromName|Nombre del remitente|tuentidad|texto"
-  "email.SMTPHost|Servidor SMTP|ssl0.ovh.net|texto"
-  "email.SMTPUser|Usuario SMTP (normalmente el email completo)||email"
-  "email.SMTPPass|Contraseña SMTP||secreto"
-  "email.SMTPPort|Puerto SMTP|465|numero"
-  "email.SMTPCrypto|Cifrado SMTP|ssl|opcion:ssl,tls"
+  "app.baseURL|URL pública del sitio|https://tuentidad.es/|url|APP_BASE_URL"
+  "database.default.hostname|Servidor MySQL (panel OVH › Bases de datos)||texto|DB_HOSTNAME"
+  "database.default.database|Nombre de la base de datos||texto|DB_DATABASE"
+  "database.default.username|Usuario de la base de datos||texto|DB_USERNAME"
+  "database.default.password|Contraseña de la base de datos||secreto|DB_PASSWORD"
+  "database.default.port|Puerto MySQL|3306|numero|DB_PORT"
+  "email.fromEmail|Email remitente|no-reply@tuentidad.es|email|EMAIL_FROM"
+  "email.fromName|Nombre del remitente|tuentidad|texto|EMAIL_FROM_NAME"
+  "email.SMTPHost|Servidor SMTP|ssl0.ovh.net|texto|SMTP_HOST"
+  "email.SMTPUser|Usuario SMTP (normalmente el email completo)||email|SMTP_USER"
+  "email.SMTPPass|Contraseña SMTP||secreto|SMTP_PASSWORD"
+  "email.SMTPPort|Puerto SMTP|465|numero|SMTP_PORT"
+  "email.SMTPCrypto|Cifrado SMTP|ssl|opcion:ssl,tls|SMTP_CRYPTO"
 )
+
+# Clave de cifrado en --desde-entorno: debe venir de fuera y no cambiar entre despliegues
+CLAVE_CIFRADO_ENTORNO="ENCRYPTION_KEY"
 
 # Variables fijas: se escriben si no existen, no se preguntan
 FIJAS=(
@@ -156,8 +162,8 @@ validar() {
 }
 
 preguntar() {
-  local clave descripcion defecto tipo actual valor repetido
-  IFS='|' read -r clave descripcion defecto tipo <<< "$1"
+  local clave descripcion defecto tipo _entorno actual valor repetido
+  IFS='|' read -r clave descripcion defecto tipo _entorno <<< "$1"
 
   actual="${VALORES[$clave]-}"
   # Sugerencias que dependen de otras variables
@@ -224,6 +230,57 @@ probar_bd() {
   ' || echo "  Revisa los datos con: $0 database.default.hostname database.default.password …"
 }
 
+# Genera el .env sin interacción a partir de variables de entorno.
+# Falla (sin escribir nada) si falta alguna obligatoria o alguna no es válida.
+desde_entorno() {
+  local entrada clave descripcion defecto tipo entorno valor errores=0
+
+  for entrada in "${PREGUNTAS[@]}"; do
+    IFS='|' read -r clave descripcion defecto tipo entorno <<< "$entrada"
+    valor="${!entorno-}"
+    if [[ -z "$valor" && "$clave" == "email.SMTPUser" ]]; then
+      valor="${VALORES[email.fromEmail]-}"
+    fi
+    valor="${valor:-$defecto}"
+    [[ "$tipo" == "url" && -n "$valor" && "$valor" != */ ]] && valor="$valor/"
+
+    if [[ -z "$valor" ]]; then
+      echo "✗ Falta $entorno ($descripcion)" >&2
+      errores=$((errores + 1))
+    elif ! validar "$tipo" "$valor" > /dev/null; then
+      echo "✗ $entorno no es válida: $(validar "$tipo" "$valor" | sed 's/^ *//')" >&2
+      errores=$((errores + 1))
+    else
+      fijar "$clave" "$valor"
+    fi
+  done
+
+  valor="${!CLAVE_CIFRADO_ENTORNO-}"
+  if [[ ! "$valor" =~ ^hex2bin:[0-9a-f]{64}$ ]]; then
+    echo "✗ $CLAVE_CIFRADO_ENTORNO debe tener el formato hex2bin:<64 caracteres hexadecimales>" >&2
+    echo "  Genérala una sola vez con: echo \"hex2bin:\$(openssl rand -hex 32)\"" >&2
+    errores=$((errores + 1))
+  else
+    fijar "encryption.key" "$valor"
+  fi
+
+  if [[ $errores -gt 0 ]]; then
+    echo "No se ha generado $ENV_FILE ($errores error(es))." >&2
+    exit 1
+  fi
+}
+
+variables_entorno() {
+  local entrada clave descripcion defecto tipo entorno
+  printf '%-16s %-26s %s\n' "VARIABLE" "POR DEFECTO" "DESCRIPCIÓN"
+  for entrada in "${PREGUNTAS[@]}"; do
+    IFS='|' read -r clave descripcion defecto tipo entorno <<< "$entrada"
+    [[ "$entorno" == "SMTP_USER" ]] && defecto="(= EMAIL_FROM)"
+    printf '%-16s %-26s %s\n' "$entorno" "${defecto:-(obligatoria)}" "$descripcion"
+  done
+  printf '%-16s %-26s %s\n' "$CLAVE_CIFRADO_ENTORNO" "(obligatoria)" "Clave de cifrado (hex2bin:…)"
+}
+
 listar() {
   cargar
   if [[ ${#VALORES[@]} -eq 0 ]]; then
@@ -245,6 +302,17 @@ listar() {
 case "${1-}" in
   -h|--ayuda|--help) ayuda; exit 0 ;;
   -l|--listar)       listar; exit 0 ;;
+  --variables)       variables_entorno; exit 0 ;;
+  --desde-entorno)
+    desde_entorno
+    for entrada in "${FIJAS[@]}"; do
+      fijar "${entrada%%|*}" "${entrada#*|}"
+    done
+    rm -f "$ENV_FILE"
+    guardar
+    echo "✓ Generado $ENV_FILE a partir de variables de entorno."
+    exit 0
+    ;;
 esac
 
 cargar
