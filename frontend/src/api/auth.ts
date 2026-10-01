@@ -27,6 +27,8 @@ export async function getCurrentUser(): Promise<User | null> {
 
 export async function login(email: string, password: string, remember: boolean): Promise<User> {
   const { user } = await post<UserResponse>('/api/auth/login', { email, password, remember })
+  // Al iniciar sesión el servidor regenera la sesión, y con ella el token CSRF
+  resetCsrf()
   return user
 }
 
@@ -38,6 +40,8 @@ export async function logout(): Promise<void> {
 
 export async function register(data: RegisterData): Promise<User> {
   const { user } = await post<UserResponse>('/api/auth/register', data)
+  // El registro inicia sesión: el token CSRF cambia igual que en el login
+  resetCsrf()
   return user
 }
 
