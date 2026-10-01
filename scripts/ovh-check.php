@@ -3,7 +3,7 @@
 /**
  * Diagnóstico de un solo uso del alojamiento OVH para tuentidad.
  *
- * 1. Sube este archivo a la carpeta web (www/ en OVH) por FTP.
+ * 1. Sube este archivo a la carpeta web (www/ en OVH) por SFTP.
  * 2. Ábrelo en el navegador: https://tuentidad.es/ovh-check.php
  * 3. El archivo se borra solo al terminar; si no pudiera, bórralo a mano.
  *

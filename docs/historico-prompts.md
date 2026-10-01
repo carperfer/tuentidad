@@ -122,3 +122,11 @@ Para cada entrada registrar:
 - **Resultado esperado:** Estrategia de entornos definida.
 - **Resultado obtenido:** Se descarta `pre.tuentidad.es`. La landing sigue publicada hasta el MVP; la aplicación se valida en local con la estructura de OVH simulada y el alojamiento con `ovh-check.php`.
 - **Decisión:** Un único entorno (`produccion`). El paso a `DESPLIEGUE=app` se hará en el Sprint 7.
+
+### 2026-10-01 — Despliegue por SFTP
+
+- **Objetivo:** Corregir el primer despliegue, que falló porque el FTP de OVH no admite FTPS (`500 This security scheme is not implemented`).
+- **Prompt utilizado:** "si que funciona sftp" (tras proponer FTP sin cifrar como única alternativa).
+- **Resultado esperado:** Despliegue cifrado sin depender de FTP.
+- **Resultado obtenido:** `scripts/subir-sftp.sh` sube por SFTP con `lftp`, verificando la clave del servidor (`SFTP_KNOWN_HOSTS`), sin borrar nada del servidor y reemplazando cada archivo de forma atómica. Probado contra un servidor SFTP en Docker: primera subida, cambios, conservación de archivos del servidor, clave falsa y contraseña incorrecta.
+- **Decisión:** Desplegar siempre por SFTP. Se descarta FTP sin cifrar.

@@ -31,10 +31,10 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 - [x] Layout base con estética inspirada en tuenti.es (cabecera, cajas, paleta)
 - [x] CI en GitHub Actions: PHPUnit, PHP-CS-Fixer, Vitest, oxlint y comprobación de tipos
 - [x] Script de empaquetado para despliegue (`scripts/build-release.sh`)
-- [x] Acceso al servidor: el plan no tiene SSH, se despliega por FTP
+- [x] Acceso al servidor: el plan no tiene consola SSH; el FTP de OVH no admite FTPS, se despliega por SFTP
 - [ ] Verificación del plan OVH con `ovh-check.php` (versiones PHP/MySQL, extensiones, SMTP)
-- [x] Despliegue automático por FTP en cada push a `main` (`deploy.yml`, credenciales en GitHub Secrets)
-- [ ] Primer despliegue en OVH (pendiente de configurar los secrets de FTP)
+- [x] Despliegue automático por SFTP en cada push a `main` (`deploy.yml`, credenciales en GitHub Secrets)
+- [ ] Primer despliegue en OVH (pendiente de validar la conexión SFTP)
 
 **Entregable:** SPA llamando a `/api/health` funcionando con la estructura de OVH (simulada en local) y despliegue automático de la landing en producción.
 
