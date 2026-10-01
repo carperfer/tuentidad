@@ -77,6 +77,17 @@ Esas redes tampoco tienen salida a Internet, por eso `composer install` se ejecu
 
 ## Despliegue
 
+### Automático (rama `produccion`)
+
+OVH despliega automáticamente la rama **`produccion`** mediante su integración Git. Esa rama no se edita a mano: la genera el workflow [`deploy.yml`](.github/workflows/deploy.yml) en cada push a `main`, solo con el contenido publicable. Así el código fuente, la documentación y la configuración de desarrollo nunca quedan accesibles desde la web.
+
+- **Ahora:** se publica solo la landing de [`landing/`](landing/index.html).
+- **Con el MVP:** se publicará el paquete de `scripts/build-release.sh` (con `vendor/` y la SPA ya compilados).
+
+El despliegue también se puede lanzar a mano desde GitHub › Actions › Deploy › *Run workflow*.
+
+### Paquete de la aplicación
+
 `scripts/build-release.sh` genera en `release/` el paquete para OVH: backend con dependencias de producción, build de la SPA dentro de `public/` y las herramientas de servidor.
 
 ```

@@ -86,3 +86,11 @@ Para cada entrada registrar:
   - `deploy/.ovhconfig` (PHP 8.3) y `backend/.env.example`, incluidos en el paquete de `build-release.sh`.
   - Probado de punta a punta con el paquete en Apache y MySQL en Docker, incluyendo contraseñas con caracteres especiales.
 - **Decisión:** El `.env` de producción se gestiona solo con `configurar-env.sh`; nunca se sube al repositorio ni en el paquete.
+
+### 2026-10-01 — Despliegue automático por rama `produccion`
+
+- **Objetivo:** Adaptar el despliegue automático de OVH (push a `main`) para que solo se publique la landing.
+- **Prompt utilizado:** "El despliegue se hace automáticamente al hacer un push a main. Pero por ahora sólo se muestra la landing."
+- **Resultado esperado:** Que al fusionar el Sprint 0 no se publique el código fuente en la web.
+- **Resultado obtenido:** La landing pasa a `landing/`; el workflow `deploy.yml` genera en cada push a `main` la rama `produccion` solo con el contenido publicable. Se crea la rama `produccion` inicial con la landing.
+- **Decisión:** OVH debe desplegar la rama `produccion` en lugar de `main` (cambio en el panel de OVH antes de fusionar el PR del Sprint 0).
