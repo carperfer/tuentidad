@@ -16,6 +16,9 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
 
     $routes->get('invitations/(:segment)', 'Invitations::show/$1');
 
+    $routes->post('deploy/migrate', 'Deploy::migrate');
+    $routes->post('deploy/first-user', 'Deploy::firstUser');
+
     $routes->group('', ['filter' => 'apiauth'], static function (RouteCollection $routes): void {
         $routes->get('invitations', 'Invitations::index');
         $routes->post('invitations', 'Invitations::create');

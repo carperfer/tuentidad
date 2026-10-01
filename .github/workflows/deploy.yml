@@ -89,6 +89,7 @@ jobs:
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_CRYPTO: ${{ secrets.SMTP_CRYPTO }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
         run: |
           ./scripts/build-release.sh
           ./scripts/configurar-env.sh --desde-entorno
@@ -118,3 +119,21 @@ jobs:
           SFTP_PORT: ${{ vars.SFTP_PORT || '22' }}
           SFTP_KNOWN_HOSTS: ${{ vars.SFTP_KNOWN_HOSTS }}
         run: ./scripts/subir-sftp.sh sitio/www "$FTP_PUBLIC_DIR"
+
+      # Sin consola en el servidor, las migraciones se lanzan por HTTP con el token de despliegue
+      - name: Aplicar migraciones
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'https://tuentidad.es/' }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" "${APP_BASE_URL%/}/api/deploy/migrate"
+
+      - name: Comprobar que la aplicación responde
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'https://tuentidad.es/' }}
+        run: |
+          curl -fsS "${APP_BASE_URL%/}/api/health"
+          curl -fsS -o /dev/null "${APP_BASE_URL%/}/"
