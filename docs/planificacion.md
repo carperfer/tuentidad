@@ -36,7 +36,9 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 - [x] Despliegue automático por FTP en cada push a `main` (`deploy.yml`, credenciales en GitHub Secrets)
 - [ ] Primer despliegue en OVH (pendiente de configurar los secrets de FTP)
 
-**Entregable:** "Hola mundo" de la SPA llamando a `/api/health`, desplegado en OVH.
+**Entregable:** SPA llamando a `/api/health` funcionando con la estructura de OVH (simulada en local) y despliegue automático de la landing en producción.
+
+> Se usa un único dominio (tuentidad.es) sin entorno de preproducción: la landing se mantiene publicada hasta el lanzamiento del MVP (Sprint 7), cuando se cambia `DESPLIEGUE` a `app`. El alojamiento se valida antes con `ovh-check.php`.
 
 ### Sprint 1 — Autenticación e invitaciones
 
