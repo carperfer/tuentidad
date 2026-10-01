@@ -143,3 +143,11 @@ Para cada entrada registrar:
   - 32 tests de backend y 13 de frontend. Flujo completo probado con curl y a través del proxy de Vite.
   - Acciones de GitHub actualizadas a `checkout@v7` y `setup-node@v7` (Node 24).
 - **Decisión:** Queda pendiente cómo ejecutar migraciones y crear el primer usuario en OVH sin SSH (antes del Sprint 7).
+
+### 2026-10-01 — Primera prueba real en producción
+
+- **Objetivo:** Publicar la aplicación en tuentidad.es y comprobar que funciona en OVH.
+- **Prompt utilizado:** "perfecto, podemos hacer la primera prueba en real para ver que se carga todo en producción" → ante la pregunta de qué debe ver un visitante: "App completa definitiva".
+- **Resultado esperado:** Despliegue de la aplicación con base de datos y primer usuario sin consola en el servidor.
+- **Resultado obtenido:** Endpoints `/api/deploy/migrate` y `/api/deploy/first-user` protegidos con token (`DEPLOY_TOKEN`), sin CSRF, con límite de peticiones y desactivados si no hay token. El workflow aplica las migraciones y comprueba `/api/health` tras subir. Creación de usuarios compartida entre el comando de consola y el endpoint (`UserCreator`). Probado de punta a punta en local con la estructura de OVH y una base de datos vacía.
+- **Decisión:** La aplicación queda publicada definitivamente (`DESPLIEGUE=app`); la landing deja de mostrarse.
