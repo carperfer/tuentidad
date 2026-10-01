@@ -34,5 +34,10 @@ echo "→ Dependencias de producción"
 echo "→ SPA dentro de public/"
 cp -r "$ROOT/frontend/dist/." "$RELEASE/public/"
 
+echo "→ Herramientas de servidor"
+cp "$ROOT/deploy/.ovhconfig" "$ROOT/backend/.env.example" "$RELEASE/"
+cp "$ROOT/scripts/configurar-env.sh" "$ROOT/scripts/ovh-check.php" "$RELEASE/"
+chmod +x "$RELEASE/configurar-env.sh"
+
 echo "✓ Paquete generado en $RELEASE"
-echo "  Recuerda crear release/.env en el servidor (ver backend/env)."
+echo "  En el servidor: ./configurar-env.sh para crear o actualizar .env"
