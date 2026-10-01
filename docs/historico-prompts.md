@@ -130,3 +130,16 @@ Para cada entrada registrar:
 - **Resultado esperado:** Despliegue cifrado sin depender de FTP.
 - **Resultado obtenido:** `scripts/subir-sftp.sh` sube por SFTP con `lftp`, verificando la clave del servidor (`SFTP_KNOWN_HOSTS`), sin borrar nada del servidor y reemplazando cada archivo de forma atómica. Probado contra un servidor SFTP en Docker: primera subida, cambios, conservación de archivos del servidor, clave falsa y contraseña incorrecta.
 - **Decisión:** Desplegar siempre por SFTP. Se descarta FTP sin cifrar.
+
+### 2026-10-01 — Sprint 1: autenticación e invitaciones
+
+- **Objetivo:** Implementar el acceso por invitación de punta a punta.
+- **Prompt utilizado:** "ya" (inicio del Sprint 1 tras cerrar el despliegue por SFTP).
+- **Resultado esperado:** Un usuario invita a otro, que se registra e inicia sesión.
+- **Resultado obtenido:**
+  - Backend: CodeIgniter Shield (sesión + CSRF en modo sesión), tablas `invitations` y `password_resets` (solo hashes de tokens), campos de perfil en `users`, regla de edad mínima, límites de peticiones, emails con plantilla y comando `tuentidad:usuario`.
+  - Frontend: contexto de sesión, rutas protegidas, portada con login, registro por invitación, inicio con envío y listado de invitaciones, recuperación de contraseña. El cliente reintenta una vez si el token CSRF ha cambiado.
+  - Mailpit en Docker Compose para ver los emails en local.
+  - 32 tests de backend y 13 de frontend. Flujo completo probado con curl y a través del proxy de Vite.
+  - Acciones de GitHub actualizadas a `checkout@v7` y `setup-node@v7` (Node 24).
+- **Decisión:** Queda pendiente cómo ejecutar migraciones y crear el primer usuario en OVH sin SSH (antes del Sprint 7).

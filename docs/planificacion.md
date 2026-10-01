@@ -42,13 +42,19 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 ### Sprint 1 — Autenticación e invitaciones
 
-- CodeIgniter Shield: login, logout, sesión por cookie (`HttpOnly`, `Secure`, `SameSite`) y CSRF
-- Modelo de invitaciones: token de un solo uso, caducidad y cupo por usuario
-- Envío de invitaciones por email (SMTP OVH)
-- Registro solo con token válido (verificación de edad mínima de 14 años)
-- Recuperación de contraseña
+- [x] CodeIgniter Shield: login, logout, "recordarme", sesión por cookie (`HttpOnly`, `Secure`, `SameSite`) y CSRF ligado a la sesión
+- [x] Modelo de invitaciones: token de un solo uso (solo se guarda su hash), caducidad de 7 días y cupo de 10 por usuario; reenviar no gasta cupo
+- [x] Envío de emails con plantilla propia (SMTP; Mailpit en local)
+- [x] Registro solo con invitación válida: edad mínima de 14 años, contraseña robusta sin datos personales, aceptación de condiciones
+- [x] Recuperación de contraseña con enlace de un solo uso (1 hora) y misma respuesta exista o no la cuenta
+- [x] Límite de peticiones en login, registro, invitaciones y recuperación
+- [x] Comando `php spark tuentidad:usuario` para crear el primer usuario
+- [x] SPA: portada con login, registro por invitación, inicio con invitaciones, recuperación de contraseña
+- [x] Tests: 32 de backend (API contra MySQL) y 13 de frontend
 
 **Entregable:** un usuario semilla invita a otro, que se registra e inicia sesión.
+
+> **Pendiente para producción (antes del Sprint 7):** sin SSH no se puede ejecutar `php spark migrate` ni `tuentidad:usuario` en OVH. Hay que decidir cómo aplicar migraciones y crear el primer usuario (p. ej. un paso del despliegue que llame a un endpoint protegido, o una tarea programada de OVH).
 
 ### Sprint 2 — Landing y perfiles de bienvenida
 

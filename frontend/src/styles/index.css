@@ -130,3 +130,165 @@ h2 {
 .status--error {
   color: var(--color-error);
 }
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header__nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header__nav a,
+.header__nav .link-button {
+  color: #fff;
+  font-weight: bold;
+}
+
+.header__user {
+  color: #dfe7f2;
+}
+
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--color-link);
+  cursor: pointer;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+.narrow {
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.field {
+  margin-bottom: 10px;
+}
+
+.field label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+.field input {
+  width: 100%;
+  padding: 5px 6px;
+  font: inherit;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  background: #fff;
+}
+
+.field input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
+}
+
+.field input[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.field__error {
+  margin: 3px 0 0;
+  color: var(--color-error);
+  font-size: 11px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 10px;
+}
+
+.button {
+  background: linear-gradient(var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+  border: 1px solid var(--color-primary-dark);
+  border-radius: 3px;
+  padding: 6px 14px;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.form__footer {
+  margin: 10px 0 0;
+  font-size: 11px;
+}
+
+.alert {
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.alert--error {
+  color: var(--color-error);
+  background: #fdecea;
+  border-color: #f5c6c0;
+}
+
+.alert--ok {
+  color: var(--color-ok);
+  background: #e8f5e9;
+  border-color: #c3e6c5;
+}
+
+.invitations {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.invitations li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-title-bg);
+}
+
+.invitations__email {
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--color-title-bg);
+  color: var(--color-muted);
+}
+
+.badge--accepted {
+  background: #e8f5e9;
+  color: var(--color-ok);
+}
+
+.badge--expired {
+  background: #fdecea;
+  color: var(--color-error);
+}

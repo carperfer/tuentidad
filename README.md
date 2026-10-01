@@ -44,16 +44,42 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 Requisitos: Docker y Node.js 24.
 
 ```bash
-# Backend (Apache + PHP 8.3) y MySQL
+# Backend (Apache + PHP 8.3), MySQL y Mailpit
 docker compose up -d --build
 docker compose exec -u www-data app composer install
+docker compose exec -u www-data app php spark migrate --all
+
+# Primer usuario (sin invitación); pide los datos que falten
+docker compose exec -u www-data app php spark tuentidad:usuario
 
 # Frontend (SPA con recarga en caliente; /api se redirige al backend)
 cd frontend && npm install && npm run dev
 ```
 
-- SPA: http://localhost:5173
-- API: http://localhost:8080/api/health
+| | En GitHub Codespaces | En local |
+|---|---|---|
+| SPA | `https://<codespace>-5173.app.github.dev` | http://localhost:5173 |
+| API | `https://<codespace>-8080.app.github.dev/api/health` | http://localhost:8080/api/health |
+| Emails (Mailpit) | `https://<codespace>-8025.app.github.dev` | http://localhost:8025 |
+
+`<codespace>` es el nombre del Codespace (`echo $CODESPACE_NAME`). En desarrollo ningún email sale fuera: todos se capturan en Mailpit. Los enlaces de los emails apuntan automáticamente a la SPA del Codespace (o a `localhost:5173` fuera de él); se pueden forzar con la variable `TUENTIDAD_PUBLIC_URL` al arrancar Docker Compose.
+
+### API
+
+| Método y ruta | Sesión | Descripción |
+|---|---|---|
+| `GET /api/csrf` | — | Token CSRF para las peticiones que modifican datos (cabecera `X-CSRF-TOKEN`) |
+| `GET /api/auth/me` | — | Usuario con sesión iniciada o `null` |
+| `POST /api/auth/login` | — | Iniciar sesión (`email`, `password`, `remember`) |
+| `POST /api/auth/logout` | — | Cerrar sesión |
+| `POST /api/auth/register` | — | Crear cuenta con una invitación (`token`, `first_name`, `last_name`, `birthdate`, `password`, `password_confirm`, `accept_terms`) |
+| `POST /api/auth/forgot-password` | — | Enviar enlace de recuperación (misma respuesta exista o no el email) |
+| `POST /api/auth/reset-password` | — | Cambiar la contraseña con el enlace (`token`, `password`, `password_confirm`) |
+| `GET /api/invitations/{token}` | — | Datos públicos de una invitación válida |
+| `GET /api/invitations` | Sí | Invitaciones enviadas y cupo restante |
+| `POST /api/invitations` | Sí | Invitar por email (reenviar a una pendiente no gasta cupo) |
+
+Errores: `401` sin sesión, `404` token no válido o caducado, `422` validación (`errors` por campo), `429` demasiados intentos. Login, registro, invitaciones y recuperación de contraseña tienen límite de peticiones.
 
 ### Comprobaciones
 
