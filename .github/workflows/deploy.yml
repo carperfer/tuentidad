@@ -1,0 +1,41 @@
+name: Deploy
+
+# OVH despliega automáticamente la rama `produccion` mediante su integración Git.
+# Este workflow genera esa rama a partir de main con solo el contenido publicable,
+# para que el código fuente, la documentación y la configuración de desarrollo
+# nunca queden accesibles desde la web.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Por ahora solo se publica la landing. Cuando el MVP esté listo,
+      # este paso se sustituirá por scripts/build-release.sh.
+      - name: Preparar contenido publicable
+        run: |
+          mkdir -p sitio
+          cp -r landing/. sitio/
+
+      - name: Publicar en la rama produccion
+        working-directory: sitio
+        run: |
+          git init -q -b produccion
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Despliegue de ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" produccion
