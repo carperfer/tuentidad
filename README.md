@@ -9,6 +9,7 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 ## Alcance funcional
 
 - Red social de acceso por invitación
+- Perfiles de bienvenida en la landing: 2 perfiles de demostración visibles públicamente a los que cualquier visitante puede solicitar amistad indicando su email; recibe una invitación para registrarse y, al completar el registro, queda como amigo de ese perfil
 - Enfoque en amigos reales
 - Subida y gestión de álbumes de fotos
 - Etiquetado de amigos en fotos
@@ -18,10 +19,25 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 
 ## Stack tecnológico
 
-- **Backend:** PHP
+- **Backend:** PHP con CodeIgniter 4
 - **Frontend:** React (arquitectura por componentes)
 - **Base de datos:** MySQL
 - **Hosting:** Web Cloud Hosting de OVH
+
+## Versiones y entorno
+
+- PHP 8.3 · CodeIgniter 4.6 · MySQL 8.0
+- React 18 + Vite + TypeScript
+- Entorno local con Docker Compose
+- Pendiente verificar en el panel de OVH: versiones de PHP/MySQL disponibles y acceso SSH
+
+## Arquitectura
+
+- **Backend:** CodeIgniter 4 expuesto únicamente como API REST (JSON) bajo `/api`.
+- **Frontend:** SPA en React construida con Vite y servida como estáticos desde el mismo dominio (tuentidad.es).
+- **Comunicación:** la SPA consume la API vía HTTP; al compartir dominio no se requiere CORS.
+- **Autenticación:** CodeIgniter Shield con sesión por cookie (`HttpOnly`, `Secure`, `SameSite`) y protección CSRF en todas las peticiones que modifican datos.
+- **Chat:** polling AJAX periódico contra la API (compatible con hosting compartido, sin WebSockets). El acceso a mensajes se encapsula en un servicio para poder sustituir el transporte en el futuro.
 
 ## Guía de diseño
 
