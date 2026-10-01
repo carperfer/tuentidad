@@ -1,20 +1,16 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Route, Routes } from 'react-router'
-import { Layout } from './components/Layout'
-import { Landing } from './pages/Landing'
-import { NotFound } from './pages/NotFound'
+import { BrowserRouter } from 'react-router'
+import { App } from './App'
+import { AuthProvider } from './auth/AuthContext'
 import './styles/index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<Landing />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
