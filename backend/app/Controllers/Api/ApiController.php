@@ -4,6 +4,8 @@ namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
 use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\HTTP\Exceptions\BadRequestException;
+use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Shield\Entities\User;
 
@@ -21,7 +23,11 @@ abstract class ApiController extends BaseController
      */
     protected function input(): array
     {
-        $json = $this->request->getJSON(true);
+        try {
+            $json = $this->request->getJSON(true);
+        } catch (HTTPException) {
+            throw new BadRequestException('El cuerpo de la petición no es un JSON válido.');
+        }
 
         return is_array($json) ? $json : $this->request->getPost();
     }
