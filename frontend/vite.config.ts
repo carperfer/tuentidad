@@ -8,6 +8,8 @@ const apiTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:8080'
 export default defineConfig({
   plugins: [react()],
   server: {
+    // Codespaces sirve el puerto reenviado en <codespace>-5173.app.github.dev
+    allowedHosts: ['.app.github.dev'],
     proxy: {
       '/api': { target: apiTarget, changeOrigin: true },
     },
