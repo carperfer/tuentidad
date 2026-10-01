@@ -29,7 +29,7 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 - PHP 8.3 · CodeIgniter 4.7 · MySQL 8.0
 - React 19 + Vite + TypeScript · React Router · Vitest · oxlint
 - Entorno local con Docker Compose (backend y base de datos) y Vite en local
-- El plan de OVH no tiene SSH: el despliegue se hace por FTP desde GitHub Actions. Versiones de PHP/MySQL pendientes de verificar con `ovh-check.php`
+- El plan de OVH no tiene consola SSH, pero sí SFTP: el despliegue se hace por SFTP desde GitHub Actions. Versiones de PHP/MySQL pendientes de verificar con `ovh-check.php`
 
 ## Arquitectura
 
@@ -77,7 +77,7 @@ Esas redes tampoco tienen salida a Internet, por eso `composer install` se ejecu
 
 ## Despliegue
 
-El despliegue es automático: el workflow [`deploy.yml`](.github/workflows/deploy.yml) publica en OVH por FTP en cada push a `main`. También se puede lanzar a mano desde GitHub › Actions › Deploy › *Run workflow*.
+El despliegue es automático: el workflow [`deploy.yml`](.github/workflows/deploy.yml) publica en OVH por SFTP en cada push a `main` ([`scripts/subir-sftp.sh`](scripts/subir-sftp.sh), con `lftp`). También se puede lanzar a mano desde GitHub › Actions › Deploy › *Run workflow*.
 
 Qué se publica lo decide la variable del repositorio `DESPLIEGUE`:
 
@@ -99,13 +99,13 @@ En modo `app`, [`scripts/separar-publico.sh`](scripts/separar-publico.sh) divide
 
 En *Settings › Secrets and variables › Actions*:
 
-**Secrets** (necesarios desde ya):
+**Secrets** (necesarios desde ya; se mantiene el prefijo `FTP_` aunque el acceso es por SFTP):
 
 | Secret | Valor |
 |---|---|
-| `FTP_SERVER` | Servidor FTP (panel OVH › FTP-SSH, p. ej. `ftp.clusterXXX.hosting.ovh.net`) |
-| `FTP_USERNAME` | Usuario FTP |
-| `FTP_PASSWORD` | Contraseña FTP |
+| `FTP_SERVER` | Servidor SFTP (panel OVH › FTP-SSH, p. ej. `ssh.clusterXXX.hosting.ovh.net`) |
+| `FTP_USERNAME` | Usuario FTP/SFTP |
+| `FTP_PASSWORD` | Contraseña FTP/SFTP |
 
 **Secrets de la aplicación** (necesarios al pasar a `DESPLIEGUE=app`). La lista completa, con valores por defecto, se obtiene con `./scripts/configurar-env.sh --variables`:
 
@@ -129,21 +129,22 @@ En *Settings › Secrets and variables › Actions*:
 | `DESPLIEGUE` | `landing` | `landing` o `app` |
 | `FTP_PUBLIC_DIR` | `www/` | Carpeta web del alojamiento |
 | `FTP_SERVER_DIR` | `tuentidad/` | Carpeta de la aplicación, junto a `www/` (nombre simple) |
-| `FTP_PROTOCOL` | `ftps` | `ftps` (cifrado) o `ftp` si el servidor no admite TLS |
+| `SFTP_PORT` | `22` | Puerto SFTP |
+| `SFTP_KNOWN_HOSTS` | — | Clave pública del servidor (formato `known_hosts`). Si falta, se acepta la que presente el servidor y se muestra en el log para fijarla |
 
-Si faltan los secrets de FTP, el workflow avisa y no despliega. Si falta o es inválido algún secret de la aplicación, falla antes de subir nada.
+Si faltan los secrets de acceso, el workflow avisa y no despliega. Si falta o es inválido algún secret de la aplicación, falla antes de subir nada.
 
 ### Configuración en OVH
 
 - La carpeta raíz del dominio se mantiene en `www/` (no se puede cambiar en el dominio principal).
-- La integración Git de OVH debe estar desactivada para que no compita con el despliegue por FTP.
+- La integración Git de OVH debe estar desactivada para que no compita con el despliegue por SFTP.
 - Certificado SSL activado: en producción las cookies son `Secure` y el sitio debe servirse por HTTPS.
 - `.ovhconfig` (PHP 8.3) se sube a `www/` junto con la app. Si el diagnóstico no muestra PHP 8.3, revisa el `.ovhconfig` de la raíz del alojamiento.
-- Los archivos ocultos (`.env`, `.ovhconfig`, estado del FTP) están bloqueados por OVH y por `public/.htaccess`.
+- Los archivos ocultos (`.env`, `.ovhconfig`, …) están bloqueados por OVH y por `public/.htaccess`.
 
 ### Diagnóstico del alojamiento
 
-Sube `scripts/ovh-check.php` a `www/` con un cliente FTP (FileZilla) y ábrelo en `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, `.env`, base de datos y SMTP, y se borra solo al terminar.
+Sube `scripts/ovh-check.php` a `www/` con un cliente SFTP (FileZilla) y ábrelo en `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, `.env`, base de datos y SMTP, y se borra solo al terminar.
 
 ### Paquete de la aplicación
 
