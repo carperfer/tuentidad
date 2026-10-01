@@ -22,3 +22,43 @@ Para cada entrada registrar:
 - **Resultado esperado:** Documento de base con alcance claro y trazable para futuras iteraciones.
 - **Resultado obtenido:** Se consolidan y documentan requisitos en el README y en la planificación del proyecto.
 - **Decisión:** Mantener este registro como primera entrada y ampliar el histórico en cada iteración futura.
+
+### 2026-10-01 — Refinamiento del stack: CodeIgniter 4
+
+- **Objetivo:** Concretar el framework de backend antes de planificar el desarrollo.
+- **Prompt utilizado:** "Refinamos el stack tecnologico: PHP con Codeigniter 4. ¿Algo más que refinar antes de ir a planificación del desarrollo?"
+- **Resultado esperado:** Stack actualizado y lista de decisiones técnicas pendientes.
+- **Resultado obtenido:** Se fija CodeIgniter 4 como framework backend y se identifican decisiones abiertas (integración React/CI4, chat en hosting compartido, autenticación, versiones, despliegue, RGPD).
+- **Decisión:** Resolver las decisiones abiertas antes de detallar la planificación.
+
+### 2026-10-01 — Arquitectura: API REST + SPA
+
+- **Objetivo:** Decidir la integración entre React y CodeIgniter 4.
+- **Prompt utilizado:** "Opción A" (CI4 como API REST + React como SPA con Vite en el mismo dominio).
+- **Resultado esperado:** Arquitectura frontend/backend definida.
+- **Resultado obtenido:** Se documenta la arquitectura desacoplada en el README.
+- **Decisión:** CI4 solo expone API JSON bajo `/api`; React se despliega como estáticos en el mismo dominio.
+
+### 2026-10-01 — Chat por polling y autenticación con Shield
+
+- **Objetivo:** Cerrar las decisiones de chat y autenticación condicionadas por el hosting compartido de OVH.
+- **Prompt utilizado:** "El chat será con polling. La autenticación CodeIgniter Shield con sesión por cookie y protección CSRF."
+- **Resultado esperado:** Decisiones técnicas documentadas.
+- **Resultado obtenido:** README y planificación actualizados.
+- **Decisión:** Chat mediante polling AJAX desacoplado tras un servicio; autenticación con CodeIgniter Shield, sesión por cookie y CSRF.
+
+### 2026-10-01 — Versiones, MVP y perfiles de bienvenida
+
+- **Objetivo:** Cerrar versiones, alcance del MVP y resolver la entrada de nuevos usuarios sin registro abierto.
+- **Prompt utilizado:** "Si, añadiria que como no permite el registro inicial, en la landing del portal, muestre 2 perfiles "falsos", a los cuales les permitas solicitar amistad poniendo tu correo electronico, y te envia la invitación a registrarte, dejandote como amigo de este perfil."
+- **Resultado esperado:** Mecanismo de captación compatible con el modelo de acceso por invitación.
+- **Resultado obtenido:** Se documentan versiones (PHP 8.3, CI 4.6, MySQL 8.0, React 18 + Vite + TS, Docker Compose), orden del MVP y el flujo de perfiles de bienvenida con medidas anti-abuso.
+- **Decisión:** Los perfiles de bienvenida forman parte del módulo de invitaciones del MVP y se marcan visiblemente como demostración.
+
+### 2026-10-01 — Planificación por sprints
+
+- **Objetivo:** Convertir las fases generales en un plan de sprints accionable.
+- **Prompt utilizado:** "si" (confirmación para commitear el refinamiento y pasar a la planificación detallada).
+- **Resultado esperado:** Plan por sprints con entregables claros.
+- **Resultado obtenido:** `docs/planificacion.md` reescrito: estructura de monorepo, MVP en 8 sprints (0–7) y versión 2 en 3 sprints (8–10).
+- **Decisión:** Plan aprobado por el autor del proyecto ("Perfecto").
