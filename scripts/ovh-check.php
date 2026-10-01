@@ -3,7 +3,7 @@
 /**
  * Diagnóstico de un solo uso del alojamiento OVH para tuentidad.
  *
- * 1. Sube este archivo a public/ por FTP (FileZilla o el explorador FTP de OVH).
+ * 1. Sube este archivo a la carpeta web (www/ en OVH) por FTP.
  * 2. Ábrelo en el navegador: https://tuentidad.es/ovh-check.php
  * 3. El archivo se borra solo al terminar; si no pudiera, bórralo a mano.
  *
@@ -13,8 +13,15 @@
 
 declare(strict_types=1);
 
-$root    = dirname(__DIR__);
 $results = [];
+
+// La aplicación está junto a public/ o, en OVH, en ../tuentidad/ junto a www/
+$root = dirname(__DIR__);
+foreach (glob(dirname(__DIR__) . '/*/app/Config/Paths.php') ?: [] as $paths) {
+    if (! is_file("{$root}/app/Config/Paths.php")) {
+        $root = dirname($paths, 3);
+    }
+}
 
 function check(array &$results, string $group, string $name, ?bool $ok, string $detail): void
 {
@@ -42,6 +49,7 @@ foreach (['upload_max_filesize' => '10M', 'post_max_size' => '64M', 'memory_limi
 
 // --- Aplicación ------------------------------------------------------------
 
+check($results, 'Aplicación', 'Carpeta', null, $root);
 check($results, 'Aplicación', 'vendor/', is_file("{$root}/vendor/autoload.php"), is_file("{$root}/vendor/autoload.php") ? 'presente' : 'falta: sube el paquete completo');
 
 foreach (['writable', 'writable/cache', 'writable/logs', 'writable/session', 'writable/uploads'] as $dir) {
@@ -129,7 +137,7 @@ header('Cache-Control: no-store');
 <body>
 <h1>Diagnóstico del alojamiento OVH</h1>
 <p class="resumen"><?= $failures === 0 ? 'Todo correcto.' : $e("{$failures} comprobación(es) fallida(s).") ?></p>
-<p class="aviso"><?= $deleted ? 'Este archivo se ha borrado del servidor. Para repetir el diagnóstico vuelve a subirlo a public/.' : '⚠ No se pudo borrar este archivo: bórralo a mano de public/.' ?></p>
+<p class="aviso"><?= $deleted ? 'Este archivo se ha borrado del servidor. Para repetir el diagnóstico vuelve a subirlo a www/.' : '⚠ No se pudo borrar este archivo: bórralo a mano de www/.' ?></p>
 <?php foreach ($results as $group => $items): ?>
 <h2><?= $e($group) ?></h2>
 <table>
