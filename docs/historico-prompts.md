@@ -62,3 +62,15 @@ Para cada entrada registrar:
 - **Resultado esperado:** Plan por sprints con entregables claros.
 - **Resultado obtenido:** `docs/planificacion.md` reescrito: estructura de monorepo, MVP en 8 sprints (0–7) y versión 2 en 3 sprints (8–10).
 - **Decisión:** Plan aprobado por el autor del proyecto ("Perfecto").
+
+### 2026-10-01 — Sprint 0: fundaciones
+
+- **Objetivo:** Montar la base técnica del proyecto.
+- **Prompt utilizado:** "he hecho merge" (inicio del Sprint 0 tras aprobar la planificación).
+- **Resultado esperado:** Monorepo con backend y frontend funcionando en local, CI y empaquetado para OVH.
+- **Resultado obtenido:**
+  - Backend CodeIgniter 4.7 en Docker (PHP 8.3 + Apache, MySQL 8.0) con `/api/health` y `/api/csrf`, filtro CSRF y cabeceras seguras.
+  - Frontend Vite + React 19 + TypeScript con cliente HTTP con CSRF, layout inspirado en tuenti.es y tests con Vitest.
+  - CI en GitHub Actions y script `scripts/build-release.sh` probado en Apache en modo producción.
+  - Incidencias: el firewall del Codespace bloquea las redes de Docker Compose (documentado en el README); la plantilla de Vite trae React 19 y oxlint en vez de React 18 y ESLint.
+- **Decisión:** Adoptar CodeIgniter 4.7, React 19 y oxlint. Quedan pendientes la verificación del plan OVH y el primer despliegue.

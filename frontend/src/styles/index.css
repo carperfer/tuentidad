@@ -1,0 +1,132 @@
+/*
+ * Estética inspirada en tuenti.es (2006-2012): cabecera azul, fondo claro,
+ * cajas blancas con borde fino y tipografía pequeña y densa.
+ * Los valores son una aproximación inicial a ajustar con capturas de referencia.
+ */
+:root {
+  --color-primary: #3b6db3;
+  --color-primary-dark: #2c5490;
+  --color-link: #2f5fa7;
+  --color-bg: #e9eef5;
+  --color-box: #ffffff;
+  --color-border: #c9d4e3;
+  --color-title-bg: #dfe7f2;
+  --color-text: #333333;
+  --color-muted: #6f7b8b;
+  --color-ok: #3c8d2f;
+  --color-error: #c0392b;
+
+  --font: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+  --page-width: 960px;
+  --radius: 4px;
+
+  color-scheme: light;
+  font: 12px/1.5 var(--font);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+h2 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.header {
+  background: linear-gradient(var(--color-primary), var(--color-primary-dark));
+  border-bottom: 1px solid var(--color-primary-dark);
+}
+
+.header__inner {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 8px 16px;
+}
+
+.header__logo {
+  color: #fff;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+
+.header__logo:hover {
+  text-decoration: none;
+}
+
+.page {
+  max-width: var(--page-width);
+  margin: 16px auto;
+  padding: 0 16px;
+}
+
+.footer {
+  max-width: var(--page-width);
+  margin: 24px auto;
+  padding: 0 16px;
+  color: var(--color-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.box {
+  background: var(--color-box);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.box__title {
+  background: var(--color-title-bg);
+  margin: -12px -12px 12px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.landing {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .landing {
+    grid-template-columns: 1fr;
+  }
+}
+
+.status {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.status--ok {
+  color: var(--color-ok);
+}
+
+.status--error {
+  color: var(--color-error);
+}

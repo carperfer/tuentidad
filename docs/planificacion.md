@@ -25,12 +25,14 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 ### Sprint 0 — Fundaciones
 
-- Monorepo `backend/` + `frontend/` y Docker Compose (PHP 8.3 + Apache, MySQL 8.0, Node para Vite)
-- Instalación de CodeIgniter 4.6 con `.env` por entorno y migraciones
-- SPA con Vite + React + TypeScript, router y cliente HTTP con soporte CSRF
-- Layout base con estética inspirada en tuenti.es (cabecera, columnas, paleta)
-- CI en GitHub Actions: PHPUnit, Vitest, PHP-CS-Fixer, ESLint
-- Verificación del plan OVH (versiones PHP/MySQL, SSH, cron, SMTP) y pipeline de despliegue
+- [x] Monorepo `backend/` + `frontend/` y Docker Compose (PHP 8.3 + Apache, MySQL 8.0)
+- [x] Instalación de CodeIgniter 4.7 con configuración por entorno
+- [x] SPA con Vite + React 19 + TypeScript, router y cliente HTTP con soporte CSRF
+- [x] Layout base con estética inspirada en tuenti.es (cabecera, cajas, paleta)
+- [x] CI en GitHub Actions: PHPUnit, PHP-CS-Fixer, Vitest, oxlint y comprobación de tipos
+- [x] Script de empaquetado para despliegue (`scripts/build-release.sh`)
+- [ ] Verificación del plan OVH (versiones PHP/MySQL, SSH, cron, SMTP)
+- [ ] Primer despliegue en OVH y automatización del despliegue
 
 **Entregable:** "Hola mundo" de la SPA llamando a `/api/health`, desplegado en OVH.
 
