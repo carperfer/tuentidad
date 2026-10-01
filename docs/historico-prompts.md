@@ -114,3 +114,11 @@ Para cada entrada registrar:
 - **Resultado obtenido:** El workflow sube lo público a `www/` y la aplicación a `tuentidad/` (fuera de la web); `separar-publico.sh` ajusta `index.php` para cargarla desde `../tuentidad/`. Se bloquean los archivos ocultos en `.htaccess`. Probado simulando la estructura de OVH en Apache con MySQL.
 - **Decisión:** Desactivar la integración Git de OVH y desplegar solo por FTP.
 - **Incidencia:** Dos commits se subieron por error directamente a `main` al no comprobar la rama local tras la fusión del PR #4; la web mostró el listado del repositorio hasta que se cambió la rama de OVH a `produccion`. Desde entonces se trabaja siempre en rama y PR.
+
+### 2026-10-01 — Un único dominio, sin preproducción
+
+- **Objetivo:** Decidir dónde se prueba la aplicación desplegada antes del MVP.
+- **Prompt utilizado:** "usaremos un único dominio para producción, no necesitaremos un entorno pre por ahora"
+- **Resultado esperado:** Estrategia de entornos definida.
+- **Resultado obtenido:** Se descarta `pre.tuentidad.es`. La landing sigue publicada hasta el MVP; la aplicación se valida en local con la estructura de OVH simulada y el alojamiento con `ovh-check.php`.
+- **Decisión:** Un único entorno (`produccion`). El paso a `DESPLIEGUE=app` se hará en el Sprint 7.
