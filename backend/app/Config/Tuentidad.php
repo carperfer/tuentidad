@@ -14,7 +14,9 @@ class Tuentidad extends BaseConfig
 {
     /**
      * URL pública de la SPA para los enlaces de los emails.
-     * Vacía = app.baseURL (en producción la SPA y la API comparten dominio).
+     * Vacía = app.baseURL (en producción la SPA y la API comparten dominio),
+     * salvo en desarrollo, donde la SPA la sirve Vite en el puerto 5173.
+     * En Codespaces la fija docker-compose.yml con la URL reenviada.
      */
     public string $publicURL = '';
 
@@ -43,7 +45,11 @@ class Tuentidad extends BaseConfig
      */
     public function url(string $path = ''): string
     {
-        $base = $this->publicURL !== '' ? $this->publicURL : config('App')->baseURL;
+        $base = match (true) {
+            $this->publicURL !== ''       => $this->publicURL,
+            ENVIRONMENT === 'development' => 'http://localhost:5173/',
+            default                       => config('App')->baseURL,
+        };
 
         return rtrim($base, '/') . '/' . ltrim($path, '/');
     }

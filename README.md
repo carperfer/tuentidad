@@ -56,9 +56,13 @@ docker compose exec -u www-data app php spark tuentidad:usuario
 cd frontend && npm install && npm run dev
 ```
 
-- SPA: http://localhost:5173
-- API: http://localhost:8080/api/health
-- Emails enviados (Mailpit): http://localhost:8025. En local ningún email sale fuera: todos se capturan aquí, incluidos los enlaces de invitación y de recuperación de contraseña.
+| | En GitHub Codespaces | En local |
+|---|---|---|
+| SPA | `https://<codespace>-5173.app.github.dev` | http://localhost:5173 |
+| API | `https://<codespace>-8080.app.github.dev/api/health` | http://localhost:8080/api/health |
+| Emails (Mailpit) | `https://<codespace>-8025.app.github.dev` | http://localhost:8025 |
+
+`<codespace>` es el nombre del Codespace (`echo $CODESPACE_NAME`). En desarrollo ningún email sale fuera: todos se capturan en Mailpit. Los enlaces de los emails apuntan automáticamente a la SPA del Codespace (o a `localhost:5173` fuera de él); se pueden forzar con la variable `TUENTIDAD_PUBLIC_URL` al arrancar Docker Compose.
 
 ### API
 
