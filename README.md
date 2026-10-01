@@ -145,7 +145,7 @@ En *Settings › Secrets and variables › Actions*:
 | `DEPLOY_TOKEN` | Sí | — (generar una sola vez: `openssl rand -hex 32`) |
 | `APP_BASE_URL` | No | `https://tuentidad.es/` |
 | `DB_PORT` | No | `3306` |
-| `EMAIL_FROM`, `EMAIL_FROM_NAME` | No | `no-reply@tuentidad.es`, `tuentidad` |
+| `EMAIL_FROM`, `EMAIL_FROM_NAME` | No | `no-reply@tuentidad.com`, `tuentidad` |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_CRYPTO` | No | `ssl0.ovh.net`, `465`, `ssl` |
 | `SMTP_USER` | No | igual que `EMAIL_FROM` |
 

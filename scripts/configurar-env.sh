@@ -27,7 +27,7 @@ PREGUNTAS=(
   "database.default.username|Usuario de la base de datos||texto|DB_USERNAME"
   "database.default.password|Contraseña de la base de datos||secreto|DB_PASSWORD"
   "database.default.port|Puerto MySQL|3306|numero|DB_PORT"
-  "email.fromEmail|Email remitente|no-reply@tuentidad.es|email|EMAIL_FROM"
+  "email.fromEmail|Email remitente|no-reply@tuentidad.com|email|EMAIL_FROM"
   "email.fromName|Nombre del remitente|tuentidad|texto|EMAIL_FROM_NAME"
   "email.SMTPHost|Servidor SMTP|ssl0.ovh.net|texto|SMTP_HOST"
   "email.SMTPUser|Usuario SMTP (normalmente el email completo)||email|SMTP_USER"
