@@ -77,12 +77,37 @@ Esas redes tampoco tienen salida a Internet, por eso `composer install` se ejecu
 
 ## Despliegue
 
-`scripts/build-release.sh` genera en `release/` el paquete para OVH: backend con dependencias de producción y build de la SPA dentro de `public/`.
+`scripts/build-release.sh` genera en `release/` el paquete para OVH: backend con dependencias de producción, build de la SPA dentro de `public/` y las herramientas de servidor.
 
-- La carpeta raíz del dominio en OVH debe apuntar a `release/public`.
+```
+release/
+├── .ovhconfig          # fija PHP 8.3 en OVH
+├── .env.example        # referencia de variables de producción
+├── configurar-env.sh   # crea/actualiza .env desde la consola SSH
+├── ovh-check.php       # diagnóstico de un solo uso
+├── app/ public/ vendor/ writable/ …
+```
+
+- La carpeta raíz del dominio en OVH debe apuntar a `public/` dentro de la carpeta subida.
+- OVH lee `.ovhconfig` de la raíz del alojamiento o de la carpeta de primer nivel del multisitio. Si `ovh-check.php` no muestra PHP 8.3, copia el archivo a la raíz del alojamiento.
 - `public/.htaccess` envía `/api/*` a CodeIgniter y el resto de rutas a `index.html`.
-- En el servidor hay que crear `.env` a partir de `backend/env` (`CI_ENVIRONMENT = production`, base de datos, `app.baseURL`).
 - En producción las cookies se marcan como `Secure`, por lo que el sitio debe servirse por HTTPS.
+
+### Primera puesta en marcha
+
+1. Sube el contenido de `release/` al alojamiento (nunca se incluye `.env`, así que las subidas posteriores no lo sobrescriben).
+2. Por SSH, en esa carpeta, ejecuta `./configurar-env.sh`: pregunta los datos de base de datos, SMTP y URL, los valida, genera la clave de cifrado y prueba la conexión a MySQL.
+3. Copia el diagnóstico a `public/` y ábrelo en el navegador: `cp ovh-check.php public/` → `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, base de datos y SMTP, y se borra solo al terminar.
+
+### Cambiar una variable más adelante
+
+```bash
+./configurar-env.sh                              # repasa todas; Enter mantiene el valor actual
+./configurar-env.sh database.default.password    # cambia solo esa (admite varias)
+./configurar-env.sh --listar                     # muestra la configuración con los secretos ocultos
+```
+
+Antes de guardar se hace una copia en `.env.bak`. `encryption.key` no se puede cambiar con el script, porque los datos cifrados con la clave anterior dejarían de poder leerse.
 
 ## Guía de diseño
 

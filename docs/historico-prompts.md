@@ -74,3 +74,15 @@ Para cada entrada registrar:
   - CI en GitHub Actions y script `scripts/build-release.sh` probado en Apache en modo producción.
   - Incidencias: el firewall del Codespace bloquea las redes de Docker Compose (documentado en el README); la plantilla de Vite trae React 19 y oxlint en vez de React 18 y ESLint.
 - **Decisión:** Adoptar CodeIgniter 4.7, React 19 y oxlint. Quedan pendientes la verificación del plan OVH y el primer despliegue.
+
+### 2026-10-01 — Configuración del servidor OVH
+
+- **Objetivo:** Proveer las variables de producción desde la consola del servidor y poder actualizarlas después.
+- **Prompt utilizado:** "Añadelo y creame un sh que me pregunte por estas variables para proveerlas por consola del servidor y se queden guardadas. Y a la vez si en algun momento cambia alguna variable, pueda actualizarla con el script."
+- **Resultado esperado:** Script interactivo para `.env`, diagnóstico del alojamiento y versión de PHP fijada.
+- **Resultado obtenido:**
+  - `scripts/configurar-env.sh`: pregunta y valida las variables, mantiene los valores actuales con Enter, permite actualizar variables sueltas, oculta secretos, genera la clave de cifrado, guarda copia `.env.bak` y prueba la conexión a MySQL.
+  - `scripts/ovh-check.php`: diagnóstico web de un solo uso (PHP, extensiones, límites, permisos, `.env`, MySQL, SMTP) que se borra solo.
+  - `deploy/.ovhconfig` (PHP 8.3) y `backend/.env.example`, incluidos en el paquete de `build-release.sh`.
+  - Probado de punta a punta con el paquete en Apache y MySQL en Docker, incluyendo contraseñas con caracteres especiales.
+- **Decisión:** El `.env` de producción se gestiona solo con `configurar-env.sh`; nunca se sube al repositorio ni en el paquete.
