@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use CodeIgniter\HTTP\Exceptions\BadRequestException;
 use CodeIgniter\Security\Exceptions\SecurityException;
 use Tests\Support\ApiTestCase;
 
@@ -65,6 +66,13 @@ final class AuthApiTest extends ApiTestCase
         $this->expectException(SecurityException::class);
 
         $this->postJson('api/auth/login', ['email' => 'ana@example.com', 'password' => self::PASSWORD]);
+    }
+
+    public function testInvalidJsonIsABadRequest(): void
+    {
+        $this->expectException(BadRequestException::class);
+
+        $this->withBody('{mal')->withHeaders(['Content-Type' => 'application/json'])->post('api/auth/login');
     }
 
     public function testLogout(): void
