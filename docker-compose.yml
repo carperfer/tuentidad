@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      CI_ENVIRONMENT: development
+      app_baseURL: http://localhost:8080/
+      database_default_hostname: db
+      database_default_database: tuentidad
+      database_default_username: tuentidad
+      database_default_password: tuentidad
+      database_default_DBDriver: MySQLi
+      database_tests_hostname: db
+      database_tests_database: tuentidad_test
+      database_tests_username: tuentidad
+      database_tests_password: tuentidad
+      database_tests_DBDriver: MySQLi
+      database_tests_DBPrefix: ""
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tuentidad
+      MYSQL_USER: tuentidad
+      MYSQL_PASSWORD: tuentidad
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      retries: 20
+
+volumes:
+  db-data:
