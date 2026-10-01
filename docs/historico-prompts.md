@@ -54,3 +54,11 @@ Para cada entrada registrar:
 - **Resultado esperado:** Mecanismo de captación compatible con el modelo de acceso por invitación.
 - **Resultado obtenido:** Se documentan versiones (PHP 8.3, CI 4.6, MySQL 8.0, React 18 + Vite + TS, Docker Compose), orden del MVP y el flujo de perfiles de bienvenida con medidas anti-abuso.
 - **Decisión:** Los perfiles de bienvenida forman parte del módulo de invitaciones del MVP y se marcan visiblemente como demostración.
+
+### 2026-10-01 — Planificación por sprints
+
+- **Objetivo:** Convertir las fases generales en un plan de sprints accionable.
+- **Prompt utilizado:** "si" (confirmación para commitear el refinamiento y pasar a la planificación detallada).
+- **Resultado esperado:** Plan por sprints con entregables claros.
+- **Resultado obtenido:** `docs/planificacion.md` reescrito: estructura de monorepo, MVP en 8 sprints (0–7) y versión 2 en 3 sprints (8–10).
+- **Decisión:** Plan aprobado por el autor del proyecto ("Perfecto").
