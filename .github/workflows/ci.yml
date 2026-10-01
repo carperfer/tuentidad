@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: tuentidad_test
+          MYSQL_USER: tuentidad
+          MYSQL_PASSWORD: tuentidad
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
+          --health-interval=5s
+          --health-retries=20
+    env:
+      CI_ENVIRONMENT: testing
+      database_tests_hostname: 127.0.0.1
+      database_tests_database: tuentidad_test
+      database_tests_username: tuentidad
+      database_tests_password: tuentidad
+      database_tests_DBDriver: MySQLi
+      database_tests_DBPrefix: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, mbstring, mysqli, gd, exif
+          coverage: none
+      - name: Instalar dependencias
+        run: composer install --no-interaction --no-progress
+      - name: Estilo de código
+        run: composer cs
+      - name: Tests
+        run: vendor/bin/phpunit --no-coverage
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Tipos
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
+      - name: Build
+        run: npm run build
