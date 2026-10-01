@@ -158,3 +158,15 @@ Para cada entrada registrar:
 - **Prompt utilizado:** "Base de datos creada ¿Te paso las credenciales? La cuenta de correo ha tenido que ser no-reply@tuentidad.com"
 - **Resultado obtenido:** El remitente por defecto pasa a `no-reply@tuentidad.com`. Las credenciales no se comparten en la conversación: se introducen directamente como secrets de GitHub.
 - **Decisión:** Las credenciales de producción solo viven en GitHub Secrets.
+
+### 2026-10-01 — Primer despliegue real y correcciones
+
+- **Objetivo:** Poner en marcha la aplicación en tuentidad.es y corregir lo que apareció en el log de producción.
+- **Prompts utilizados:** "lanzado", "fusionada", "ha funcionado y he podido loguearme en producción, pero enviar un correo ha fallado…", "¿has corregido?"
+- **Resultado obtenido:**
+  - `/api/*` respondía `File not found.`: el PHP-FPM de OVH no admite `index.php/ruta` tras una reescritura. Se reescribe a `index.php` (PR #9). Migraciones aplicadas y primer usuario creado por HTTP.
+  - El envío de emails falla con `535 Authentication failed`: la conexión con `ssl0.ovh.net` es correcta, el problema es la contraseña de `no-reply@tuentidad.com` en `SMTP_PASSWORD` (pendiente de revisar por el autor).
+  - Al iniciar sesión cambia el token CSRF y la primera petición posterior daba 403 (el cliente reintentaba). El cliente ahora pide un token nuevo tras el login y el registro.
+  - Un JSON mal formado daba 500; ahora responde 400 con un mensaje claro y no se registra como error crítico.
+  - Tras un reinicio del Codespace, el almacén de imágenes de Docker quedó dañado: se reconstruyeron las imágenes sin tocar el volumen de la base de datos.
+- **Decisión:** Las credenciales nunca se pegan en la conversación ni en comandos guardados; se recomienda cambiar la contraseña del primer usuario.
