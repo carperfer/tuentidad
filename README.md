@@ -110,7 +110,9 @@ Qué se publica lo decide la variable del repositorio `DESPLIEGUE`:
 | Valor | Qué se sube |
 |---|---|
 | `landing` (por defecto) | Solo la página de [`landing/`](landing/index.html) |
-| `app` | El paquete de `scripts/build-release.sh` (backend con `vendor/`, SPA compilada) y el `.env` generado a partir de los secrets |
+| `app` | El paquete de `scripts/build-release.sh` (backend con `vendor/`, SPA compilada) y el `.env` generado a partir de los secrets. Después aplica las migraciones y comprueba que la aplicación responde |
+
+Producción usa `DESPLIEGUE=app`: la aplicación está publicada en tuentidad.es (el acceso es solo por invitación).
 
 En OVH la carpeta web del dominio principal es fija (`www/`), así que el despliegue usa dos carpetas del alojamiento:
 
@@ -140,9 +142,10 @@ En *Settings › Secrets and variables › Actions*:
 | `DB_HOSTNAME`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Sí | — |
 | `SMTP_PASSWORD` | Sí | — |
 | `ENCRYPTION_KEY` | Sí | — (generar una sola vez: `echo "hex2bin:$(openssl rand -hex 32)"`) |
+| `DEPLOY_TOKEN` | Sí | — (generar una sola vez: `openssl rand -hex 32`) |
 | `APP_BASE_URL` | No | `https://tuentidad.es/` |
 | `DB_PORT` | No | `3306` |
-| `EMAIL_FROM`, `EMAIL_FROM_NAME` | No | `no-reply@tuentidad.es`, `tuentidad` |
+| `EMAIL_FROM`, `EMAIL_FROM_NAME` | No | `no-reply@tuentidad.com`, `tuentidad` |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_CRYPTO` | No | `ssl0.ovh.net`, `465`, `ssl` |
 | `SMTP_USER` | No | igual que `EMAIL_FROM` |
 
@@ -167,6 +170,20 @@ Si faltan los secrets de acceso, el workflow avisa y no despliega. Si falta o es
 - Certificado SSL activado: en producción las cookies son `Secure` y el sitio debe servirse por HTTPS.
 - `.ovhconfig` (PHP 8.3) se sube a `www/` junto con la app. Si el diagnóstico no muestra PHP 8.3, revisa el `.ovhconfig` de la raíz del alojamiento.
 - Los archivos ocultos (`.env`, `.ovhconfig`, …) están bloqueados por OVH y por `public/.htaccess`.
+
+### Tareas sin consola: migraciones y primer usuario
+
+El alojamiento no tiene SSH, así que lo que normalmente se haría con `php spark` se lanza por HTTP con el token de despliegue (`Authorization: Bearer <DEPLOY_TOKEN>`). Sin `tuentidad.deployToken` en el `.env`, estos endpoints responden 404.
+
+- `POST /api/deploy/migrate`: aplica las migraciones pendientes. El workflow lo llama en cada despliegue.
+- `POST /api/deploy/first-user`: crea el primer usuario. Solo funciona mientras no exista ninguno; se lanza una vez a mano:
+
+```bash
+read -rs DEPLOY_TOKEN   # pega el token (no se muestra)
+curl -X POST https://tuentidad.es/api/deploy/first-user \
+  -H "Authorization: Bearer $DEPLOY_TOKEN" -H 'Content-Type: application/json' \
+  -d '{"email":"tu@email.com","first_name":"Nombre","last_name":"Apellidos","birthdate":"AAAA-MM-DD","password":"…"}'
+```
 
 ### Diagnóstico del alojamiento
 

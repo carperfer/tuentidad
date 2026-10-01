@@ -38,7 +38,7 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 **Entregable:** SPA llamando a `/api/health` funcionando con la estructura de OVH (simulada en local) y despliegue automático de la landing en producción.
 
-> Se usa un único dominio (tuentidad.es) sin entorno de preproducción: la landing se mantiene publicada hasta el lanzamiento del MVP (Sprint 7), cuando se cambia `DESPLIEGUE` a `app`. El alojamiento se valida antes con `ovh-check.php`.
+> Se usa un único dominio (tuentidad.es) sin entorno de preproducción. Tras el Sprint 1 se decide publicar la aplicación de forma definitiva (`DESPLIEGUE=app`): el acceso es solo por invitación, así que nadie entra sin ser invitado.
 
 ### Sprint 1 — Autenticación e invitaciones
 
@@ -54,7 +54,7 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 **Entregable:** un usuario semilla invita a otro, que se registra e inicia sesión.
 
-> **Pendiente para producción (antes del Sprint 7):** sin SSH no se puede ejecutar `php spark migrate` ni `tuentidad:usuario` en OVH. Hay que decidir cómo aplicar migraciones y crear el primer usuario (p. ej. un paso del despliegue que llame a un endpoint protegido, o una tarea programada de OVH).
+- [x] Despliegue en producción sin consola: endpoints `/api/deploy/migrate` (lo llama el workflow) y `/api/deploy/first-user` (solo mientras no haya usuarios), protegidos con `DEPLOY_TOKEN`
 
 ### Sprint 2 — Landing y perfiles de bienvenida
 

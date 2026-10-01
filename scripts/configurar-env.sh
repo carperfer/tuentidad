@@ -27,7 +27,7 @@ PREGUNTAS=(
   "database.default.username|Usuario de la base de datos||texto|DB_USERNAME"
   "database.default.password|Contraseña de la base de datos||secreto|DB_PASSWORD"
   "database.default.port|Puerto MySQL|3306|numero|DB_PORT"
-  "email.fromEmail|Email remitente|no-reply@tuentidad.es|email|EMAIL_FROM"
+  "email.fromEmail|Email remitente|no-reply@tuentidad.com|email|EMAIL_FROM"
   "email.fromName|Nombre del remitente|tuentidad|texto|EMAIL_FROM_NAME"
   "email.SMTPHost|Servidor SMTP|ssl0.ovh.net|texto|SMTP_HOST"
   "email.SMTPUser|Usuario SMTP (normalmente el email completo)||email|SMTP_USER"
@@ -38,6 +38,9 @@ PREGUNTAS=(
 
 # Clave de cifrado en --desde-entorno: debe venir de fuera y no cambiar entre despliegues
 CLAVE_CIFRADO_ENTORNO="ENCRYPTION_KEY"
+
+# Token de los endpoints de despliegue (migraciones, primer usuario)
+TOKEN_DESPLIEGUE_ENTORNO="DEPLOY_TOKEN"
 
 # Variables fijas: se escriben si no existen, no se preguntan
 FIJAS=(
@@ -196,18 +199,27 @@ preguntar() {
   done
 }
 
+# 32 bytes aleatorios en hexadecimal
+aleatorio_hex() {
+  if command -v php > /dev/null; then
+    php -r 'echo bin2hex(random_bytes(32));'
+  elif command -v openssl > /dev/null; then
+    openssl rand -hex 32
+  else
+    od -An -tx1 -N32 /dev/urandom | tr -d ' \n'
+  fi
+}
+
 clave_cifrado() {
   [[ -n "${VALORES[encryption.key]-}" ]] && return 0
-  local hex
-  if command -v php > /dev/null; then
-    hex="$(php -r 'echo bin2hex(random_bytes(32));')"
-  elif command -v openssl > /dev/null; then
-    hex="$(openssl rand -hex 32)"
-  else
-    hex="$(od -An -tx1 -N32 /dev/urandom | tr -d ' \n')"
-  fi
-  fijar "encryption.key" "hex2bin:$hex"
+  fijar "encryption.key" "hex2bin:$(aleatorio_hex)"
   echo "Generada una clave de cifrado nueva (encryption.key)."
+}
+
+token_despliegue() {
+  [[ -n "${VALORES[tuentidad.deployToken]-}" ]] && return 0
+  fijar "tuentidad.deployToken" "$(aleatorio_hex)"
+  echo "Generado un token de despliegue nuevo (tuentidad.deployToken)."
 }
 
 probar_bd() {
@@ -264,6 +276,15 @@ desde_entorno() {
     fijar "encryption.key" "$valor"
   fi
 
+  valor="${!TOKEN_DESPLIEGUE_ENTORNO-}"
+  if [[ ! "$valor" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "✗ $TOKEN_DESPLIEGUE_ENTORNO debe tener 64 caracteres hexadecimales" >&2
+    echo "  Genéralo una sola vez con: openssl rand -hex 32" >&2
+    errores=$((errores + 1))
+  else
+    fijar "tuentidad.deployToken" "$valor"
+  fi
+
   if [[ $errores -gt 0 ]]; then
     echo "No se ha generado $ENV_FILE ($errores error(es))." >&2
     exit 1
@@ -279,6 +300,7 @@ variables_entorno() {
     printf '%-16s %-26s %s\n' "$entorno" "${defecto:-(obligatoria)}" "$descripcion"
   done
   printf '%-16s %-26s %s\n' "$CLAVE_CIFRADO_ENTORNO" "(obligatoria)" "Clave de cifrado (hex2bin:…)"
+  printf '%-16s %-26s %s\n' "$TOKEN_DESPLIEGUE_ENTORNO" "(obligatoria)" "Token de despliegue (64 hex)"
 }
 
 listar() {
@@ -289,7 +311,7 @@ listar() {
   fi
   local clave
   for clave in $(printf '%s\n' "${!VALORES[@]}" | sort); do
-    if [[ "$clave" =~ (password|Pass|key)$ ]]; then
+    if [[ "$clave" =~ (password|Pass|key|Token)$ ]]; then
       printf '%-28s = ********\n' "$clave"
     else
       printf '%-28s = %s\n' "$clave" "${VALORES[$clave]}"
@@ -328,6 +350,7 @@ for entrada in "${FIJAS[@]}"; do
   [[ -z "${VALORES[$clave]+x}" ]] && fijar "$clave" "${entrada#*|}"
 done
 clave_cifrado
+token_despliegue
 
 if [[ $# -gt 0 ]]; then
   for clave in "$@"; do

@@ -21,6 +21,12 @@ class Tuentidad extends BaseConfig
     public string $publicURL = '';
 
     /**
+     * Token de los endpoints de despliegue (/api/deploy/*): 64 caracteres
+     * hexadecimales. Vacío = endpoints desactivados.
+     */
+    public string $deployToken = '';
+
+    /**
      * Invitaciones que puede enviar cada usuario.
      */
     public int $invitationQuota = 10;

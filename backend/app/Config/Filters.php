@@ -75,7 +75,8 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             // 'honeypot',
-            'csrf',
+            // Los endpoints de despliegue se autentican con token, no con sesión
+            'csrf' => ['except' => ['api/deploy/*']],
             // 'invalidchars',
         ],
         'after' => [
