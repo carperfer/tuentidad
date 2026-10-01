@@ -21,9 +21,21 @@ services:
       database_tests_password: tuentidad
       database_tests_DBDriver: MySQLi
       database_tests_DBPrefix: ""
+      # Los emails se capturan en Mailpit: http://localhost:8025
+      email_protocol: smtp
+      email_SMTPHost: mailpit
+      email_SMTPPort: 1025
+      email_SMTPCrypto: ""
+      email_fromEmail: no-reply@tuentidad.local
+      email_fromName: tuentidad
+      # Enlaces de los emails hacia la SPA de Vite: en Codespaces, la URL reenviada
+      # del puerto 5173; fuera, localhost:5173. Se puede forzar con TUENTIDAD_PUBLIC_URL.
+      tuentidad_publicURL: ${TUENTIDAD_PUBLIC_URL:-${CODESPACE_NAME:+https://${CODESPACE_NAME}-5173.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}/}}
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   db:
     image: mysql:8.0
@@ -42,6 +54,11 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 5s
       retries: 20
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "8025:8025"
 
 volumes:
   db-data:

@@ -2,7 +2,9 @@
 
 namespace Config;
 
+use App\Validation\TuentidadRules;
 use CodeIgniter\Config\BaseConfig;
+use CodeIgniter\Shield\Authentication\Passwords\ValidationRules as ShieldRules;
 use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
 use CodeIgniter\Validation\StrictRules\FormatRules;
@@ -25,6 +27,8 @@ class Validation extends BaseConfig
         FormatRules::class,
         FileRules::class,
         CreditCardRules::class,
+        ShieldRules::class,
+        TuentidadRules::class,
     ];
 
     /**

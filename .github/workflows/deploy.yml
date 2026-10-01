@@ -48,7 +48,7 @@ jobs:
             echo "configurado=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.ftp.outputs.configurado == 'true'
 
       - name: Preparar landing
@@ -64,7 +64,7 @@ jobs:
           extensions: intl, mbstring, mysqli, gd, exif
           coverage: none
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
         with:
           node-version: '24'
