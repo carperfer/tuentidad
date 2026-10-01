@@ -29,7 +29,7 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 - PHP 8.3 · CodeIgniter 4.7 · MySQL 8.0
 - React 19 + Vite + TypeScript · React Router · Vitest · oxlint
 - Entorno local con Docker Compose (backend y base de datos) y Vite en local
-- Pendiente verificar en el panel de OVH: versiones de PHP/MySQL disponibles y acceso SSH
+- El plan de OVH no tiene SSH: el despliegue se hace por FTP desde GitHub Actions. Versiones de PHP/MySQL pendientes de verificar con `ovh-check.php`
 
 ## Arquitectura
 
@@ -77,48 +77,81 @@ Esas redes tampoco tienen salida a Internet, por eso `composer install` se ejecu
 
 ## Despliegue
 
-### Automático (rama `produccion`)
+El despliegue es automático: el workflow [`deploy.yml`](.github/workflows/deploy.yml) publica en OVH por FTP en cada push a `main`. También se puede lanzar a mano desde GitHub › Actions › Deploy › *Run workflow*.
 
-OVH despliega automáticamente la rama **`produccion`** mediante su integración Git. Esa rama no se edita a mano: la genera el workflow [`deploy.yml`](.github/workflows/deploy.yml) en cada push a `main`, solo con el contenido publicable. Así el código fuente, la documentación y la configuración de desarrollo nunca quedan accesibles desde la web.
+Qué se publica lo decide la variable del repositorio `DESPLIEGUE`:
 
-- **Ahora:** se publica solo la landing de [`landing/`](landing/index.html).
-- **Con el MVP:** se publicará el paquete de `scripts/build-release.sh` (con `vendor/` y la SPA ya compilados).
+| Valor | Qué se sube |
+|---|---|
+| `landing` (por defecto) | Solo la página de [`landing/`](landing/index.html) |
+| `app` | El paquete de `scripts/build-release.sh` (backend con `vendor/`, SPA compilada) y el `.env` generado a partir de los secrets |
 
-El despliegue también se puede lanzar a mano desde GitHub › Actions › Deploy › *Run workflow*.
+El código fuente, la documentación y la configuración de desarrollo nunca se suben. Las credenciales viven solo en los secrets de GitHub; el `.env` se genera en cada despliegue y nunca pasa por git.
+
+### Configuración en GitHub
+
+En *Settings › Secrets and variables › Actions*:
+
+**Secrets** (necesarios desde ya):
+
+| Secret | Valor |
+|---|---|
+| `FTP_SERVER` | Servidor FTP (panel OVH › FTP-SSH, p. ej. `ftp.clusterXXX.hosting.ovh.net`) |
+| `FTP_USERNAME` | Usuario FTP |
+| `FTP_PASSWORD` | Contraseña FTP |
+
+**Secrets de la aplicación** (necesarios al pasar a `DESPLIEGUE=app`). La lista completa, con valores por defecto, se obtiene con `./scripts/configurar-env.sh --variables`:
+
+| Secret | Obligatorio | Por defecto |
+|---|---|---|
+| `DB_HOSTNAME`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Sí | — |
+| `SMTP_PASSWORD` | Sí | — |
+| `ENCRYPTION_KEY` | Sí | — (generar una sola vez: `echo "hex2bin:$(openssl rand -hex 32)"`) |
+| `APP_BASE_URL` | No | `https://tuentidad.es/` |
+| `DB_PORT` | No | `3306` |
+| `EMAIL_FROM`, `EMAIL_FROM_NAME` | No | `no-reply@tuentidad.es`, `tuentidad` |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_CRYPTO` | No | `ssl0.ovh.net`, `465`, `ssl` |
+| `SMTP_USER` | No | igual que `EMAIL_FROM` |
+
+`ENCRYPTION_KEY` no debe cambiar nunca una vez en producción: los datos cifrados con la clave anterior dejarían de poder leerse.
+
+**Variables** (opcionales):
+
+| Variable | Por defecto | Uso |
+|---|---|---|
+| `DESPLIEGUE` | `landing` | `landing` o `app` |
+| `FTP_SERVER_DIR` | `tuentidad/` | Carpeta del alojamiento donde se sube |
+| `FTP_PROTOCOL` | `ftps` | `ftps` (cifrado) o `ftp` si el servidor no admite TLS |
+
+Si faltan los secrets de FTP, el workflow avisa y no despliega. Si falta o es inválido algún secret de la aplicación, falla antes de subir nada.
+
+### Configuración en OVH
+
+- La carpeta raíz del dominio (*Multisitio*) debe ser `tuentidad/public` (o `<FTP_SERVER_DIR>/public`). Así `.env`, `vendor/` y `writable/` quedan fuera de la web.
+- Certificado SSL activado: en producción las cookies son `Secure` y el sitio debe servirse por HTTPS.
+- Si existía una integración Git con el repositorio, hay que desasociarla para que no compita con el despliegue por FTP.
+- OVH lee `.ovhconfig` (PHP 8.3) de la raíz del alojamiento o de la carpeta de primer nivel del multisitio. Si el diagnóstico no muestra PHP 8.3, copia el archivo a la raíz del alojamiento.
+
+### Diagnóstico del alojamiento
+
+Sube `scripts/ovh-check.php` a `tuentidad/public/` con un cliente FTP (FileZilla) y ábrelo en `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, `.env`, base de datos y SMTP, y se borra solo al terminar.
 
 ### Paquete de la aplicación
 
-`scripts/build-release.sh` genera en `release/` el paquete para OVH: backend con dependencias de producción, build de la SPA dentro de `public/` y las herramientas de servidor.
+`scripts/build-release.sh` genera en `release/` el mismo paquete que publica el workflow en modo `app`:
 
 ```
 release/
 ├── .ovhconfig          # fija PHP 8.3 en OVH
 ├── .env.example        # referencia de variables de producción
-├── configurar-env.sh   # crea/actualiza .env desde la consola SSH
+├── configurar-env.sh   # genera .env (interactivo o --desde-entorno)
 ├── ovh-check.php       # diagnóstico de un solo uso
 ├── app/ public/ vendor/ writable/ …
 ```
 
-- La carpeta raíz del dominio en OVH debe apuntar a `public/` dentro de la carpeta subida.
-- OVH lee `.ovhconfig` de la raíz del alojamiento o de la carpeta de primer nivel del multisitio. Si `ovh-check.php` no muestra PHP 8.3, copia el archivo a la raíz del alojamiento.
-- `public/.htaccess` envía `/api/*` a CodeIgniter y el resto de rutas a `index.html`.
-- En producción las cookies se marcan como `Secure`, por lo que el sitio debe servirse por HTTPS.
+`public/.htaccess` envía `/api/*` a CodeIgniter y el resto de rutas a `index.html`.
 
-### Primera puesta en marcha
-
-1. Sube el contenido de `release/` al alojamiento (nunca se incluye `.env`, así que las subidas posteriores no lo sobrescriben).
-2. Por SSH, en esa carpeta, ejecuta `./configurar-env.sh`: pregunta los datos de base de datos, SMTP y URL, los valida, genera la clave de cifrado y prueba la conexión a MySQL.
-3. Copia el diagnóstico a `public/` y ábrelo en el navegador: `cp ovh-check.php public/` → `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, base de datos y SMTP, y se borra solo al terminar.
-
-### Cambiar una variable más adelante
-
-```bash
-./configurar-env.sh                              # repasa todas; Enter mantiene el valor actual
-./configurar-env.sh database.default.password    # cambia solo esa (admite varias)
-./configurar-env.sh --listar                     # muestra la configuración con los secretos ocultos
-```
-
-Antes de guardar se hace una copia en `.env.bak`. `encryption.key` no se puede cambiar con el script, porque los datos cifrados con la clave anterior dejarían de poder leerse.
+`configurar-env.sh` también sirve en local: sin argumentos pregunta cada valor (útil para preparar un `.env` a mano), `--listar` muestra uno existente con los secretos ocultos y `--desde-entorno` es el modo que usa el workflow.
 
 ## Guía de diseño
 

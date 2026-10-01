@@ -1,9 +1,15 @@
 name: Deploy
 
-# OVH despliega automáticamente la rama `produccion` mediante su integración Git.
-# Este workflow genera esa rama a partir de main con solo el contenido publicable,
-# para que el código fuente, la documentación y la configuración de desarrollo
-# nunca queden accesibles desde la web.
+# Publica tuentidad.es en OVH por FTP en cada push a main.
+#
+# Qué se publica lo decide la variable del repositorio DESPLIEGUE:
+#   - landing (por defecto): solo la página de landing/
+#   - app: el paquete completo de scripts/build-release.sh con el .env
+#     generado a partir de los secrets (nunca pasa por git)
+#
+# En ambos casos se sube a FTP_SERVER_DIR con la misma estructura, y la carpeta
+# raíz del dominio en OVH debe apuntar a <FTP_SERVER_DIR>/public.
+# Configuración completa en el README (sección Despliegue).
 
 on:
   push:
@@ -11,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: deploy
@@ -20,22 +26,77 @@ concurrency:
 jobs:
   publicar:
     runs-on: ubuntu-latest
+    environment: produccion
+    env:
+      DESPLIEGUE: ${{ vars.DESPLIEGUE || 'landing' }}
     steps:
+      - name: Comprobar configuración FTP
+        id: ftp
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          if [[ -z "$FTP_SERVER" || -z "$FTP_USERNAME" || -z "$FTP_PASSWORD" ]]; then
+            echo "::warning::Faltan los secrets FTP_SERVER, FTP_USERNAME o FTP_PASSWORD: no se despliega."
+            echo "configurado=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configurado=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.ftp.outputs.configurado == 'true'
 
-      # Por ahora solo se publica la landing. Cuando el MVP esté listo,
-      # este paso se sustituirá por scripts/build-release.sh.
-      - name: Preparar contenido publicable
+      - name: Preparar landing
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'landing'
         run: |
-          mkdir -p sitio
-          cp -r landing/. sitio/
+          mkdir -p sitio/public
+          cp -r landing/. sitio/public/
 
-      - name: Publicar en la rama produccion
-        working-directory: sitio
+      - uses: shivammathur/setup-php@v2
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        with:
+          php-version: '8.3'
+          extensions: intl, mbstring, mysqli, gd, exif
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Preparar aplicación
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        env:
+          ENV_FILE: ${{ github.workspace }}/release/.env
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          DB_HOSTNAME: ${{ secrets.DB_HOSTNAME }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_FROM_NAME: ${{ secrets.EMAIL_FROM_NAME }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_CRYPTO: ${{ secrets.SMTP_CRYPTO }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
         run: |
-          git init -q -b produccion
-          git config user.name "github-actions[bot]"
-          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -q -m "Despliegue de ${GITHUB_SHA::7}"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" produccion
+          ./scripts/build-release.sh
+          ./scripts/configurar-env.sh --desde-entorno
+          mv release sitio
+
+      - name: Subir por FTP
+        if: steps.ftp.outputs.configurado == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./sitio/
+          server-dir: ${{ vars.FTP_SERVER_DIR || 'tuentidad/' }}
