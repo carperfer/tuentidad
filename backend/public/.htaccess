@@ -34,8 +34,10 @@ DirectoryIndex index.html
 	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 	RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
 
-	# API: todo lo que cuelga de /api va al front controller de CodeIgniter
-	RewriteRule ^api(/.*)?$ index.php/$0 [L,NC,QSA]
+	# API: todo lo que cuelga de /api va al front controller de CodeIgniter.
+	# Sin PATH_INFO (index.php/ruta): el PHP-FPM de OVH no lo admite tras una
+	# reescritura. CodeIgniter toma la ruta de REQUEST_URI.
+	RewriteRule ^api(/.*)?$ index.php [L,NC,QSA]
 
 	# SPA: cualquier otra ruta que no sea un fichero real se sirve con
 	# index.html (build de React) para que el router del cliente la resuelva
