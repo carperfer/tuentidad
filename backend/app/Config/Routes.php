@@ -16,6 +16,9 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
 
     $routes->get('invitations/(:segment)', 'Invitations::show/$1');
 
+    $routes->get('welcome-profiles', 'WelcomeProfiles::index');
+    $routes->post('welcome-profiles/(:num)/friend-requests', 'WelcomeProfiles::request/$1');
+
     $routes->post('deploy/migrate', 'Deploy::migrate');
     $routes->post('deploy/first-user', 'Deploy::firstUser');
 

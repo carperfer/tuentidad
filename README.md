@@ -75,7 +75,9 @@ cd frontend && npm install && npm run dev
 | `POST /api/auth/register` | — | Crear cuenta con una invitación (`token`, `first_name`, `last_name`, `birthdate`, `password`, `password_confirm`, `accept_terms`) |
 | `POST /api/auth/forgot-password` | — | Enviar enlace de recuperación (misma respuesta exista o no el email) |
 | `POST /api/auth/reset-password` | — | Cambiar la contraseña con el enlace (`token`, `password`, `password_confirm`) |
-| `GET /api/invitations/{token}` | — | Datos públicos de una invitación válida |
+| `GET /api/invitations/{token}` | — | Datos públicos de una invitación válida (`welcome: true` si viene de un perfil de bienvenida) |
+| `GET /api/welcome-profiles` | — | Perfiles de bienvenida de la portada |
+| `POST /api/welcome-profiles/{id}/friend-requests` | — | Pedir amistad a un perfil de bienvenida (`email`, `accept_privacy`; `website` es un campo trampa). Envía el enlace de registro; al registrarse, quedan como amigos |
 | `GET /api/invitations` | Sí | Invitaciones enviadas y cupo restante |
 | `POST /api/invitations` | Sí | Invitar por email (reenviar a una pendiente no gasta cupo) |
 
@@ -100,6 +102,14 @@ sudo iptables-legacy -I FORWARD -i br-+ -o br-+ -j ACCEPT
 ```
 
 Esas redes tampoco tienen salida a Internet, por eso `composer install` se ejecuta con `docker run` o desde el contenedor ya levantado, y Vite se ejecuta fuera de Docker.
+
+Si tras reiniciar el Codespace Docker no arranca los contenedores (errores como `RWLayer … is unexpectedly nil` o `failed to extract layer`), recréalos sin tocar el volumen de la base de datos:
+
+```bash
+docker compose rm -fs              # elimina los contenedores (los datos siguen en el volumen)
+docker compose build --pull app    # solo si el error menciona capas de imagen
+docker compose up -d
+```
 
 ## Despliegue
 

@@ -17,6 +17,8 @@ export type InvitationList = {
 export type PublicInvitation = {
   email: string
   inviter: string | null
+  /** La invitación viene de un perfil de bienvenida: al registrarse, serán amigos. */
+  welcome: boolean
 }
 
 export function listInvitations(): Promise<InvitationList> {

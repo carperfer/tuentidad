@@ -28,6 +28,7 @@ export function mockApi(routes: Record<string, Handler>) {
 const defaults: Record<string, Handler> = {
   'GET /api/csrf': () => ({ body: { header: 'X-CSRF-TOKEN', token: 'csrf' } }),
   'GET /api/auth/me': () => ({ body: { user: null } }),
+  'GET /api/welcome-profiles': () => ({ body: { profiles: [] } }),
 }
 
 export const ana = { id: 1, email: 'ana@example.com', first_name: 'Ana', last_name: 'García' }

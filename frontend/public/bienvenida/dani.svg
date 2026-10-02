@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Avatar ilustrado de Dani">
+  <rect width="120" height="120" fill="#cfe3d8"/>
+  <path d="M22 120c2-24 18-36 38-36s36 12 38 36z" fill="#2c5490"/>
+  <ellipse cx="60" cy="58" rx="21" ry="24" fill="#d9a07c"/>
+  <path d="M38 52c0-16 10-24 22-24s22 8 22 24c-4-8-12-10-22-10s-18 2-22 10z" fill="#2b2b2b"/>
+  <path d="M34 54c0-6 3-10 6-10v16c-3 0-6-2-6-6zM86 54c0-6-3-10-6-10v16c3 0 6-2 6-6z" fill="#3b6db3"/>
+  <path d="M38 46c4-16 40-16 44 0" stroke="#3b6db3" stroke-width="5" fill="none"/>
+  <circle cx="52" cy="58" r="2.5" fill="#333"/>
+  <circle cx="68" cy="58" r="2.5" fill="#333"/>
+  <path d="M52 69c5 5 11 5 16 0" stroke="#8a4b30" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>
