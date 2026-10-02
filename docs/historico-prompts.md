@@ -170,3 +170,25 @@ Para cada entrada registrar:
   - Un JSON mal formado daba 500; ahora responde 400 con un mensaje claro y no se registra como error crítico.
   - Tras un reinicio del Codespace, el almacén de imágenes de Docker quedó dañado: se reconstruyeron las imágenes sin tocar el volumen de la base de datos.
 - **Decisión:** Las credenciales nunca se pegan en la conversación ni en comandos guardados; se recomienda cambiar la contraseña del primer usuario.
+
+### 2026-10-02 — Envío de emails en producción resuelto
+
+- **Objetivo:** Que las invitaciones salgan desde producción.
+- **Prompts utilizados:** "las credenciales son correctas, pero en producción sigue indicando que no se pudo enviar", "faltaban secretos, redespliego", "perfecto, ya ha funcionado".
+- **Resultado obtenido:** Diagnóstico por pasos: DNS (el correo de `tuentidad.com` es MX Plan, `ssl0.ovh.net:465` es correcto), prueba SMTP con `curl` desde el Codespace (la primera se hizo sin contraseña por un error en el comando propuesto; la segunda dio `235`), y revisión de los secrets: faltaban algunos en el environment `produccion`. Tras completarlos y redesplegar, los emails salen.
+- **Decisión:** Ante fallos de configuración en producción, probar primero los servicios externos desde fuera del alojamiento para separar el problema de la aplicación.
+
+### 2026-10-02 — Sprint 2: perfiles de bienvenida y páginas legales
+
+- **Objetivo:** Dar una puerta de entrada a quien no conoce a nadie dentro y publicar las páginas legales.
+- **Prompt utilizado:** "perfecto, ya ha funcionado, podemos continuar"
+- **Resultado obtenido:**
+  - Dos perfiles de demostración (Lucía y Dani) creados por migración, sin credenciales, con avatares SVG ilustrados.
+  - `GET /api/welcome-profiles` y `POST /api/welcome-profiles/{id}/friend-requests` con límite por IP y por email, campo trampa, consentimiento con fecha y respuesta idéntica exista o no la cuenta.
+  - Tabla `friendships` y amistad automática al registrarse desde un perfil de bienvenida.
+  - Borrado de invitaciones no aceptadas 30 días después de caducar.
+  - `InvitationSender` compartido entre invitaciones de usuarios y de perfiles de bienvenida.
+  - Los tests detectaron que `/api/deploy/first-user` contaba los perfiles de bienvenida como usuarios: ahora cuenta solo cuentas con credenciales.
+  - Páginas de privacidad, condiciones y cookies, con los datos del responsable pendientes de completar.
+  - 49 tests de backend y 19 de frontend.
+- **Decisión:** Solo la invitación desde un perfil de bienvenida crea amistad automática (la de invitaciones entre usuarios se decide en el Sprint 4).

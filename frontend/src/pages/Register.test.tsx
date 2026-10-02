@@ -32,7 +32,7 @@ describe('Register', () => {
 
   it('muestra quién invita y los errores de cada campo', async () => {
     mockApi({
-      [`GET /api/invitations/${TOKEN}`]: () => ({ body: { email: 'bea@example.com', inviter: 'Ana García' } }),
+      [`GET /api/invitations/${TOKEN}`]: () => ({ body: { email: 'bea@example.com', inviter: 'Ana García', welcome: false } }),
       'POST /api/auth/register': () => ({
         status: 422,
         body: { message: 'Revisa', errors: { birthdate: 'Tienes que tener al menos 14 años para usar tuentidad.' } },
@@ -50,9 +50,20 @@ describe('Register', () => {
     expect(birthdate).toHaveAttribute('aria-invalid', 'true')
   })
 
+  it('si viene de un perfil de bienvenida, avisa de que serán amigos', async () => {
+    mockApi({
+      [`GET /api/invitations/${TOKEN}`]: () => ({
+        body: { email: 'marta@example.com', inviter: 'Lucía Martín', welcome: true },
+      }),
+    })
+    renderRegister()
+
+    expect(await screen.findByText(/ha aceptado tu solicitud de amistad/)).toBeInTheDocument()
+  })
+
   it('crea la cuenta y entra en el inicio', async () => {
     const fetchMock = mockApi({
-      [`GET /api/invitations/${TOKEN}`]: () => ({ body: { email: 'bea@example.com', inviter: null } }),
+      [`GET /api/invitations/${TOKEN}`]: () => ({ body: { email: 'bea@example.com', inviter: null, welcome: false } }),
       'POST /api/auth/register': () => ({ status: 201, body: { user: { ...ana, email: 'bea@example.com' } } }),
     })
     renderRegister()

@@ -58,13 +58,18 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 ### Sprint 2 — Landing y perfiles de bienvenida
 
-- Landing pública con login y los 2 perfiles de bienvenida (marcados como demostración)
-- Seeder de perfiles de bienvenida
-- Formulario de solicitud de amistad por email: limitación de peticiones (Throttler), honeypot y aceptación de privacidad
-- Al registrarse con esa invitación, amistad automática con el perfil de bienvenida
-- Páginas legales: política de privacidad, términos y cookies
+- [x] Portada con login y los 2 perfiles de bienvenida (Lucía y Dani), marcados como «Perfil de demostración», con avatares ilustrados
+- [x] Perfiles creados por migración (llegan a producción con el despliegue); son usuarios sin credenciales, no pueden iniciar sesión
+- [x] Solicitud de amistad por email: límite de peticiones (por IP y por email), campo trampa y aceptación de la privacidad (se guarda la fecha del consentimiento)
+- [x] Misma respuesta exista o no la cuenta (si existe, se le envía un recordatorio para iniciar sesión)
+- [x] Al registrarse con esa invitación, amistad automática con el perfil de bienvenida (tabla `friendships`, base del Sprint 4)
+- [x] Las invitaciones no aceptadas se borran 30 días después de caducar
+- [x] Páginas legales: privacidad, condiciones de uso y cookies (solo técnicas, sin banner)
+- [x] Tests: 49 de backend y 19 de frontend
 
 **Entregable:** un visitante anónimo puede acabar registrado y como amigo de un perfil de bienvenida.
+
+> **Pendiente:** completar los datos del responsable en `frontend/src/pages/legal/owner.ts` (nombre, NIF, dirección y email de contacto) y revisar los textos legales con asesoría antes de abrir el sitio al público.
 
 ### Sprint 3 — Perfil
 
