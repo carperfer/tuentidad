@@ -292,3 +292,90 @@ h2 {
   background: #fdecea;
   color: var(--color-error);
 }
+
+.landing__main {
+  display: grid;
+  gap: 16px;
+}
+
+.welcome-profiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.welcome-profile {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px;
+  border: 1px solid var(--color-title-bg);
+  border-radius: var(--radius);
+}
+
+.welcome-profile__avatar {
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  max-width: 100%;
+}
+
+.welcome-profile__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.welcome-profile h3 {
+  font-size: 13px;
+  margin: 0 0 2px;
+}
+
+.welcome-profile p {
+  margin: 6px 0 10px;
+}
+
+/* Campo trampa para bots: fuera de la vista y sin ocupar espacio */
+.honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.footer p {
+  margin: 0 0 4px;
+}
+
+.legal {
+  max-width: 760px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.legal h2 {
+  margin: 18px 0 6px;
+}
+
+.legal ul {
+  padding-left: 20px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.legal table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.legal th,
+.legal td {
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  padding: 6px 8px;
+  vertical-align: top;
+}

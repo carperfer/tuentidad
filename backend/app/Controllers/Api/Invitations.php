@@ -2,9 +2,10 @@
 
 namespace App\Controllers\Api;
 
-use App\Libraries\Mailer;
+use App\Libraries\InvitationSender;
 use App\Libraries\Tokens;
 use App\Models\InvitationModel;
+use App\Models\WelcomeProfileModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -50,51 +51,29 @@ class Invitations extends ApiController
             return $this->invalid(['email' => 'Esta persona ya está en tuentidad.']);
         }
 
-        $model    = model(InvitationModel::class);
-        $config   = config('Tuentidad');
-        $token    = Tokens::generate();
-        $expires  = date('Y-m-d H:i:s', time() + $config->invitationLifetime);
-        $existing = $model->findPending((int) $user->id, $email);
-
-        if ($existing !== null) {
-            // Reenvío: nuevo enlace y nueva caducidad, sin gastar otra invitación
-            $model->update($existing['id'], ['token_hash' => $token['hash'], 'expires_at' => $expires]);
-            $id = $existing['id'];
-        } else {
-            if ($this->remaining((int) $user->id) <= 0) {
-                return $this->invalid(['email' => 'Ya has usado todas tus invitaciones.']);
-            }
-            $id = $model->insert([
-                'inviter_id' => $user->id,
-                'email'      => $email,
-                'token_hash' => $token['hash'],
-                'expires_at' => $expires,
-            ]);
+        $isPending = model(InvitationModel::class)->findPending((int) $user->id, $email) !== null;
+        if (! $isPending && $this->remaining((int) $user->id) <= 0) {
+            return $this->invalid(['email' => 'Ya has usado todas tus invitaciones.']);
         }
 
-        $sent = (new Mailer())->send(
+        $result = (new InvitationSender())->send(
+            (int) $user->id,
             $email,
             "{$user->first_name} te invita a tuentidad",
             'emails/invitation',
-            [
-                'inviterName' => trim("{$user->first_name} {$user->last_name}"),
-                'url'         => $config->url('registro/' . $token['token']),
-                'days'        => intdiv($config->invitationLifetime, DAY),
-            ],
+            ['inviterName' => trim("{$user->first_name} {$user->last_name}")],
         );
 
-        if (! $sent) {
-            if ($existing === null) {
-                $model->delete($id);
-            }
-
+        if ($result === InvitationSender::FAILED) {
             return $this->message('No se ha podido enviar la invitación. Inténtalo más tarde.', 502);
         }
 
+        $resent = $result === InvitationSender::RESENT;
+
         return $this->respond([
-            'message'   => $existing !== null ? "Hemos vuelto a enviar la invitación a {$email}." : "Invitación enviada a {$email}.",
+            'message'   => $resent ? "Hemos vuelto a enviar la invitación a {$email}." : "Invitación enviada a {$email}.",
             'remaining' => $this->remaining((int) $user->id),
-        ], $existing !== null ? 200 : 201);
+        ], $resent ? 200 : 201);
     }
 
     /**
@@ -116,6 +95,8 @@ class Invitations extends ApiController
         return $this->respond([
             'email'   => $invitation['email'],
             'inviter' => $inviter !== null ? trim("{$inviter->first_name} {$inviter->last_name}") : null,
+            // Al registrarse, quedará como amigo de este perfil de bienvenida
+            'welcome' => $inviter !== null && model(WelcomeProfileModel::class)->isWelcomeUser((int) $inviter->id),
         ]);
     }
 

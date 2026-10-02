@@ -112,7 +112,7 @@ final class InvitationApiTest extends ApiTestCase
         $result = $this->get("api/invitations/{$token}");
 
         $result->assertOK();
-        $this->assertSame(['email' => 'bea@example.com', 'inviter' => 'Ana Pruebas'], $this->json($result));
+        $this->assertSame(['email' => 'bea@example.com', 'inviter' => 'Ana Pruebas', 'welcome' => false], $this->json($result));
     }
 
     public function testInvalidOrExpiredInvitationsAreNotFound(): void
