@@ -19,6 +19,7 @@ export function Header() {
         {user && (
           <nav className="header__nav" aria-label="Principal">
             <Link to="/inicio">Inicio</Link>
+            <Link to={`/perfil/${user.id}`}>Mi perfil</Link>
             <span className="header__user">{user.first_name}</span>
             <button type="button" className="link-button" onClick={handleLogout}>
               Salir

@@ -192,3 +192,10 @@ Para cada entrada registrar:
   - Páginas de privacidad, condiciones y cookies, con los datos del responsable pendientes de completar.
   - 49 tests de backend y 19 de frontend.
 - **Decisión:** Solo la invitación desde un perfil de bienvenida crea amistad automática (la de invitaciones entre usuarios se decide en el Sprint 4).
+
+### 2026-10-23 — Sprint 3: perfil y privacidad
+
+- **Objetivo:** Continuar el desarrollo con perfiles editables, datos visibles según privacidad y un resumen de actividad propia.
+- **Prompt utilizado:** "Continua con el sprint"; se eligió privacidad configurable por campo (público, solo amigos o privado).
+- **Resultado obtenido:** Implementados edición de perfil, biografía, estado, avatar privado en almacenamiento, filtros por amistad y resumen de amistades e invitaciones. Las pruebas frontend pasan (21 en total). Se añadieron pruebas backend y la suite completa pasa en Docker (55 tests). La columna social se llama `profile_status` porque Shield ya usa `users.status`, y las URLs de avatar son relativas para funcionar en cualquier dominio.
+- **Decisión:** Mantener pendiente el cierre del Sprint 3 hasta ejecutar las pruebas backend en CI o corregir la conexión entre contenedores del Codespace.
