@@ -1,35 +1,149 @@
 # Planificación formativa del proyecto
 
-Plan base para implementar tuentidad.es con trazabilidad completa del proceso asistido por IA.
+Plan de desarrollo de tuentidad.es con trazabilidad completa del proceso asistido por IA.
 
-## Fase 1 — Fundaciones
+## Supuestos
 
-- Definir requisitos funcionales y no funcionales
-- Alinear identidad visual con tuenti.es original
-- Establecer arquitectura base: PHP + React + MySQL
-- Configurar entorno de despliegue en OVH Web Cloud Hosting
+- Sprints de 2 semanas.
+- Cada sprint termina con algo desplegable y probado (tests en verde en CI).
+- Orden del MVP: invitaciones (incluidos perfiles de bienvenida) → perfil → amigos → fotos con etiquetado y comentarios. Chat y eventos quedan para la versión 2.
 
-## Fase 2 — Núcleo social
+## Estructura del repositorio
 
-- Sistema de invitaciones y acceso privado
-- Gestión de perfiles y red de amigos reales
-- Álbumes de fotos, etiquetado y comentarios
+```
+tuentidad/
+├── backend/          # CodeIgniter 4 (API REST bajo /api)
+├── frontend/         # React 18 + Vite + TypeScript (SPA)
+├── docker/           # Dockerfiles y configuración local
+├── docs/             # Documentación y registro de prompts
+└── docker-compose.yml
+```
 
-## Fase 3 — Comunicación y actividad
+En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIgniter. Un `.htaccess` envía `/api/*` a `index.php` y el resto de rutas a `index.html`.
 
-- Chat integrado en tiempo real
-- Sistema de eventos (creación, invitación y confirmación)
-- Notificaciones de actividad social
+## MVP
 
-## Fase 4 — Calidad y publicación
+### Sprint 0 — Fundaciones
 
-- Pruebas funcionales y de integración por módulo
-- Revisión de seguridad y datos personales
-- Validación UX final y despliegue controlado en OVH
+- [x] Monorepo `backend/` + `frontend/` y Docker Compose (PHP 8.3 + Apache, MySQL 8.0)
+- [x] Instalación de CodeIgniter 4.7 con configuración por entorno
+- [x] SPA con Vite + React 19 + TypeScript, router y cliente HTTP con soporte CSRF
+- [x] Layout base con estética inspirada en tuenti.es (cabecera, cajas, paleta)
+- [x] CI en GitHub Actions: PHPUnit, PHP-CS-Fixer, Vitest, oxlint y comprobación de tipos
+- [x] Script de empaquetado para despliegue (`scripts/build-release.sh`)
+- [x] Acceso al servidor: el plan no tiene consola SSH; el FTP de OVH no admite FTPS, se despliega por SFTP
+- [ ] Verificación del plan OVH con `ovh-check.php` (versiones PHP/MySQL, extensiones, SMTP)
+- [x] Despliegue automático por SFTP en cada push a `main` (`deploy.yml`, credenciales en GitHub Secrets)
+- [ ] Primer despliegue en OVH (pendiente de validar la conexión SFTP)
+
+**Entregable:** SPA llamando a `/api/health` funcionando con la estructura de OVH (simulada en local) y despliegue automático de la landing en producción.
+
+> Se usa un único dominio (tuentidad.es) sin entorno de preproducción. Tras el Sprint 1 se decide publicar la aplicación de forma definitiva (`DESPLIEGUE=app`): el acceso es solo por invitación, así que nadie entra sin ser invitado.
+
+### Sprint 1 — Autenticación e invitaciones
+
+- [x] CodeIgniter Shield: login, logout, "recordarme", sesión por cookie (`HttpOnly`, `Secure`, `SameSite`) y CSRF ligado a la sesión
+- [x] Modelo de invitaciones: token de un solo uso (solo se guarda su hash), caducidad de 7 días y cupo de 10 por usuario; reenviar no gasta cupo
+- [x] Envío de emails con plantilla propia (SMTP; Mailpit en local)
+- [x] Registro solo con invitación válida: edad mínima de 14 años, contraseña robusta sin datos personales, aceptación de condiciones
+- [x] Recuperación de contraseña con enlace de un solo uso (1 hora) y misma respuesta exista o no la cuenta
+- [x] Límite de peticiones en login, registro, invitaciones y recuperación
+- [x] Comando `php spark tuentidad:usuario` para crear el primer usuario
+- [x] SPA: portada con login, registro por invitación, inicio con invitaciones, recuperación de contraseña
+- [x] Tests: 32 de backend (API contra MySQL) y 13 de frontend
+
+**Entregable:** un usuario semilla invita a otro, que se registra e inicia sesión.
+
+- [x] Despliegue en producción sin consola: endpoints `/api/deploy/migrate` (lo llama el workflow) y `/api/deploy/first-user` (solo mientras no haya usuarios), protegidos con `DEPLOY_TOKEN`
+
+### Sprint 2 — Landing y perfiles de bienvenida
+
+- [x] Portada con login y los 2 perfiles de bienvenida (Lucía y Dani), marcados como «Perfil de demostración», con avatares ilustrados
+- [x] Perfiles creados por migración (llegan a producción con el despliegue); son usuarios sin credenciales, no pueden iniciar sesión
+- [x] Solicitud de amistad por email: límite de peticiones (por IP y por email), campo trampa y aceptación de la privacidad (se guarda la fecha del consentimiento)
+- [x] Misma respuesta exista o no la cuenta (si existe, se le envía un recordatorio para iniciar sesión)
+- [x] Al registrarse con esa invitación, amistad automática con el perfil de bienvenida (tabla `friendships`, base del Sprint 4)
+- [x] Las invitaciones no aceptadas se borran 30 días después de caducar
+- [x] Páginas legales: privacidad, condiciones de uso y cookies (solo técnicas, sin banner)
+- [x] Tests: 49 de backend y 19 de frontend
+
+**Entregable:** un visitante anónimo puede acabar registrado y como amigo de un perfil de bienvenida.
+
+> **Pendiente:** completar los datos del responsable en `frontend/src/pages/legal/owner.ts` (nombre, NIF, dirección y email de contacto) y revisar los textos legales con asesoría antes de abrir el sitio al público.
+
+### Sprint 3 — Perfil
+
+- [x] Página de perfil: datos personales, foto de perfil y estado
+- [x] Edición del perfil y privacidad por campo (público, solo amigos o privado)
+- [x] Página de inicio con resumen de amistades e invitaciones propias
+- [x] Tests frontend (21 en total)
+- [x] Tests backend (55 en total, ejecutados en Docker) y frontend (21)
+
+**Entregable:** perfil editable con datos filtrados según la relación de amistad; pendiente validar la suite backend en el entorno de CI.
+
+### Sprint 4 — Amigos
+
+- Solicitudes de amistad: enviar, aceptar, rechazar y cancelar
+- Listado de amigos y eliminación de amistad
+- Búsqueda de usuarios
+- Novedades de amigos en la página de inicio
+
+**Entregable:** red de amigos funcional entre usuarios reales.
+
+### Sprint 5 — Fotos I: álbumes y subida
+
+- Álbumes: crear, editar y borrar
+- Subida múltiple con validación de tipo y tamaño
+- Generación de miniaturas (GD/Imagick) y eliminación de metadatos EXIF
+- Visor de fotos con navegación anterior/siguiente
+- Permisos: solo los amigos ven las fotos
+
+**Entregable:** subir y navegar álbumes de fotos.
+
+### Sprint 6 — Fotos II: etiquetas y comentarios
+
+- Etiquetado de amigos sobre la foto (seleccionando una zona)
+- El etiquetado puede retirarse por la persona etiquetada
+- Página "fotos en las que sales"
+- Comentarios en fotos
+- Notificaciones básicas en la web (etiquetas, comentarios, solicitudes de amistad)
+
+**Entregable:** experiencia de fotos completa estilo Tuenti.
+
+### Sprint 7 — Calidad y lanzamiento del MVP
+
+- Revisión de seguridad (OWASP: XSS, CSRF, IDOR, subidas de archivos)
+- RGPD: borrado de cuenta y exportación de datos
+- Pruebas de integración de los flujos principales
+- Revisión UX y responsive
+- Despliegue controlado en OVH y copias de seguridad de la base de datos
+
+**Entregable:** MVP publicado en tuentidad.es.
+
+## Versión 2
+
+### Sprint 8 — Chat
+
+- Conversaciones 1 a 1 entre amigos
+- Polling AJAX con intervalo adaptativo (más frecuente con el chat abierto)
+- Indicador de amigos conectados y mensajes no leídos
+- Transporte encapsulado en un servicio para poder sustituirlo
+
+### Sprint 9 — Eventos
+
+- Crear eventos (cumpleaños, fiestas, quedadas) con fecha, lugar y descripción
+- Invitar amigos y confirmar asistencia (sí / no / quizás)
+- Comentarios en el evento y recordatorios por cron
+
+### Sprint 10 — Notificaciones y pulido
+
+- Centro de notificaciones unificado
+- Emails de resumen opcionales
+- Mejoras de rendimiento (índices, caché, paginación)
 
 ## Seguimiento obligatorio de prompts
 
-En cada fase:
+En cada sprint:
 
 1. Registrar prompts en `docs/historico-prompts.md`
 2. Documentar objetivo y resultado de cada iteración
