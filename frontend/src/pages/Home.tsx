@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { errorMessage, fieldErrors } from '../api/client'
 import { listInvitations, sendInvitation, type InvitationList, type InvitationStatus } from '../api/invitations'
+import { getDashboardSummary, type DashboardSummary } from '../api/profile'
 import { useAuth } from '../auth/context'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
+import { Link } from 'react-router'
 
 const STATUS: Record<InvitationStatus, string> = {
   pending: 'Pendiente',
@@ -14,6 +16,7 @@ const STATUS: Record<InvitationStatus, string> = {
 export function Home() {
   const { user } = useAuth()
   const [data, setData] = useState<InvitationList | null>(null)
+  const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [email, setEmail] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
@@ -27,6 +30,12 @@ export function Home() {
   }, [])
 
   useEffect(load, [load])
+
+  useEffect(() => {
+    getDashboardSummary()
+      .then(setSummary)
+      .catch((caught: unknown) => setError(errorMessage(caught)))
+  }, [])
 
   async function handleInvite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -52,7 +61,15 @@ export function Home() {
     <div className="landing">
       <section className="box">
         <h1>Hola, {user?.first_name}</h1>
-        <p>Pronto podrás ver aquí lo que hacen tus amigos. De momento, ¡invítalos!</p>
+        <p>Este es el resumen de tu actividad en tuentidad.</p>
+        {summary && (
+          <dl className="activity-summary">
+            <div><dt>Amigos</dt><dd>{summary.friends_count}</dd></div>
+            <div><dt>Invitaciones enviadas</dt><dd>{summary.invitations_sent}</dd></div>
+            <div><dt>Ya se han unido</dt><dd>{summary.invitations_accepted}</dd></div>
+          </dl>
+        )}
+        <p><Link to={`/perfil/${user?.id}`}>Ver y editar mi perfil</Link></p>
       </section>
 
       <aside className="box">
