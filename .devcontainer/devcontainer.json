@@ -6,7 +6,7 @@
     "ghcr.io/devcontainers/features/php:1": {
       "version": "8.3"
     },
-    "ghcr.io/devcontainers/features/mysql-server:1": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
 
   "customizations": {
