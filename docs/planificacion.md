@@ -83,10 +83,11 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 ### Sprint 4 — Amigos
 
-- Solicitudes de amistad: enviar, aceptar, rechazar y cancelar
-- Listado de amigos y eliminación de amistad
-- Búsqueda de usuarios
-- Novedades de amigos en la página de inicio
+- [x] Solicitudes de amistad: enviar, aceptar, rechazar y cancelar
+- [x] Listado de amigos y eliminación de amistad
+- [x] Búsqueda de usuarios
+- [x] Novedades de amigos en la página de inicio, filtradas por privacidad
+- [x] Tests de backend y frontend para los flujos principales
 
 **Entregable:** red de amigos funcional entre usuarios reales.
 

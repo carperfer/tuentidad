@@ -23,6 +23,15 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
 
     $routes->group('', ['filter' => 'apiauth'], static function (RouteCollection $routes): void {
         $routes->get('dashboard', 'Dashboard::index');
+        $routes->get('friends', 'Friends::index');
+        $routes->get('friends/activity', 'Friends::activity');
+        $routes->get('friends/search', 'Friends::search');
+        $routes->delete('friends/(:num)', 'Friends::remove/$1');
+        $routes->get('friend-requests', 'Friends::requests');
+        $routes->post('friend-requests', 'Friends::request');
+        $routes->post('friend-requests/(:num)/accept', 'Friends::accept/$1');
+        $routes->post('friend-requests/(:num)/reject', 'Friends::reject/$1');
+        $routes->delete('friend-requests/(:num)', 'Friends::cancel/$1');
         $routes->get('profiles/(:num)', 'Profiles::show/$1');
         $routes->get('profiles/(:num)/avatar', 'Profiles::avatar/$1');
         $routes->put('profile', 'Profiles::update');

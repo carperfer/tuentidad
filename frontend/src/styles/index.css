@@ -16,7 +16,7 @@
   --color-ok: #3c8d2f;
   --color-error: #c0392b;
 
-  --font: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+  --font: "Lucida Grande", Tahoma, Verdana, Arial, sans-serif;
   --page-width: 960px;
   --radius: 4px;
 
@@ -197,7 +197,7 @@ h2 {
   outline-offset: -1px;
 }
 
-.field input[aria-invalid='true'] {
+.field input[aria-invalid="true"] {
   border-color: var(--color-error);
 }
 
@@ -471,6 +471,96 @@ h2 {
   margin: 2px 0 0;
   font-size: 18px;
   font-weight: bold;
+}
+
+.friends-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.friends-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.friends-search .field {
+  margin: 0;
+}
+
+.friends-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: 10px;
+}
+
+.friends-section h3 {
+  font-size: 12px;
+  margin: 0 0 6px;
+}
+
+.friends-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.friends-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-title-bg);
+}
+
+.friends-list li:last-child {
+  border-bottom: 0;
+}
+
+.friends-list__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.friends-activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.friends-activity li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--color-title-bg);
+}
+
+.friends-activity li:last-child {
+  border-bottom: 0;
+}
+
+.friends-activity p {
+  margin: 2px 0 0;
+}
+
+.friends-activity time {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+@media (max-width: 440px) {
+  .friends-search {
+    grid-template-columns: 1fr;
+  }
+
+  .friends-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 720px) {
