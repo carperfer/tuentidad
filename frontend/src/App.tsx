@@ -2,6 +2,9 @@ import { Route, Routes } from 'react-router'
 import { Layout } from './components/Layout'
 import { RequireAuth, RequireGuest } from './components/RequireAuth'
 import { ForgotPassword } from './pages/ForgotPassword'
+import { Cookies } from './pages/legal/Cookies'
+import { Privacy } from './pages/legal/Privacy'
+import { Terms } from './pages/legal/Terms'
 import { Home } from './pages/Home'
 import { Landing } from './pages/Landing'
 import { NotFound } from './pages/NotFound'
@@ -38,6 +41,9 @@ export function App() {
             </RequireAuth>
           }
         />
+        <Route path="privacidad" element={<Privacy />} />
+        <Route path="condiciones" element={<Terms />} />
+        <Route path="cookies" element={<Cookies />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

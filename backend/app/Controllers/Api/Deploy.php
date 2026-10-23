@@ -45,7 +45,8 @@ class Deploy extends ApiController
             return $denied;
         }
 
-        if (db_connect()->table('users')->countAllResults() > 0) {
+        // Cuentas con credenciales: los perfiles de bienvenida son usuarios pero no cuentan
+        if (db_connect()->table(config('Auth')->tables['identities'])->countAllResults() > 0) {
             return $this->message('Ya existen usuarios: este endpoint solo sirve para crear el primero.', 409);
         }
 

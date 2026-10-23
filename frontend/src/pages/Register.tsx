@@ -70,7 +70,12 @@ export function Register() {
     <section className="box narrow">
       <h1>Crea tu cuenta</h1>
       <p>
-        {invitation.inviter ? (
+        {invitation.inviter && invitation.welcome ? (
+          <>
+            <strong>{invitation.inviter}</strong> ha aceptado tu solicitud de amistad: en cuanto crees tu cuenta, seréis
+            amigos.{' '}
+          </>
+        ) : invitation.inviter ? (
           <>
             <strong>{invitation.inviter}</strong> te ha invitado a tuentidad.{' '}
           </>
@@ -128,7 +133,10 @@ export function Register() {
             checked={form.accept_terms}
             onChange={(e) => update('accept_terms', e.target.checked)}
           />
-          Acepto las condiciones de uso y la política de privacidad
+          <span>
+            Acepto las <Link to="/condiciones">condiciones de uso</Link> y la{' '}
+            <Link to="/privacidad">política de privacidad</Link>
+          </span>
         </label>
         {errors.accept_terms && <p className="field__error">{errors.accept_terms}</p>}
         <button type="submit" className="button" disabled={sending}>

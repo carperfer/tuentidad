@@ -9,7 +9,7 @@ class InvitationModel extends Model
     protected $table          = 'invitations';
     protected $returnType     = 'array';
     protected $useTimestamps  = true;
-    protected $allowedFields  = ['inviter_id', 'email', 'token_hash', 'expires_at', 'accepted_at', 'user_id'];
+    protected $allowedFields  = ['inviter_id', 'email', 'token_hash', 'expires_at', 'accepted_at', 'user_id', 'consented_at'];
     protected $dateFormat     = 'datetime';
     protected $useSoftDeletes = false;
 
@@ -50,5 +50,18 @@ class InvitationModel extends Model
             ->orderBy('created_at', 'DESC')
             ->orderBy('id', 'DESC')
             ->findAll();
+    }
+
+    /**
+     * Borra invitaciones que nunca se aceptaron y caducaron hace tiempo,
+     * para no conservar emails de personas que no se registraron.
+     */
+    public function purgeStale(int $olderThanSeconds = 30 * DAY): int
+    {
+        $this->where('accepted_at', null)
+            ->where('expires_at <', date('Y-m-d H:i:s', time() - $olderThanSeconds))
+            ->delete();
+
+        return $this->db->affectedRows();
     }
 }

@@ -4,6 +4,7 @@ import { errorMessage, fieldErrors } from '../api/client'
 import { useAuth } from '../auth/context'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
+import { WelcomeProfiles } from '../components/WelcomeProfiles'
 
 export function Landing() {
   const { login } = useAuth()
@@ -34,14 +35,17 @@ export function Landing() {
 
   return (
     <div className="landing">
-      <section className="box landing__intro">
-        <h1>Bienvenido a tuentidad</h1>
-        <p>
-          La red social privada para estar en contacto con tus amigos de verdad: comparte fotos, organiza quedadas y
-          habla con tu gente.
-        </p>
-        <p>Solo se entra por invitación. Si un amigo ya está dentro, pídele que te invite.</p>
-      </section>
+      <div className="landing__main">
+        <section className="box landing__intro">
+          <h1>Bienvenido a tuentidad</h1>
+          <p>
+            La red social privada para estar en contacto con tus amigos de verdad: comparte fotos, organiza quedadas y
+            habla con tu gente.
+          </p>
+          <p>Solo se entra por invitación. Si un amigo ya está dentro, pídele que te invite.</p>
+        </section>
+        <WelcomeProfiles />
+      </div>
 
       <aside className="box">
         <h2 className="box__title">Entra en tuentidad</h2>
