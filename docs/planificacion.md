@@ -73,11 +73,13 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 ### Sprint 3 — Perfil
 
-- Página de perfil: datos personales, foto de perfil y estado
-- Edición del perfil y ajustes de privacidad (qué ven los amigos y qué ven los demás)
-- Página de inicio con resumen de la actividad propia
+- [x] Página de perfil: datos personales, foto de perfil y estado
+- [x] Edición del perfil y privacidad por campo (público, solo amigos o privado)
+- [x] Página de inicio con resumen de amistades e invitaciones propias
+- [x] Tests frontend (21 en total)
+- [x] Tests backend (55 en total, ejecutados en Docker) y frontend (21)
 
-**Entregable:** perfil completo editable y visible para amigos.
+**Entregable:** perfil editable con datos filtrados según la relación de amistad; pendiente validar la suite backend en el entorno de CI.
 
 ### Sprint 4 — Amigos
 

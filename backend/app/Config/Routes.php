@@ -13,7 +13,6 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
     $routes->post('auth/register', 'Registration::register');
     $routes->post('auth/forgot-password', 'Passwords::forgot');
     $routes->post('auth/reset-password', 'Passwords::reset');
-
     $routes->get('invitations/(:segment)', 'Invitations::show/$1');
 
     $routes->get('welcome-profiles', 'WelcomeProfiles::index');
@@ -23,6 +22,11 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
     $routes->post('deploy/first-user', 'Deploy::firstUser');
 
     $routes->group('', ['filter' => 'apiauth'], static function (RouteCollection $routes): void {
+        $routes->get('dashboard', 'Dashboard::index');
+        $routes->get('profiles/(:num)', 'Profiles::show/$1');
+        $routes->get('profiles/(:num)/avatar', 'Profiles::avatar/$1');
+        $routes->put('profile', 'Profiles::update');
+        $routes->post('profile/avatar', 'Profiles::uploadAvatar');
         $routes->get('invitations', 'Invitations::index');
         $routes->post('invitations', 'Invitations::create');
     });
