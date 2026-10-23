@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Avatar ilustrado de Lucía">
+  <rect width="120" height="120" fill="#f6d6c8"/>
+  <path d="M22 120c2-24 18-36 38-36s36 12 38 36z" fill="#3b6db3"/>
+  <path d="M30 58c0-24 13-38 30-38s30 14 30 38c0 14-4 30-8 36H38c-4-6-8-22-8-36z" fill="#7a3f22"/>
+  <ellipse cx="60" cy="58" rx="20" ry="23" fill="#f2c4a8"/>
+  <path d="M40 50c4-12 12-18 20-18s16 6 20 18c-8-6-14-8-20-8s-12 2-20 8z" fill="#7a3f22"/>
+  <circle cx="52" cy="58" r="2.5" fill="#333"/>
+  <circle cx="68" cy="58" r="2.5" fill="#333"/>
+  <path d="M53 68c4 4 10 4 14 0" stroke="#b5533a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <circle cx="46" cy="65" r="3.5" fill="#f0a08a" opacity=".6"/>
+  <circle cx="74" cy="65" r="3.5" fill="#f0a08a" opacity=".6"/>
+</svg>
