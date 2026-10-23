@@ -18,6 +18,13 @@ class UserModel extends ShieldUserModel
             'first_name',
             'last_name',
             'birthdate',
+            'bio',
+            'profile_status',
+            'avatar',
+            'birthdate_visibility',
+            'bio_visibility',
+            'status_visibility',
+            'avatar_visibility',
         ];
     }
 }
