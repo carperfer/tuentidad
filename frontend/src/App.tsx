@@ -8,6 +8,7 @@ import { Terms } from './pages/legal/Terms'
 import { Home } from './pages/Home'
 import { Landing } from './pages/Landing'
 import { NotFound } from './pages/NotFound'
+import { Profile } from './pages/Profile'
 import { Register } from './pages/Register'
 import { ResetPassword } from './pages/ResetPassword'
 
@@ -38,6 +39,14 @@ export function App() {
           element={
             <RequireAuth>
               <Home />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="perfil/:id"
+          element={
+            <RequireAuth>
+              <Profile />
             </RequireAuth>
           }
         />

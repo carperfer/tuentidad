@@ -78,6 +78,11 @@ cd frontend && npm install && npm run dev
 | `GET /api/invitations/{token}` | — | Datos públicos de una invitación válida (`welcome: true` si viene de un perfil de bienvenida) |
 | `GET /api/welcome-profiles` | — | Perfiles de bienvenida de la portada |
 | `POST /api/welcome-profiles/{id}/friend-requests` | — | Pedir amistad a un perfil de bienvenida (`email`, `accept_privacy`; `website` es un campo trampa). Envía el enlace de registro; al registrarse, quedan como amigos |
+| `GET /api/profiles/{id}` | Sí | Ver un perfil; aplica la privacidad de cada dato según la relación de amistad |
+| `GET /api/profiles/{id}/avatar` | Sí | Ver la foto solo si la privacidad del perfil lo permite |
+| `PUT /api/profile` | Sí | Actualizar datos personales, estado, biografía y visibilidad (`public`, `friends` o `private`) |
+| `POST /api/profile/avatar` | Sí | Subir foto JPG, PNG o WebP de hasta 2 MB (máximo 4000 × 4000 px) |
+| `GET /api/dashboard` | Sí | Resumen de amistades e invitaciones propias |
 | `GET /api/invitations` | Sí | Invitaciones enviadas y cupo restante |
 | `POST /api/invitations` | Sí | Invitar por email (reenviar a una pendiente no gasta cupo) |
 
