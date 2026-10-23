@@ -199,3 +199,10 @@ Para cada entrada registrar:
 - **Prompt utilizado:** "Continua con el sprint"; se eligió privacidad configurable por campo (público, solo amigos o privado).
 - **Resultado obtenido:** Implementados edición de perfil, biografía, estado, avatar privado en almacenamiento, filtros por amistad y resumen de amistades e invitaciones. Las pruebas frontend pasan (21 en total). Se añadieron pruebas backend y la suite completa pasa en Docker (55 tests). La columna social se llama `profile_status` porque Shield ya usa `users.status`, y las URLs de avatar son relativas para funcionar en cualquier dominio.
 - **Decisión:** Mantener pendiente el cierre del Sprint 3 hasta ejecutar las pruebas backend en CI o corregir la conexión entre contenedores del Codespace.
+
+### 2026-10-23T13:29:14Z — Sprint 4: amigos
+
+- **Objetivo:** Implementar el siguiente sprint de la planificación: solicitudes, búsqueda, amistades y novedades.
+- **Prompt utilizado:** "Siguiente fase".
+- **Resultado obtenido:** Añadidos endpoints autenticados para buscar usuarios, gestionar solicitudes de amistad, listar y eliminar amigos; las amistades confirmadas se mantienen simétricas. La pantalla de inicio muestra solicitudes, contactos y estados visibles de amigos. Se agregó timestamp de cambio de estado y el feed excluye perfiles no amigos y estados privados.
+- **Decisión:** Mantener las solicitudes pendientes separadas de `friendships`; exponer solo nombre y apellido en búsqueda/listados. Validación en curso con PHPUnit, Vitest, typecheck y lint.

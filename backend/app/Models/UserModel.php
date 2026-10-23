@@ -20,6 +20,7 @@ class UserModel extends ShieldUserModel
             'birthdate',
             'bio',
             'profile_status',
+            'profile_status_updated_at',
             'avatar',
             'birthdate_visibility',
             'bio_visibility',

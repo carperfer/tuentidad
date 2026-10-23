@@ -56,35 +56,44 @@ docker compose exec -u www-data app php spark tuentidad:usuario
 cd frontend && npm install && npm run dev
 ```
 
-| | En GitHub Codespaces | En local |
-|---|---|---|
-| SPA | `https://<codespace>-5173.app.github.dev` | http://localhost:5173 |
-| API | `https://<codespace>-8080.app.github.dev/api/health` | http://localhost:8080/api/health |
-| Emails (Mailpit) | `https://<codespace>-8025.app.github.dev` | http://localhost:8025 |
+|                  | En GitHub Codespaces                                 | En local                         |
+| ---------------- | ---------------------------------------------------- | -------------------------------- |
+| SPA              | `https://<codespace>-5173.app.github.dev`            | http://localhost:5173            |
+| API              | `https://<codespace>-8080.app.github.dev/api/health` | http://localhost:8080/api/health |
+| Emails (Mailpit) | `https://<codespace>-8025.app.github.dev`            | http://localhost:8025            |
 
 `<codespace>` es el nombre del Codespace (`echo $CODESPACE_NAME`). En desarrollo ningún email sale fuera: todos se capturan en Mailpit. Los enlaces de los emails apuntan automáticamente a la SPA del Codespace (o a `localhost:5173` fuera de él); se pueden forzar con la variable `TUENTIDAD_PUBLIC_URL` al arrancar Docker Compose.
 
 ### API
 
-| Método y ruta | Sesión | Descripción |
-|---|---|---|
-| `GET /api/csrf` | — | Token CSRF para las peticiones que modifican datos (cabecera `X-CSRF-TOKEN`) |
-| `GET /api/auth/me` | — | Usuario con sesión iniciada o `null` |
-| `POST /api/auth/login` | — | Iniciar sesión (`email`, `password`, `remember`) |
-| `POST /api/auth/logout` | — | Cerrar sesión |
-| `POST /api/auth/register` | — | Crear cuenta con una invitación (`token`, `first_name`, `last_name`, `birthdate`, `password`, `password_confirm`, `accept_terms`) |
-| `POST /api/auth/forgot-password` | — | Enviar enlace de recuperación (misma respuesta exista o no el email) |
-| `POST /api/auth/reset-password` | — | Cambiar la contraseña con el enlace (`token`, `password`, `password_confirm`) |
-| `GET /api/invitations/{token}` | — | Datos públicos de una invitación válida (`welcome: true` si viene de un perfil de bienvenida) |
-| `GET /api/welcome-profiles` | — | Perfiles de bienvenida de la portada |
-| `POST /api/welcome-profiles/{id}/friend-requests` | — | Pedir amistad a un perfil de bienvenida (`email`, `accept_privacy`; `website` es un campo trampa). Envía el enlace de registro; al registrarse, quedan como amigos |
-| `GET /api/profiles/{id}` | Sí | Ver un perfil; aplica la privacidad de cada dato según la relación de amistad |
-| `GET /api/profiles/{id}/avatar` | Sí | Ver la foto solo si la privacidad del perfil lo permite |
-| `PUT /api/profile` | Sí | Actualizar datos personales, estado, biografía y visibilidad (`public`, `friends` o `private`) |
-| `POST /api/profile/avatar` | Sí | Subir foto JPG, PNG o WebP de hasta 2 MB (máximo 4000 × 4000 px) |
-| `GET /api/dashboard` | Sí | Resumen de amistades e invitaciones propias |
-| `GET /api/invitations` | Sí | Invitaciones enviadas y cupo restante |
-| `POST /api/invitations` | Sí | Invitar por email (reenviar a una pendiente no gasta cupo) |
+| Método y ruta                                     | Sesión | Descripción                                                                                                                                                        |
+| ------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /api/csrf`                                   | —      | Token CSRF para las peticiones que modifican datos (cabecera `X-CSRF-TOKEN`)                                                                                       |
+| `GET /api/auth/me`                                | —      | Usuario con sesión iniciada o `null`                                                                                                                               |
+| `POST /api/auth/login`                            | —      | Iniciar sesión (`email`, `password`, `remember`)                                                                                                                   |
+| `POST /api/auth/logout`                           | —      | Cerrar sesión                                                                                                                                                      |
+| `POST /api/auth/register`                         | —      | Crear cuenta con una invitación (`token`, `first_name`, `last_name`, `birthdate`, `password`, `password_confirm`, `accept_terms`)                                  |
+| `POST /api/auth/forgot-password`                  | —      | Enviar enlace de recuperación (misma respuesta exista o no el email)                                                                                               |
+| `POST /api/auth/reset-password`                   | —      | Cambiar la contraseña con el enlace (`token`, `password`, `password_confirm`)                                                                                      |
+| `GET /api/invitations/{token}`                    | —      | Datos públicos de una invitación válida (`welcome: true` si viene de un perfil de bienvenida)                                                                      |
+| `GET /api/welcome-profiles`                       | —      | Perfiles de bienvenida de la portada                                                                                                                               |
+| `POST /api/welcome-profiles/{id}/friend-requests` | —      | Pedir amistad a un perfil de bienvenida (`email`, `accept_privacy`; `website` es un campo trampa). Envía el enlace de registro; al registrarse, quedan como amigos |
+| `GET /api/profiles/{id}`                          | Sí     | Ver un perfil; aplica la privacidad de cada dato según la relación de amistad                                                                                      |
+| `GET /api/profiles/{id}/avatar`                   | Sí     | Ver la foto solo si la privacidad del perfil lo permite                                                                                                            |
+| `PUT /api/profile`                                | Sí     | Actualizar datos personales, estado, biografía y visibilidad (`public`, `friends` o `private`)                                                                     |
+| `POST /api/profile/avatar`                        | Sí     | Subir foto JPG, PNG o WebP de hasta 2 MB (máximo 4000 × 4000 px)                                                                                                   |
+| `GET /api/dashboard`                              | Sí     | Resumen de amistades e invitaciones propias                                                                                                                        |
+| `GET /api/friends`                                | Sí     | Lista de amistades confirmadas                                                                                                                                     |
+| `GET /api/friends/search?q=...`                   | Sí     | Busca usuarios por nombre o apellido sin exponer su email                                                                                                          |
+| `GET /api/friends/activity`                       | Sí     | Estados visibles publicados por amistades confirmadas                                                                                                              |
+| `GET /api/friend-requests`                        | Sí     | Solicitudes recibidas y enviadas                                                                                                                                   |
+| `POST /api/friend-requests`                       | Sí     | Envía una solicitud (`user_id`)                                                                                                                                    |
+| `POST /api/friend-requests/{id}/accept`           | Sí     | Acepta una solicitud recibida y crea la amistad mutua                                                                                                              |
+| `POST /api/friend-requests/{id}/reject`           | Sí     | Rechaza una solicitud recibida                                                                                                                                     |
+| `DELETE /api/friend-requests/{id}`                | Sí     | Cancela una solicitud enviada                                                                                                                                      |
+| `DELETE /api/friends/{id}`                        | Sí     | Elimina una amistad en ambos sentidos                                                                                                                              |
+| `GET /api/invitations`                            | Sí     | Invitaciones enviadas y cupo restante                                                                                                                              |
+| `POST /api/invitations`                           | Sí     | Invitar por email (reenviar a una pendiente no gasta cupo)                                                                                                         |
 
 Errores: `401` sin sesión, `404` token no válido o caducado, `422` validación (`errors` por campo), `429` demasiados intentos. Login, registro, invitaciones y recuperación de contraseña tienen límite de peticiones.
 
@@ -118,14 +127,14 @@ docker compose up -d
 
 ## Despliegue
 
-El despliegue es automático: el workflow [`deploy.yml`](.github/workflows/deploy.yml) publica en OVH por SFTP en cada push a `main` ([`scripts/subir-sftp.sh`](scripts/subir-sftp.sh), con `lftp`). También se puede lanzar a mano desde GitHub › Actions › Deploy › *Run workflow*.
+El despliegue es automático: el workflow [`deploy.yml`](.github/workflows/deploy.yml) publica en OVH por SFTP en cada push a `main` ([`scripts/subir-sftp.sh`](scripts/subir-sftp.sh), con `lftp`). También se puede lanzar a mano desde GitHub › Actions › Deploy › _Run workflow_.
 
 Qué se publica lo decide la variable del repositorio `DESPLIEGUE`:
 
-| Valor | Qué se sube |
-|---|---|
-| `landing` (por defecto) | Solo la página de [`landing/`](landing/index.html) |
-| `app` | El paquete de `scripts/build-release.sh` (backend con `vendor/`, SPA compilada) y el `.env` generado a partir de los secrets. Después aplica las migraciones y comprueba que la aplicación responde |
+| Valor                   | Qué se sube                                                                                                                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `landing` (por defecto) | Solo la página de [`landing/`](landing/index.html)                                                                                                                                                  |
+| `app`                   | El paquete de `scripts/build-release.sh` (backend con `vendor/`, SPA compilada) y el `.env` generado a partir de los secrets. Después aplica las migraciones y comprueba que la aplicación responde |
 
 Producción usa `DESPLIEGUE=app`: la aplicación está publicada en tuentidad.es (el acceso es solo por invitación).
 
@@ -140,41 +149,41 @@ En modo `app`, [`scripts/separar-publico.sh`](scripts/separar-publico.sh) divide
 
 ### Configuración en GitHub
 
-En *Settings › Secrets and variables › Actions*:
+En _Settings › Secrets and variables › Actions_:
 
 **Secrets** (necesarios desde ya; se mantiene el prefijo `FTP_` aunque el acceso es por SFTP):
 
-| Secret | Valor |
-|---|---|
-| `FTP_SERVER` | Servidor SFTP (panel OVH › FTP-SSH, p. ej. `ssh.clusterXXX.hosting.ovh.net`) |
-| `FTP_USERNAME` | Usuario FTP/SFTP |
-| `FTP_PASSWORD` | Contraseña FTP/SFTP |
+| Secret         | Valor                                                                        |
+| -------------- | ---------------------------------------------------------------------------- |
+| `FTP_SERVER`   | Servidor SFTP (panel OVH › FTP-SSH, p. ej. `ssh.clusterXXX.hosting.ovh.net`) |
+| `FTP_USERNAME` | Usuario FTP/SFTP                                                             |
+| `FTP_PASSWORD` | Contraseña FTP/SFTP                                                          |
 
 **Secrets de la aplicación** (necesarios al pasar a `DESPLIEGUE=app`). La lista completa, con valores por defecto, se obtiene con `./scripts/configurar-env.sh --variables`:
 
-| Secret | Obligatorio | Por defecto |
-|---|---|---|
-| `DB_HOSTNAME`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Sí | — |
-| `SMTP_PASSWORD` | Sí | — |
-| `ENCRYPTION_KEY` | Sí | — (generar una sola vez: `echo "hex2bin:$(openssl rand -hex 32)"`) |
-| `DEPLOY_TOKEN` | Sí | — (generar una sola vez: `openssl rand -hex 32`) |
-| `APP_BASE_URL` | No | `https://tuentidad.es/` |
-| `DB_PORT` | No | `3306` |
-| `EMAIL_FROM`, `EMAIL_FROM_NAME` | No | `no-reply@tuentidad.com`, `tuentidad` |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_CRYPTO` | No | `ssl0.ovh.net`, `465`, `ssl` |
-| `SMTP_USER` | No | igual que `EMAIL_FROM` |
+| Secret                                                     | Obligatorio | Por defecto                                                        |
+| ---------------------------------------------------------- | ----------- | ------------------------------------------------------------------ |
+| `DB_HOSTNAME`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Sí          | —                                                                  |
+| `SMTP_PASSWORD`                                            | Sí          | —                                                                  |
+| `ENCRYPTION_KEY`                                           | Sí          | — (generar una sola vez: `echo "hex2bin:$(openssl rand -hex 32)"`) |
+| `DEPLOY_TOKEN`                                             | Sí          | — (generar una sola vez: `openssl rand -hex 32`)                   |
+| `APP_BASE_URL`                                             | No          | `https://tuentidad.es/`                                            |
+| `DB_PORT`                                                  | No          | `3306`                                                             |
+| `EMAIL_FROM`, `EMAIL_FROM_NAME`                            | No          | `no-reply@tuentidad.com`, `tuentidad`                              |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_CRYPTO`                    | No          | `ssl0.ovh.net`, `465`, `ssl`                                       |
+| `SMTP_USER`                                                | No          | igual que `EMAIL_FROM`                                             |
 
 `ENCRYPTION_KEY` no debe cambiar nunca una vez en producción: los datos cifrados con la clave anterior dejarían de poder leerse.
 
 **Variables** (opcionales):
 
-| Variable | Por defecto | Uso |
-|---|---|---|
-| `DESPLIEGUE` | `landing` | `landing` o `app` |
-| `FTP_PUBLIC_DIR` | `www/` | Carpeta web del alojamiento |
-| `FTP_SERVER_DIR` | `tuentidad/` | Carpeta de la aplicación, junto a `www/` (nombre simple) |
-| `SFTP_PORT` | `22` | Puerto SFTP |
-| `SFTP_KNOWN_HOSTS` | — | Clave pública del servidor (formato `known_hosts`). Si falta, se acepta la que presente el servidor y se muestra en el log para fijarla |
+| Variable           | Por defecto  | Uso                                                                                                                                     |
+| ------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `DESPLIEGUE`       | `landing`    | `landing` o `app`                                                                                                                       |
+| `FTP_PUBLIC_DIR`   | `www/`       | Carpeta web del alojamiento                                                                                                             |
+| `FTP_SERVER_DIR`   | `tuentidad/` | Carpeta de la aplicación, junto a `www/` (nombre simple)                                                                                |
+| `SFTP_PORT`        | `22`         | Puerto SFTP                                                                                                                             |
+| `SFTP_KNOWN_HOSTS` | —            | Clave pública del servidor (formato `known_hosts`). Si falta, se acepta la que presente el servidor y se muestra en el log para fijarla |
 
 Si faltan los secrets de acceso, el workflow avisa y no despliega. Si falta o es inválido algún secret de la aplicación, falla antes de subir nada.
 
@@ -236,6 +245,7 @@ La forma más sencilla de empezar a desarrollar es usar **GitHub Codespaces**, q
 En la página principal del repositorio, haz clic en el botón verde **Code → Codespaces → Create codespace on `feature/…`**.
 
 El devcontainer incluye:
+
 - **Node.js 22 LTS** (para el frontend React)
 - **PHP 8.3** (para el backend)
 - **MySQL** (base de datos local)
@@ -282,11 +292,11 @@ Consulta el [flujo de desarrollo completo](docs/development-workflow.md) para m�
 
 ## Documentación operativa
 
-| Documento | Descripción |
-|---|---|
-| [Flujo de desarrollo](docs/development-workflow.md) | Estrategia de ramas, proceso de PR y reglas de protección de `main` |
-| [Acceso SSH a producción](docs/production-ssh-access.md) | Procedimiento seguro para operaciones puntuales en producción |
-| [Variables de entorno](.env.example) | Plantilla de configuración para desarrollo, staging y producción |
+| Documento                                                | Descripción                                                         |
+| -------------------------------------------------------- | ------------------------------------------------------------------- |
+| [Flujo de desarrollo](docs/development-workflow.md)      | Estrategia de ramas, proceso de PR y reglas de protección de `main` |
+| [Acceso SSH a producción](docs/production-ssh-access.md) | Procedimiento seguro para operaciones puntuales en producción       |
+| [Variables de entorno](.env.example)                     | Plantilla de configuración para desarrollo, staging y producción    |
 
 ---
 

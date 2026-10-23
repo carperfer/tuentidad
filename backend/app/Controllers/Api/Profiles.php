@@ -67,6 +67,10 @@ class Profiles extends ApiController
             return $this->invalid($this->validator->getErrors());
         }
 
+        if (($user->profile_status ?? '') !== $data['profile_status']) {
+            $data['profile_status_updated_at'] = date('Y-m-d H:i:s');
+        }
+
         if (! model(UserModel::class)->update((int) $user->id, $data)) {
             return $this->message('No se ha podido guardar el perfil.', 500);
         }
