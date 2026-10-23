@@ -1,0 +1,139 @@
+name: Deploy
+
+# Publica tuentidad.es en OVH por SFTP en cada push a main.
+#
+# Qué se publica lo decide la variable del repositorio DESPLIEGUE:
+#   - landing (por defecto): solo la página de landing/
+#   - app: el paquete completo de scripts/build-release.sh con el .env
+#     generado a partir de los secrets (nunca pasa por git)
+#
+# La carpeta web de OVH es fija (www/), así que se separa en dos destinos:
+#   - FTP_PUBLIC_DIR (www/): solo lo público (landing, o public/ de la app)
+#   - FTP_SERVER_DIR (tuentidad/): la aplicación (app, vendor, writable, .env),
+#     fuera de la web; index.php se ajusta para cargarla desde ahí
+# Configuración completa en el README (sección Despliegue).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment: produccion
+    env:
+      DESPLIEGUE: ${{ vars.DESPLIEGUE || 'landing' }}
+      FTP_PUBLIC_DIR: ${{ vars.FTP_PUBLIC_DIR || 'www/' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || 'tuentidad/' }}
+    steps:
+      - name: Comprobar configuración SFTP
+        id: ftp
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          if [[ -z "$FTP_SERVER" || -z "$FTP_USERNAME" || -z "$FTP_PASSWORD" ]]; then
+            echo "::warning::Faltan los secrets FTP_SERVER, FTP_USERNAME o FTP_PASSWORD (datos SFTP): no se despliega."
+            echo "configurado=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configurado=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.ftp.outputs.configurado == 'true'
+
+      - name: Preparar landing
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'landing'
+        run: |
+          mkdir -p sitio/www
+          cp -r landing/. sitio/www/
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        with:
+          php-version: '8.3'
+          extensions: intl, mbstring, mysqli, gd, exif
+          coverage: none
+
+      - uses: actions/setup-node@v7
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Preparar aplicación
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        env:
+          ENV_FILE: ${{ github.workspace }}/release/.env
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          DB_HOSTNAME: ${{ secrets.DB_HOSTNAME }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_FROM_NAME: ${{ secrets.EMAIL_FROM_NAME }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_CRYPTO: ${{ secrets.SMTP_CRYPTO }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          ./scripts/build-release.sh
+          ./scripts/configurar-env.sh --desde-entorno
+          ./scripts/separar-publico.sh release sitio "$FTP_SERVER_DIR"
+
+      - name: Instalar lftp
+        if: steps.ftp.outputs.configurado == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # Primero la aplicación, para que el nuevo index.php no apunte a código que aún no está
+      - name: Subir aplicación por SFTP
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        env:
+          SFTP_HOST: ${{ secrets.FTP_SERVER }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: ${{ vars.SFTP_PORT || '22' }}
+          SFTP_KNOWN_HOSTS: ${{ vars.SFTP_KNOWN_HOSTS }}
+        run: ./scripts/subir-sftp.sh sitio/app "$FTP_SERVER_DIR"
+
+      - name: Subir web pública por SFTP
+        if: steps.ftp.outputs.configurado == 'true'
+        env:
+          SFTP_HOST: ${{ secrets.FTP_SERVER }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: ${{ vars.SFTP_PORT || '22' }}
+          SFTP_KNOWN_HOSTS: ${{ vars.SFTP_KNOWN_HOSTS }}
+        run: ./scripts/subir-sftp.sh sitio/www "$FTP_PUBLIC_DIR"
+
+      # Sin consola en el servidor, las migraciones se lanzan por HTTP con el token de despliegue
+      - name: Aplicar migraciones
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'https://tuentidad.es/' }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" "${APP_BASE_URL%/}/api/deploy/migrate"
+
+      - name: Comprobar que la aplicación responde
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'https://tuentidad.es/' }}
+        run: |
+          curl -fsS "${APP_BASE_URL%/}/api/health"
+          curl -fsS -o /dev/null "${APP_BASE_URL%/}/"
