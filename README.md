@@ -276,7 +276,7 @@ composer install
 php -S 0.0.0.0:8080 -t public/
 ```
 
-Los puertos 3000 (frontend), 8080 (backend) y 3306 (MySQL) se redirigen automáticamente.
+Los puertos 5173 (frontend), 8080 (backend) y 3306 (MySQL) se redirigen automáticamente.
 
 ### 4. Trabajar en una rama feature
 
