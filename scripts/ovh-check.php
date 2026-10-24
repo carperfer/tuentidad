@@ -38,14 +38,33 @@ foreach (['intl', 'mbstring', 'json', 'mysqli', 'curl', 'fileinfo'] as $ext) {
     check($results, 'Extensiones obligatorias', $ext, extension_loaded($ext), extension_loaded($ext) ? 'cargada' : 'NO cargada');
 }
 
-$images = array_filter(['gd', 'imagick'], 'extension_loaded');
-check($results, 'Extensiones para fotos', 'gd o imagick', $images !== [], $images === [] ? 'ninguna' : implode(', ', $images));
-check($results, 'Extensiones para fotos', 'exif', extension_loaded('exif'), extension_loaded('exif') ? 'cargada' : 'NO cargada');
-
-foreach (['upload_max_filesize' => '10M', 'post_max_size' => '64M', 'memory_limit' => '256M', 'max_execution_time' => null] as $ini => $recommended) {
-    $value = (string) ini_get($ini);
-    check($results, 'Límites', $ini, null, $value . ($recommended !== null ? " (recomendado ≥ {$recommended})" : ''));
+// Las fotos se procesan solo con GD (App\Libraries\PhotoProcessor)
+$gd = extension_loaded('gd') ? gd_info() : [];
+check($results, 'Extensiones para fotos', 'gd', $gd !== [], $gd === [] ? 'NO cargada' : (string) $gd['GD Version']);
+foreach (['JPEG Support' => 'JPEG', 'PNG Support' => 'PNG', 'WebP Support' => 'WebP'] as $key => $format) {
+    check($results, 'Extensiones para fotos', "GD con {$format}", ! empty($gd[$key]), ! empty($gd[$key]) ? 'sí' : 'NO');
 }
+check($results, 'Extensiones para fotos', 'exif', function_exists('exif_read_data'), function_exists('exif_read_data') ? 'cargada' : 'NO cargada (las fotos de móvil pueden salir giradas)');
+
+function iniBytes(string $value): int
+{
+    $number = (int) $value;
+
+    return match (strtoupper(substr(trim($value), -1))) {
+        'G'     => $number * 1024 ** 3,
+        'M'     => $number * 1024 ** 2,
+        'K'     => $number * 1024,
+        default => $number,
+    };
+}
+
+// Cada foto se sube en una petición: hasta 10 MB y 25 megapíxeles abiertos con GD
+foreach (['upload_max_filesize' => '10M', 'post_max_size' => '11M', 'memory_limit' => '256M'] as $ini => $minimum) {
+    $value = (string) ini_get($ini);
+    $ok    = ($ini === 'memory_limit' && $value === '-1') || iniBytes($value) >= iniBytes($minimum);
+    check($results, 'Límites', $ini, $ok, "{$value} (mínimo {$minimum})");
+}
+check($results, 'Límites', 'max_execution_time', null, (string) ini_get('max_execution_time'));
 
 // --- Aplicación ------------------------------------------------------------
 

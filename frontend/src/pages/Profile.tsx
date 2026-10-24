@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { errorMessage, fieldErrors } from '../api/client'
 import {
   getProfile,
@@ -121,6 +121,9 @@ export function Profile() {
         {profile.status && <p className="profile-card__status">{profile.status}</p>}
         <p>{profile.bio || (profile.is_owner ? 'Todavía no ha añadido información sobre sí.' : 'Sin información visible.')}</p>
         {profile.birthdate && <p>Fecha de nacimiento: {profile.birthdate}</p>}
+        <p>
+          <Link to={`/perfil/${profile.id}/fotos`}>{profile.is_owner ? 'Mis fotos' : 'Ver sus fotos'}</Link>
+        </p>
       </section>
 
       {profile.is_owner ? (

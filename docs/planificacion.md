@@ -93,11 +93,13 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 ### Sprint 5 — Fotos I: álbumes y subida
 
-- Álbumes: crear, editar y borrar
-- Subida múltiple con validación de tipo y tamaño
-- Generación de miniaturas (GD/Imagick) y eliminación de metadatos EXIF
-- Visor de fotos con navegación anterior/siguiente
-- Permisos: solo los amigos ven las fotos
+- [x] Álbumes: crear, editar y borrar
+- [x] Subida múltiple con validación de tipo y tamaño (JPG, PNG o WebP; 10 MB y 25 megapíxeles por foto). La SPA sube las fotos de una en una para respetar los límites del hosting compartido
+- [x] Miniaturas con GD (sin Imagick) y eliminación de metadatos EXIF; se aplica antes la orientación EXIF
+- [x] Visor de fotos con navegación anterior/siguiente (también con las flechas del teclado)
+- [x] Permisos: solo el dueño y sus amigos ven los álbumes y las fotos, que se sirven a través de la API
+- [x] Tests: 72 de backend y 30 de frontend
+- [ ] Verificar en OVH que GD tiene soporte de JPEG, PNG y WebP, `exif_read_data` y límites de subida (`upload_max_filesize` ≥ 10 MB, `memory_limit` ≥ 256 MB). Si falta algo, no se puede instalar: habrá que cambiar la estrategia
 
 **Entregable:** subir y navegar álbumes de fotos.
 
