@@ -28,7 +28,7 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 
 - PHP 8.3 · CodeIgniter 4.7 · MySQL 8.0
 - React 19 + Vite + TypeScript · React Router · Vitest · oxlint
-- Entorno local con Docker Compose (backend y base de datos) y Vite en local
+- Entorno local con Docker Compose (backend, base de datos, Mailpit y Vite)
 - El plan de OVH no tiene consola SSH, pero sí SFTP: el despliegue se hace por SFTP desde GitHub Actions. Versiones de PHP/MySQL pendientes de verificar con `ovh-check.php`
 
 ## Arquitectura
@@ -44,17 +44,17 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 Requisitos: Docker y Node.js 24.
 
 ```bash
-# Backend (Apache + PHP 8.3), MySQL y Mailpit
+# Backend (Apache + PHP 8.3), MySQL, Mailpit y frontend (Vite con recarga en caliente;
+# /api se redirige al backend)
 docker compose up -d --build
 docker compose exec -u www-data app composer install
 docker compose exec -u www-data app php spark migrate --all
 
 # Primer usuario (sin invitación); pide los datos que falten
 docker compose exec -u www-data app php spark tuentidad:usuario
-
-# Frontend (SPA con recarga en caliente; /api se redirige al backend)
-cd frontend && npm install && npm run dev
 ```
+
+El contenedor `frontend` instala las dependencias al arrancar en su propio volumen de `node_modules`; tras cambiar `package.json`, basta con `docker compose restart frontend`. Para lint, typecheck y tests sigue haciendo falta `npm install` en `frontend/` en la máquina anfitriona.
 
 |                  | En GitHub Codespaces                                 | En local                         |
 | ---------------- | ---------------------------------------------------- | -------------------------------- |
