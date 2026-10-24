@@ -36,6 +36,15 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->get('profiles/(:num)/avatar', 'Profiles::avatar/$1');
         $routes->put('profile', 'Profiles::update');
         $routes->post('profile/avatar', 'Profiles::uploadAvatar');
+        $routes->get('users/(:num)/albums', 'Albums::index/$1');
+        $routes->post('albums', 'Albums::create');
+        $routes->get('albums/(:num)', 'Albums::show/$1');
+        $routes->put('albums/(:num)', 'Albums::update/$1');
+        $routes->delete('albums/(:num)', 'Albums::delete/$1');
+        $routes->post('albums/(:num)/photos', 'Albums::upload/$1');
+        $routes->get('photos/(:num)/image', 'Albums::image/$1');
+        $routes->get('photos/(:num)/thumb', 'Albums::thumb/$1');
+        $routes->delete('photos/(:num)', 'Albums::deletePhoto/$1');
         $routes->get('invitations', 'Invitations::index');
         $routes->post('invitations', 'Invitations::create');
     });

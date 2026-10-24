@@ -206,3 +206,19 @@ Para cada entrada registrar:
 - **Prompt utilizado:** "Siguiente fase".
 - **Resultado obtenido:** Añadidos endpoints autenticados para buscar usuarios, gestionar solicitudes de amistad, listar y eliminar amigos; las amistades confirmadas se mantienen simétricas. La pantalla de inicio muestra solicitudes, contactos y estados visibles de amigos. Se agregó timestamp de cambio de estado y el feed excluye perfiles no amigos y estados privados.
 - **Decisión:** Mantener las solicitudes pendientes separadas de `friendships`; exponer solo nombre y apellido en búsqueda/listados. Validación en curso con PHPUnit, Vitest, typecheck y lint.
+- **Cierre (2026-10-24):** Suite completa en verde (61 tests de backend y 24 de frontend).
+
+### 2026-10-24 — Frontend en Docker Compose
+
+- **Objetivo:** Que `docker compose up` arranque también la SPA.
+- **Prompt utilizado:** "Puedes hacer que el docker compose up también arranque el frontend".
+- **Resultado obtenido:** Servicio `frontend` (Node 24) con Vite y recarga en caliente en el puerto 5173; `/api` se redirige al contenedor `app` y `node_modules` va en un volumen propio.
+- **Decisión:** Lint, typecheck y tests del frontend siguen ejecutándose en la máquina anfitriona.
+
+### 2026-10-24 — Sprint 5: álbumes y subida de fotos
+
+- **Objetivo:** Implementar el Sprint 5 de la planificación.
+- **Prompt utilizado:** "¿Siguiente fase?"; se aceptó el planteamiento propuesto: "Si, al final haremos una prueba para ver que en el servidor OVH esta todo instalado correctamente, sino cambiaremos la estrategia porque no se pueden instalar cosas en OVH".
+- **Resultado esperado:** Álbumes con subida múltiple, miniaturas, visor y fotos visibles solo para amigos.
+- **Resultado obtenido:** Tablas `albums` y `photos`; librería `PhotoProcessor` solo con GD que reduce a 1600 px, crea una miniatura cuadrada de 240 px, aplica la orientación EXIF y guarda en JPEG sin metadatos. Las fotos se guardan en `writable/uploads/photos` y solo se sirven por la API al dueño y a sus amigos. La SPA tiene páginas de álbumes, álbum y visor (con flechas del teclado) y sube las fotos de una en una. Tests: 72 de backend y 30 de frontend; subida real comprobada en Docker.
+- **Decisión:** Álbumes visibles solo para amigos (sin privacidad por álbum, como dice el plan). Se guarda solo la versión reducida, no el original. Queda pendiente verificar en OVH las extensiones y límites de PHP; si falta algo, se cambiará la estrategia porque en OVH no se puede instalar nada.

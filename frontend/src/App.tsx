@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router'
 import { Layout } from './components/Layout'
 import { RequireAuth, RequireGuest } from './components/RequireAuth'
+import { Album } from './pages/Album'
+import { Albums } from './pages/Albums'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Cookies } from './pages/legal/Cookies'
 import { Privacy } from './pages/legal/Privacy'
@@ -8,6 +10,7 @@ import { Terms } from './pages/legal/Terms'
 import { Home } from './pages/Home'
 import { Landing } from './pages/Landing'
 import { NotFound } from './pages/NotFound'
+import { PhotoViewer } from './pages/PhotoViewer'
 import { Profile } from './pages/Profile'
 import { Register } from './pages/Register'
 import { ResetPassword } from './pages/ResetPassword'
@@ -47,6 +50,30 @@ export function App() {
           element={
             <RequireAuth>
               <Profile />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="perfil/:id/fotos"
+          element={
+            <RequireAuth>
+              <Albums />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="albumes/:id"
+          element={
+            <RequireAuth>
+              <Album />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="albumes/:albumId/fotos/:photoId"
+          element={
+            <RequireAuth>
+              <PhotoViewer />
             </RequireAuth>
           }
         />
