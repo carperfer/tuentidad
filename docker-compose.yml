@@ -37,6 +37,22 @@ services:
       mailpit:
         condition: service_started
 
+  frontend:
+    image: node:24-bookworm-slim
+    working_dir: /app
+    # npm install en cada arranque: es rápido si no hay cambios en package-lock.json
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      # node_modules propio del contenedor, separado del de la máquina anfitriona
+      - frontend-node-modules:/app/node_modules
+    environment:
+      API_PROXY_TARGET: http://app
+    depends_on:
+      - app
+
   db:
     image: mysql:8.0
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
@@ -62,3 +78,4 @@ services:
 
 volumes:
   db-data:
+  frontend-node-modules:
