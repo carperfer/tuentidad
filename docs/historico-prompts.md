@@ -229,3 +229,10 @@ Para cada entrada registrar:
 - **Prompt utilizado:** "Estoy en un iPad y no puedo subir por sftp, lo puedes hacer por mi?"
 - **Resultado obtenido:** El workflow Deploy tiene una opción manual («diagnostico») que publica `ovh-check.php` en `www/`. Resultado: todo correcto. PHP 8.3.36 (FPM), MySQL 8.4.11, GD con JPEG/PNG/WebP, exif, `upload_max_filesize` 128 MB, `post_max_size` 130 MB, `memory_limit` 512 MB, `max_execution_time` 165 s, carpetas `writable` escribibles, `.env` de producción y SMTP accesible.
 - **Decisión:** Se mantiene el procesado de fotos solo con GD y los límites del Sprint 5. En local se usa MySQL 8.0 y en producción 8.4.
+
+### 2026-10-25 — Rediseño según la guía de layout
+
+- **Objetivo:** Planificar la adaptación de toda la SPA a `docs/frontend-layout.md`.
+- **Prompt utilizado:** "En la carpeta doces hay un archivo Frontend-layout.md quiero que metas en el siguiente sprint la adecuación de todo el proyecto a este estilo, secciones posiciones de kas secciones…"
+- **Resultado obtenido:** Nuevo Sprint 6 «Rediseño según la guía de layout» (tokens, primitivos, tres columnas, topbar, status bar y plantillas de Inicio y Perfil aplicadas a las páginas existentes). Los sprints siguientes se renumeran: Fotos II pasa a ser el 7, el lanzamiento del MVP el 8 y la versión 2 los sprints 9 a 11.
+- **Decisión:** Rediseño como sprint propio en lugar de sumarlo a Fotos II, para que las funciones nuevas se construyan ya sobre el layout. Variante de módulo `boxed` por defecto. Los módulos de funciones que aún no existen no se muestran vacíos.

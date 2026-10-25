@@ -6,7 +6,7 @@ Plan de desarrollo de tuentidad.es con trazabilidad completa del proceso asistid
 
 - Sprints de 2 semanas.
 - Cada sprint termina con algo desplegable y probado (tests en verde en CI).
-- Orden del MVP: invitaciones (incluidos perfiles de bienvenida) → perfil → amigos → fotos con etiquetado y comentarios. Chat y eventos quedan para la versión 2.
+- Orden del MVP: invitaciones (incluidos perfiles de bienvenida) → perfil → amigos → fotos → rediseño según la guía de layout → etiquetado y comentarios en fotos. Chat y eventos quedan para la versión 2.
 
 ## Estructura del repositorio
 
@@ -103,17 +103,41 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 **Entregable:** subir y navegar álbumes de fotos.
 
-### Sprint 6 — Fotos II: etiquetas y comentarios
+### Sprint 6 — Rediseño según la guía de layout
+
+Adaptar toda la SPA a [frontend-layout.md](frontend-layout.md) (capturas de referencia en `docs/sourceimages/`): retícula, regiones y orden de los módulos de cada página.
+
+- [ ] Tokens de diseño (§10) como variables CSS, sustituyendo la paleta actual
+- [ ] Variante de módulo `boxed` por defecto (cabecera azul claro, la más próxima al estilo actual)
+- [ ] Primitivos: `Module`, `Avatar` (tamaños de §7.5), `Button` (primario y secundario), `Dropdown`, `Pager`, `MediaObject` y contadores entre paréntesis
+- [ ] Layout de tres columnas (240 px / flexible / 190 px en 990 px) con los cortes de §11 (dos columnas por debajo de 1000 px y una por debajo de 760 px, con menú hamburguesa)
+- [ ] Topbar fija (§3): logo, Inicio, Perfil, Gente, buscador de personas, botón **Subir fotos**, Mi cuenta y Salir; pestaña activa resaltada
+- [ ] Status bar en Inicio (§4): avatar, «¿Cómo va todo?» con el último estado, hace cuánto se cambió y **Subir fotos**
+- [ ] Inicio (§5.1): izquierda con tarjeta de usuario e invitaciones; centro con «Novedades» (`FeedItem`); derecha con «Añadir amigos» y solicitudes de amistad
+- [ ] Perfil ajeno y propio (§5.2 y §5.3): izquierda con foto de perfil e «Información»; centro con cabecera (nombre, relación y acciones: Editar mi perfil, Mis álbumes (n), Añadir como amigo) y caja de estado; derecha con «Fotos» (rejilla 2×3, «Álbumes (n) ▾», «Ver todas (n)»), «Amigos en común» y «Sus amigos / Mis amigos»
+- [ ] Edición del perfil en una vista propia dentro del layout
+- [ ] Backend para la columna derecha del perfil: amigos de un usuario, amigos en común y últimas fotos (respetando que solo los amigos ven las fotos)
+- [ ] Álbumes, álbum y visor de fotos dentro del layout (miniaturas de ~75 px)
+- [ ] Portada, registro, recuperación de contraseña y páginas legales con los nuevos tokens y la topbar sin sesión
+- [ ] Footer (§9): copyright y enlaces legales
+- [ ] Accesibilidad (§12): `<aside>`/`<main>`, un `<h2>` por módulo, `aria-label` en botones de icono, fechas en `<time>` y contraste AA
+- [ ] Tests de frontend actualizados a la nueva estructura
+
+Fuera de alcance: los módulos de funciones que aún no existen (tablón, espacio personal, mensajes, vídeos, chat, calendario y eventos, redes, visitas al perfil, eventos patrocinados y selector de idioma) no se muestran vacíos; cada uno se añade en el hueco que le da la guía en el sprint de su función.
+
+**Entregable:** todas las páginas actuales con la estructura de tres columnas y los módulos de la guía.
+
+### Sprint 7 — Fotos II: etiquetas y comentarios
 
 - Etiquetado de amigos sobre la foto (seleccionando una zona)
 - El etiquetado puede retirarse por la persona etiquetada
-- Página "fotos en las que sales"
+- Página "fotos en las que sales" y módulo «Fotos en las que sale…» del perfil (§5.2 de la guía de layout)
 - Comentarios en fotos
 - Notificaciones básicas en la web (etiquetas, comentarios, solicitudes de amistad)
 
 **Entregable:** experiencia de fotos completa estilo Tuenti.
 
-### Sprint 7 — Calidad y lanzamiento del MVP
+### Sprint 8 — Calidad y lanzamiento del MVP
 
 - Revisión de seguridad (OWASP: XSS, CSRF, IDOR, subidas de archivos)
 - RGPD: borrado de cuenta y exportación de datos
@@ -125,20 +149,22 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 
 ## Versión 2
 
-### Sprint 8 — Chat
+### Sprint 9 — Chat
 
 - Conversaciones 1 a 1 entre amigos
 - Polling AJAX con intervalo adaptativo (más frecuente con el chat abierto)
 - Indicador de amigos conectados y mensajes no leídos
 - Transporte encapsulado en un servicio para poder sustituirlo
+- Interfaz según §8 de la guía de layout: lista de contactos, ventana flotante y dock inferior
 
-### Sprint 9 — Eventos
+### Sprint 10 — Eventos
 
 - Crear eventos (cumpleaños, fiestas, quedadas) con fecha, lugar y descripción
 - Invitar amigos y confirmar asistencia (sí / no / quizás)
 - Comentarios en el evento y recordatorios por cron
+- Módulo «Calendario» en la columna izquierda de Inicio (§6.1 de la guía de layout)
 
-### Sprint 10 — Notificaciones y pulido
+### Sprint 11 — Notificaciones y pulido
 
 - Centro de notificaciones unificado
 - Emails de resumen opcionales
