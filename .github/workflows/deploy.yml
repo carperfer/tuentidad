@@ -17,6 +17,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      diagnostico:
+        description: 'Publicar también ovh-check.php en www/ (se borra solo al abrirlo)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -94,6 +99,11 @@ jobs:
           ./scripts/build-release.sh
           ./scripts/configurar-env.sh --desde-entorno
           ./scripts/separar-publico.sh release sitio "$FTP_SERVER_DIR"
+
+      # Sin cliente SFTP a mano (p. ej. desde un móvil), el diagnóstico se publica con el despliegue
+      - name: Añadir diagnóstico de OVH
+        if: steps.ftp.outputs.configurado == 'true' && inputs.diagnostico
+        run: cp scripts/ovh-check.php sitio/www/
 
       - name: Instalar lftp
         if: steps.ftp.outputs.configurado == 'true'
