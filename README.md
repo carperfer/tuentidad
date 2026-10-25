@@ -29,7 +29,7 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 - PHP 8.3 · CodeIgniter 4.7 · MySQL 8.0
 - React 19 + Vite + TypeScript · React Router · Vitest · oxlint
 - Entorno local con Docker Compose (backend, base de datos, Mailpit y Vite)
-- El plan de OVH no tiene consola SSH, pero sí SFTP: el despliegue se hace por SFTP desde GitHub Actions. Versiones de PHP/MySQL pendientes de verificar con `ovh-check.php`
+- El plan de OVH no tiene consola SSH, pero sí SFTP: el despliegue se hace por SFTP desde GitHub Actions. Verificado con `ovh-check.php`: PHP 8.3 (FPM) y MySQL 8.4 en producción
 
 ## Arquitectura
 
