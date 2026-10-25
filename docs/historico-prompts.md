@@ -222,3 +222,10 @@ Para cada entrada registrar:
 - **Resultado esperado:** Álbumes con subida múltiple, miniaturas, visor y fotos visibles solo para amigos.
 - **Resultado obtenido:** Tablas `albums` y `photos`; librería `PhotoProcessor` solo con GD que reduce a 1600 px, crea una miniatura cuadrada de 240 px, aplica la orientación EXIF y guarda en JPEG sin metadatos. Las fotos se guardan en `writable/uploads/photos` y solo se sirven por la API al dueño y a sus amigos. La SPA tiene páginas de álbumes, álbum y visor (con flechas del teclado) y sube las fotos de una en una. Tests: 72 de backend y 30 de frontend; subida real comprobada en Docker.
 - **Decisión:** Álbumes visibles solo para amigos (sin privacidad por álbum, como dice el plan). Se guarda solo la versión reducida, no el original. Queda pendiente verificar en OVH las extensiones y límites de PHP; si falta algo, se cambiará la estrategia porque en OVH no se puede instalar nada.
+
+### 2026-10-25 — Diagnóstico del alojamiento OVH
+
+- **Objetivo:** Comprobar que OVH tiene lo necesario para el Sprint 5 (no se puede instalar nada en el servidor).
+- **Prompt utilizado:** "Estoy en un iPad y no puedo subir por sftp, lo puedes hacer por mi?"
+- **Resultado obtenido:** El workflow Deploy tiene una opción manual («diagnostico») que publica `ovh-check.php` en `www/`. Resultado: todo correcto. PHP 8.3.36 (FPM), MySQL 8.4.11, GD con JPEG/PNG/WebP, exif, `upload_max_filesize` 128 MB, `post_max_size` 130 MB, `memory_limit` 512 MB, `max_execution_time` 165 s, carpetas `writable` escribibles, `.env` de producción y SMTP accesible.
+- **Decisión:** Se mantiene el procesado de fotos solo con GD y los límites del Sprint 5. En local se usa MySQL 8.0 y en producción 8.4.

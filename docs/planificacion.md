@@ -32,9 +32,9 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 - [x] CI en GitHub Actions: PHPUnit, PHP-CS-Fixer, Vitest, oxlint y comprobación de tipos
 - [x] Script de empaquetado para despliegue (`scripts/build-release.sh`)
 - [x] Acceso al servidor: el plan no tiene consola SSH; el FTP de OVH no admite FTPS, se despliega por SFTP
-- [ ] Verificación del plan OVH con `ovh-check.php` (versiones PHP/MySQL, extensiones, SMTP)
+- [x] Verificación del plan OVH con `ovh-check.php` (2026-10-25): PHP 8.3.36 (FPM), MySQL 8.4.11, todas las extensiones y SMTP `ssl0.ovh.net:465` accesible
 - [x] Despliegue automático por SFTP en cada push a `main` (`deploy.yml`, credenciales en GitHub Secrets)
-- [ ] Primer despliegue en OVH (pendiente de validar la conexión SFTP)
+- [x] Primer despliegue en OVH
 
 **Entregable:** SPA llamando a `/api/health` funcionando con la estructura de OVH (simulada en local) y despliegue automático de la landing en producción.
 
@@ -99,7 +99,7 @@ En producción (OVH), el build de la SPA se publica junto al `public/` de CodeIg
 - [x] Visor de fotos con navegación anterior/siguiente (también con las flechas del teclado)
 - [x] Permisos: solo el dueño y sus amigos ven los álbumes y las fotos, que se sirven a través de la API
 - [x] Tests: 72 de backend y 30 de frontend
-- [ ] Verificar en OVH que GD tiene soporte de JPEG, PNG y WebP, `exif_read_data` y límites de subida (`upload_max_filesize` ≥ 10 MB, `memory_limit` ≥ 256 MB). Si falta algo, no se puede instalar: habrá que cambiar la estrategia
+- [x] Verificado en OVH: GD con JPEG, PNG y WebP, `exif` cargada, `upload_max_filesize` 128 MB, `post_max_size` 130 MB, `memory_limit` 512 MB y `max_execution_time` 165 s
 
 **Entregable:** subir y navegar álbumes de fotos.
 
