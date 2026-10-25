@@ -220,7 +220,7 @@ curl -X POST https://tuentidad.es/api/deploy/first-user \
 
 ### Diagnóstico del alojamiento
 
-Sube `scripts/ovh-check.php` a `www/` con un cliente SFTP (FileZilla) y ábrelo en `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, `.env`, base de datos y SMTP, y se borra solo al terminar.
+Sube `scripts/ovh-check.php` a `www/` con un cliente SFTP (FileZilla), o lanza a mano el workflow **Deploy** (Actions → Deploy → Run workflow) marcando «Publicar también ovh-check.php», y ábrelo en `https://tuentidad.es/ovh-check.php`. Comprueba PHP, extensiones, permisos, `.env`, base de datos y SMTP, y se borra solo al terminar.
 
 ### Paquete de la aplicación
 
