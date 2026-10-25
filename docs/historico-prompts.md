@@ -236,3 +236,11 @@ Para cada entrada registrar:
 - **Prompt utilizado:** "En la carpeta doces hay un archivo Frontend-layout.md quiero que metas en el siguiente sprint la adecuación de todo el proyecto a este estilo, secciones posiciones de kas secciones…"
 - **Resultado obtenido:** Nuevo Sprint 6 «Rediseño según la guía de layout» (tokens, primitivos, tres columnas, topbar, status bar y plantillas de Inicio y Perfil aplicadas a las páginas existentes). Los sprints siguientes se renumeran: Fotos II pasa a ser el 7, el lanzamiento del MVP el 8 y la versión 2 los sprints 9 a 11.
 - **Decisión:** Rediseño como sprint propio en lugar de sumarlo a Fotos II, para que las funciones nuevas se construyan ya sobre el layout. Variante de módulo `boxed` por defecto. Los módulos de funciones que aún no existen no se muestran vacíos.
+
+### 2026-10-25 — Sprint 6: rediseño según la guía de layout
+
+- **Objetivo:** Adaptar toda la SPA a `docs/frontend-layout.md`.
+- **Prompt utilizado:** "Continúa con el sprint 6".
+- **Resultado esperado:** Las páginas actuales con la retícula de tres columnas, la topbar, la status bar y los módulos de la guía.
+- **Resultado obtenido:** Tokens de §10 y variante de módulo `boxed`. Primitivos `Module`, `Avatar`, `MediaObject`, `Dropdown`, `Pager` y `Columns` (240 / flexible / 190 px, con dos y una columna por debajo de 1000 y 760 px). Topbar fija con menú hamburguesa en móvil, status bar «¿Cómo va todo?» y fondo azul con logotipo para visitantes. Inicio, perfil (ajeno y propio) y nueva página Gente con los módulos en las columnas de §5; la edición del perfil pasa a `/perfil/editar` y la lista completa de amigos a `/perfil/{id}/amigos`. Backend: avatares en los listados (según su privacidad), relación con el perfil, amigos de un usuario, amigos en común, últimas fotos y cambio rápido de estado. Tests: 77 de backend y 39 de frontend; revisión visual con capturas en escritorio, tableta y móvil.
+- **Decisión:** Las listas de amigos de otra persona solo las ven sus amigos; los amigos en común, cualquier usuario con sesión. Los grises de la guía se oscurecen (`#6e6e6e`) para cumplir el contraste AA. Sin indicador de conexión hasta el chat.

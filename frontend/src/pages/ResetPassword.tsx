@@ -4,6 +4,8 @@ import { resetPassword } from '../api/auth'
 import { errorMessage, fieldErrors } from '../api/client'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
+import { Columns } from '../components/ui/Columns'
+import { Module } from '../components/ui/Module'
 
 export function ResetPassword() {
   const { token = '' } = useParams()
@@ -31,8 +33,8 @@ export function ResetPassword() {
   }
 
   return (
-    <section className="box narrow">
-      <h1>Elige una contraseña nueva</h1>
+    <Columns narrow>
+      <Module title="Elige una contraseña nueva" as="h1">
       {notice ? (
         <>
           <Alert kind="ok">{notice}</Alert>
@@ -71,6 +73,7 @@ export function ResetPassword() {
           )}
         </form>
       )}
-    </section>
+    </Module>
+    </Columns>
   )
 }

@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import { OWNER } from './owner'
+import { Columns } from '../../components/ui/Columns'
 
 const COOKIES = [
   { name: 'tuentidad_session', purpose: 'Mantener tu sesión iniciada y proteger los formularios', duration: '2 horas' },
@@ -8,7 +9,8 @@ const COOKIES = [
 
 export function Cookies() {
   return (
-    <article className="box legal">
+    <Columns>
+      <article className="module legal">
       <h1>Política de cookies</h1>
       <p className="status">Última actualización: {OWNER.updated}</p>
 
@@ -48,5 +50,6 @@ export function Cookies() {
         Más información en la <Link to="/privacidad">política de privacidad</Link>.
       </p>
     </article>
+    </Columns>
   )
 }

@@ -4,6 +4,7 @@ import { errorMessage, fieldErrors } from '../api/client'
 import { listWelcomeProfiles, requestFriendship, type WelcomeProfile } from '../api/welcome'
 import { Alert } from './Alert'
 import { Field } from './Field'
+import { Module } from './ui/Module'
 
 /** Perfiles de demostración a los que cualquiera puede pedir amistad para entrar. */
 export function WelcomeProfiles() {
@@ -18,15 +19,14 @@ export function WelcomeProfiles() {
   if (profiles.length === 0) return null
 
   return (
-    <section className="box">
-      <h2 className="box__title">¿Aún no conoces a nadie dentro?</h2>
+    <Module title="¿Aún no conoces a nadie dentro?">
       <p>Pide amistad a uno de nuestros perfiles de bienvenida y te enviaremos un enlace para crear tu cuenta.</p>
       <div className="welcome-profiles">
         {profiles.map((profile) => (
           <WelcomeProfileCard key={profile.id} profile={profile} />
         ))}
       </div>
-    </section>
+    </Module>
   )
 }
 

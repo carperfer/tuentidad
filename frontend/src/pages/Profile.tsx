@@ -1,207 +1,288 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { errorMessage, fieldErrors } from '../api/client'
+import { errorMessage } from '../api/client'
 import {
-  getProfile,
-  updateProfile,
-  uploadAvatar,
-  type Profile as ProfileDataView,
-  type ProfileData,
-  type Visibility,
-} from '../api/profile'
+  acceptFriendRequest,
+  cancelFriendRequest,
+  listMutualFriends,
+  listUserFriends,
+  rejectFriendRequest,
+  sendFriendRequest,
+  type FriendSample,
+} from '../api/friends'
+import { listAlbums, listRecentPhotos, type AlbumSummary, type Photo } from '../api/photos'
+import { getProfile, type Profile as ProfileView, type Relationship } from '../api/profile'
 import { Alert } from '../components/Alert'
-import { Field } from '../components/Field'
+import { FriendsGrid } from '../components/people/FriendsGrid'
+import { ProfilePhoto } from '../components/ProfileSidebar'
+import { Avatar } from '../components/ui/Avatar'
+import { Columns } from '../components/ui/Columns'
+import { Dropdown } from '../components/ui/Dropdown'
+import { Counter, Module } from '../components/ui/Module'
+import { formatDay, timeAgo } from '../lib/dates'
 
-const VISIBILITY_LABELS: Record<Visibility, string> = {
-  public: 'Todos los usuarios',
-  friends: 'Solo mis amigos',
-  private: 'Solo yo',
+const RELATIONSHIP_LABEL: Record<Relationship, string> = {
+  self: 'Tú',
+  friend: 'Sois amigos',
+  incoming: 'Te ha enviado una solicitud de amistad',
+  outgoing: 'Solicitud de amistad enviada',
+  none: '',
 }
 
-const EMPTY_PROFILE: ProfileData = {
-  first_name: '',
-  last_name: '',
-  birthdate: '',
-  bio: '',
-  status: '',
-  birthdate_visibility: 'friends',
-  bio_visibility: 'public',
-  status_visibility: 'public',
-  avatar_visibility: 'public',
+type SocialData = {
+  photos: { photos: Photo[]; total: number }
+  albums: AlbumSummary[]
+  friends: FriendSample
 }
 
+type ProfileData = {
+  profile: ProfileView
+  social: SocialData | null
+  mutual: FriendSample | null
+}
+
+/** Perfil y, si la relación lo permite, sus fotos y amigos. */
+async function fetchProfileData(profileId: number): Promise<ProfileData> {
+  const { profile } = await getProfile(profileId)
+  const canSeeSocial = profile.relationship === 'self' || profile.relationship === 'friend'
+  const [photos, albums, friends, mutual] = await Promise.all([
+    canSeeSocial ? listRecentPhotos(profileId, 6) : null,
+    canSeeSocial ? listAlbums(profileId) : null,
+    canSeeSocial ? listUserFriends(profileId, 6) : null,
+    profile.relationship === 'self' ? null : listMutualFriends(profileId, 6),
+  ])
+
+  return {
+    profile,
+    social: photos && albums && friends ? { photos, albums: albums.albums, friends } : null,
+    mutual,
+  }
+}
+
+/** Perfil propio o ajeno (guía §5.2 y §5.3). */
 export function Profile() {
   const { id } = useParams()
   const profileId = Number(id)
-  const [profile, setProfile] = useState<ProfileDataView | null>(null)
-  const [form, setForm] = useState<ProfileData>(EMPTY_PROFILE)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const valid = Number.isInteger(profileId) && profileId > 0
+  const [profile, setProfile] = useState<ProfileView | null>(null)
+  const [social, setSocial] = useState<SocialData | null>(null)
+  const [mutual, setMutual] = useState<FriendSample | null>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  const apply = useCallback((data: ProfileData) => {
+    setProfile(data.profile)
+    setSocial(data.social)
+    setMutual(data.mutual)
+  }, [])
 
   useEffect(() => {
-    if (!Number.isInteger(profileId) || profileId < 1) return
-
-    getProfile(profileId)
-      .then(({ profile: result }) => {
-        setProfile(result)
-        if (result.is_owner) {
-          setForm({
-            first_name: result.first_name,
-            last_name: result.last_name,
-            birthdate: result.birthdate ?? '',
-            bio: result.bio ?? '',
-            status: result.status ?? '',
-            birthdate_visibility: result.visibility?.birthdate ?? 'friends',
-            bio_visibility: result.visibility?.bio ?? 'public',
-            status_visibility: result.visibility?.status ?? 'public',
-            avatar_visibility: result.visibility?.avatar ?? 'public',
-          })
-        }
-      })
+    if (!valid) return
+    fetchProfileData(profileId)
+      .then(apply)
       .catch((caught: unknown) => setError(errorMessage(caught)))
-  }, [profileId])
+  }, [valid, profileId, apply])
 
-  function setValue<K extends keyof ProfileData>(key: K, value: ProfileData[K]) {
-    setForm((current) => ({ ...current, [key]: value }))
-  }
-
-  async function handleSave(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setSaving(true)
-    setErrors({})
+  async function perform(action: () => Promise<{ message: string }>) {
+    setBusy(true)
     setError('')
     setNotice('')
     try {
-      const result = await updateProfile(form)
-      setProfile(result.profile)
-      setNotice('Tu perfil se ha actualizado.')
+      setNotice((await action()).message)
+      apply(await fetchProfileData(profileId))
     } catch (caught) {
-      setErrors(fieldErrors(caught))
       setError(errorMessage(caught))
     } finally {
-      setSaving(false)
+      setBusy(false)
     }
   }
 
-  async function handleAvatar(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    setError('')
-    setNotice('')
-    try {
-      const result = await uploadAvatar(file)
-      setProfile(result.profile)
-      setNotice('Tu foto de perfil se ha actualizado.')
-    } catch (caught) {
-      setErrors(fieldErrors(caught))
-      setError(errorMessage(caught))
-    } finally {
-      setUploading(false)
-      event.target.value = ''
-    }
+  if (!valid) return <Columns><Alert>No se ha encontrado el perfil.</Alert></Columns>
+  if (profile === null) {
+    return <Columns>{error ? <Alert>{error}</Alert> : <p className="status">Cargando perfil…</p>}</Columns>
   }
 
-  if (!Number.isInteger(profileId) || profileId < 1) return <Alert>No se ha encontrado el perfil.</Alert>
-  if (error && profile === null) return <Alert>{error}</Alert>
-  if (profile === null) return <p className="status">Cargando perfil…</p>
+  const own = profile.relationship === 'self'
+  const requestId = profile.request_id
+  const albumCount = social?.albums.length ?? 0
 
   return (
-    <div className="profile-layout">
-      <section className="box profile-card">
-        <h1>{profile.first_name} {profile.last_name}</h1>
-        {profile.avatar_url ? (
-          <img className="profile-card__avatar" src={profile.avatar_url} alt={`Foto de ${profile.first_name}`} />
-        ) : (
-          <div className="profile-card__avatar profile-card__avatar--empty" aria-label="Sin foto de perfil" />
-        )}
-        {profile.status && <p className="profile-card__status">{profile.status}</p>}
-        <p>{profile.bio || (profile.is_owner ? 'Todavía no ha añadido información sobre sí.' : 'Sin información visible.')}</p>
-        {profile.birthdate && <p>Fecha de nacimiento: {profile.birthdate}</p>}
-        <p>
-          <Link to={`/perfil/${profile.id}/fotos`}>{profile.is_owner ? 'Mis fotos' : 'Ver sus fotos'}</Link>
-        </p>
-      </section>
-
-      {profile.is_owner ? (
-        <section className="box">
-          <h2 className="box__title">Edita tu perfil</h2>
-          {notice && <Alert kind="ok">{notice}</Alert>}
-          {error && <Alert>{error}</Alert>}
-          <form onSubmit={handleSave} noValidate>
-            <Field
-              label="Nombre"
-              value={form.first_name}
-              onChange={(event) => setValue('first_name', event.target.value)}
-              error={errors.first_name}
-              required
-            />
-            <Field
-              label="Apellidos"
-              value={form.last_name}
-              onChange={(event) => setValue('last_name', event.target.value)}
-              error={errors.last_name}
-              required
-            />
-            <Field
-              label="Fecha de nacimiento"
-              type="date"
-              value={form.birthdate}
-              onChange={(event) => setValue('birthdate', event.target.value)}
-              error={errors.birthdate}
-              required
-            />
-            <Field
-              label="Sobre mí"
-              value={form.bio}
-              onChange={(event) => setValue('bio', event.target.value)}
-              error={errors.bio}
-              maxLength={500}
-            />
-            <Field
-              label="Estado"
-              value={form.status}
-              onChange={(event) => setValue('status', event.target.value)}
-              error={errors.status}
-              maxLength={160}
-            />
-            <fieldset className="privacy-fields">
-              <legend>Quién puede ver cada dato</legend>
-              {(['birthdate', 'bio', 'status', 'avatar'] as const).map((field) => (
-                <label className="privacy-fields__row" key={field}>
-                  <span>{field === 'birthdate' ? 'Fecha de nacimiento' : field === 'bio' ? 'Sobre mí' : field === 'status' ? 'Estado' : 'Foto de perfil'}</span>
-                  <select
-                    value={form[`${field}_visibility`]}
-                    onChange={(event) => setValue(`${field}_visibility`, event.target.value as Visibility)}
-                    aria-label={`Visibilidad: ${field}`}
+    <Columns
+      left={
+        <>
+          <ProfilePhoto profile={profile} className="profile-photo--profile" />
+          <Module title="Información">
+            <dl className="info-list">
+              {profile.birthdate && (
+                <>
+                  <dt>Fecha de nacimiento</dt>
+                  <dd>{formatDay(profile.birthdate)}</dd>
+                </>
+              )}
+              {profile.bio && (
+                <>
+                  <dt>Sobre mí</dt>
+                  <dd>{profile.bio}</dd>
+                </>
+              )}
+            </dl>
+            {!profile.birthdate && !profile.bio && (
+              <p className="status">{own ? 'Todavía no has añadido información.' : 'Sin información visible.'}</p>
+            )}
+          </Module>
+        </>
+      }
+      right={
+        <>
+          {social && (
+            <Module
+              title="Fotos"
+              action={
+                albumCount > 0 && (
+                  <Dropdown
+                    label={
+                      <>
+                        Álbumes <Counter value={albumCount} />
+                      </>
+                    }
                   >
-                    {Object.entries(VISIBILITY_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </fieldset>
-            <button type="submit" className="button" disabled={saving}>
-              {saving ? 'Guardando…' : 'Guardar cambios'}
+                    <ul className="dropdown__list">
+                      {social.albums.map((album) => (
+                        <li key={album.id}>
+                          <Link to={`/albumes/${album.id}`}>
+                            {album.title} <Counter value={album.photo_count} />
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </Dropdown>
+                )
+              }
+              footer={
+                social.photos.total > 0 && (
+                  <Link to={`/perfil/${profile.id}/fotos`}>
+                    Ver todas <Counter value={social.photos.total} />
+                  </Link>
+                )
+              }
+            >
+              {social.photos.photos.length === 0 ? (
+                <p className="status">{own ? <Link to={`/perfil/${profile.id}/fotos`}>Sube tus primeras fotos</Link> : 'Todavía no hay fotos.'}</p>
+              ) : (
+                <ul className="photos-sidebar">
+                  {social.photos.photos.map((photo, index) => (
+                    <li key={photo.id}>
+                      <Link to={`/albumes/${photo.album_id}/fotos/${photo.id}`}>
+                        <img src={photo.thumb_url} alt={`Foto ${index + 1} de ${profile.first_name}`} loading="lazy" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Module>
+          )}
+          {mutual && (
+            <FriendsGrid
+              title="Amigos en común"
+              people={mutual.friends}
+              total={mutual.total}
+              moreTo={social ? `/perfil/${profile.id}/amigos` : undefined}
+            />
+          )}
+          {social && (
+            <FriendsGrid
+              title={own ? 'Mis amigos' : 'Sus amigos'}
+              people={social.friends.friends}
+              total={social.friends.total}
+              moreTo={`/perfil/${profile.id}/amigos`}
+              empty={own ? 'Todavía no tienes amigos.' : 'Todavía no tiene amigos.'}
+            />
+          )}
+        </>
+      }
+    >
+      {notice && <Alert kind="ok">{notice}</Alert>}
+      {error && <Alert>{error}</Alert>}
+
+      <header className="profile-header">
+        <div className="profile-header__photo">
+          <Avatar src={profile.avatar_url} name={profile.first_name} size={96} decorative />
+        </div>
+        <div className="profile-header__text">
+        <h1>
+          {profile.first_name} {profile.last_name}{' '}
+          {RELATIONSHIP_LABEL[profile.relationship] && (
+            <small className="muted">{RELATIONSHIP_LABEL[profile.relationship]}</small>
+          )}
+        </h1>
+        <div className="profile-header__actions">
+          {own && (
+            <>
+              <Link to="/perfil/editar" className="button">
+                Editar mi perfil
+              </Link>
+              <Link to={`/perfil/${profile.id}/fotos`} className="button">
+                Mis álbumes de fotos <Counter value={albumCount} />
+              </Link>
+            </>
+          )}
+          {profile.relationship === 'friend' && (
+            <Link to={`/perfil/${profile.id}/fotos`}>
+              Ver álbumes de fotos <Counter value={albumCount} />
+            </Link>
+          )}
+          {profile.relationship === 'none' && (
+            <button type="button" className="button" disabled={busy} onClick={() => perform(() => sendFriendRequest(profile.id))}>
+              Añadir como amigo
             </button>
-          </form>
-          <div className="avatar-upload">
-            <label htmlFor="avatar-upload">Foto de perfil (JPG, PNG o WebP; máximo 2 MB)</label>
-            <input id="avatar-upload" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatar} disabled={uploading} />
-            {errors.avatar && <p className="field__error">{errors.avatar}</p>}
-            {uploading && <p className="status">Subiendo foto…</p>}
-          </div>
-        </section>
-      ) : (
-        <section className="box">
-          <h2 className="box__title">Perfil</h2>
-          <p>Algunos datos solo son visibles para sus amigos.</p>
-        </section>
+          )}
+          {profile.relationship === 'outgoing' && requestId !== null && (
+            <button
+              type="button"
+              className="link-button"
+              disabled={busy}
+              onClick={() => perform(() => cancelFriendRequest(requestId))}
+            >
+              Cancelar solicitud
+            </button>
+          )}
+          {profile.relationship === 'incoming' && requestId !== null && (
+            <>
+              <button
+                type="button"
+                className="button"
+                disabled={busy}
+                onClick={() => perform(() => acceptFriendRequest(requestId))}
+              >
+                Aceptar solicitud
+              </button>
+              <button
+                type="button"
+                className="link-button"
+                disabled={busy}
+                onClick={() => perform(() => rejectFriendRequest(requestId))}
+              >
+                Rechazar
+              </button>
+            </>
+          )}
+        </div>
+        </div>
+      </header>
+
+      {profile.status && (
+        <p className="status-box">
+          {profile.status}{' '}
+          {profile.status_updated_at && (
+            <time className="muted" dateTime={profile.status_updated_at}>
+              {timeAgo(profile.status_updated_at)}
+            </time>
+          )}
+        </p>
       )}
-    </div>
+
+      {!social && <p className="status">Solo sus amigos pueden ver sus fotos y su lista de amigos.</p>}
+    </Columns>
   )
 }

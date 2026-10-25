@@ -50,6 +50,26 @@ class Albums extends ApiController
         return $this->respond(['albums' => $albums]);
     }
 
+    /**
+     * Últimas fotos de un usuario (módulo «Fotos» del perfil) y su total.
+     */
+    public function recentPhotos(int $userId): ResponseInterface
+    {
+        if (auth()->getProvider()->findById($userId) === null) {
+            return $this->message('No se ha encontrado el usuario.', 404);
+        }
+        if (! $this->canView($userId)) {
+            return $this->message('Solo sus amigos pueden ver sus fotos.', 403);
+        }
+
+        $limit  = (int) $this->request->getGet('limit');
+        $query  = db_connect()->table('photos')->select('photos.*')->join('albums', 'albums.id = photos.album_id')->where('albums.user_id', $userId);
+        $total  = $query->countAllResults(false);
+        $photos = $query->orderBy('photos.id', 'DESC')->limit($limit >= 1 ? min($limit, 50) : 6)->get()->getResultArray();
+
+        return $this->respond(['photos' => array_map($this->photoData(...), $photos), 'total' => $total]);
+    }
+
     public function show(int $id): ResponseInterface
     {
         $album = $this->viewableAlbum($id);

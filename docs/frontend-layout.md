@@ -438,12 +438,12 @@ Primitivos compartidos: Module, Avatar, Button, Dropdown, Pager, MediaObject, Co
 
 ## 14. Checklist de implementación
 
-- [ ] Tokens de §10 definidos como variables CSS.
-- [ ] Componente `Module` con variantes `plain` y `boxed` (elegir una por defecto).
-- [ ] Layout de tres columnas con sus dos puntos de corte.
-- [ ] Topbar sticky con pestaña activa y badge.
-- [ ] Primitivos: `Avatar` (tamaños e indicador), `Button`, `Dropdown`, `Pager`, `MediaObject`.
-- [ ] Plantillas: Inicio, Perfil ajeno, Perfil propio.
-- [ ] Chat: lista, ventana flotante y dock.
-- [ ] Footer con selector de idioma.
-- [ ] Revisión de accesibilidad (§12).
+- [x] Tokens de §10 definidos como variables CSS.
+- [x] Componente `Module` en variante `boxed` (la `plain` no se usa por ahora).
+- [x] Layout de tres columnas con sus dos puntos de corte.
+- [x] Topbar sticky con pestaña activa. Pendiente: badge de notificaciones (con los mensajes y las notificaciones).
+- [x] Primitivos: `Avatar` (tamaños), `Button`, `Dropdown`, `Pager`, `MediaObject`. Pendiente: indicador de conexión del avatar (con el chat).
+- [x] Plantillas: Inicio, Perfil ajeno, Perfil propio.
+- [ ] Chat: lista, ventana flotante y dock. Pendiente: chat (Sprint 9).
+- [x] Footer (sin selector de idioma: solo castellano por ahora).
+- [x] Revisión de accesibilidad (§12).

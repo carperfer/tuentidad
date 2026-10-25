@@ -5,6 +5,9 @@ import { createAlbum, listAlbums, thumbUrl, type AlbumSummary } from '../api/pho
 import { getProfile, type Profile } from '../api/profile'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
+import { OwnerCard } from '../components/ProfileSidebar'
+import { Columns } from '../components/ui/Columns'
+import { Counter, Module } from '../components/ui/Module'
 
 /** Álbumes de un usuario; el dueño puede crear álbumes nuevos. */
 export function Albums() {
@@ -46,71 +49,78 @@ export function Albums() {
     }
   }
 
-  if (!Number.isInteger(userId) || userId < 1) return <Alert>No se ha encontrado el usuario.</Alert>
-  if (error) return <Alert>{error}</Alert>
-  if (profile === null || albums === null) return <p className="status">Cargando fotos…</p>
+  if (!Number.isInteger(userId) || userId < 1) return <Columns><Alert>No se ha encontrado el usuario.</Alert></Columns>
+
+  const own = profile?.is_owner ?? false
 
   return (
-    <div className="albums-layout">
-      <section className="box">
-        <h1 className="box__title">
-          {profile.is_owner ? 'Mis fotos' : `Fotos de ${profile.first_name}`}
-        </h1>
-        <p>
-          <Link to={`/perfil/${profile.id}`}>Volver al perfil</Link>
-        </p>
-        {albums.length === 0 ? (
-          <p className="status">
-            {profile.is_owner ? 'Todavía no has creado ningún álbum.' : 'Todavía no tiene álbumes.'}
-          </p>
-        ) : (
-          <ul className="album-grid">
-            {albums.map((album) => (
-              <li key={album.id}>
-                <Link to={`/albumes/${album.id}`} className="album-card">
-                  {album.cover_photo_id ? (
-                    <img src={thumbUrl(album.cover_photo_id)} alt="" className="album-card__cover" />
-                  ) : (
-                    <span className="album-card__cover album-card__cover--empty" />
-                  )}
-                  <strong>{album.title}</strong>
-                  <span className="album-card__count">
-                    {album.photo_count === 1 ? '1 foto' : `${album.photo_count} fotos`}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {profile.is_owner && (
-        <section className="box">
-          <h2 className="box__title">Nuevo álbum</h2>
-          <p>Solo tus amigos podrán ver las fotos.</p>
-          {formError && <Alert>{formError}</Alert>}
-          <form onSubmit={handleCreate} noValidate>
-            <Field
-              label="Título"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              error={errors.title}
-              maxLength={100}
-              required
-            />
-            <Field
-              label="Descripción"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              error={errors.description}
-              maxLength={500}
-            />
-            <button type="submit" className="button" disabled={creating}>
-              {creating ? 'Creando…' : 'Crear álbum'}
-            </button>
-          </form>
-        </section>
+    <Columns
+      left={
+        <>
+          <OwnerCard userId={userId} profile={profile} />
+          {own && (
+            <Module title="Nuevo álbum">
+              <p className="muted">Solo tus amigos podrán ver las fotos.</p>
+              {formError && <Alert>{formError}</Alert>}
+              <form onSubmit={handleCreate} noValidate>
+                <Field
+                  label="Título"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  error={errors.title}
+                  maxLength={100}
+                  required
+                />
+                <Field
+                  label="Descripción"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  error={errors.description}
+                  maxLength={500}
+                />
+                <button type="submit" className="button button--primary" disabled={creating}>
+                  {creating ? 'Creando…' : 'Crear álbum'}
+                </button>
+              </form>
+            </Module>
+          )}
+        </>
+      }
+    >
+      {error ? (
+        <Alert>{error}</Alert>
+      ) : profile === null || albums === null ? (
+        <p className="status">Cargando fotos…</p>
+      ) : (
+        <Module
+          as="h1"
+          title={
+            <>
+              {own ? 'Mis álbumes de fotos' : `Álbumes de ${profile.first_name}`} <Counter value={albums.length} />
+            </>
+          }
+        >
+          {albums.length === 0 ? (
+            <p className="status">{own ? 'Todavía no has creado ningún álbum.' : 'Todavía no tiene álbumes.'}</p>
+          ) : (
+            <ul className="album-grid">
+              {albums.map((album) => (
+                <li key={album.id}>
+                  <Link to={`/albumes/${album.id}`} className="album-card">
+                    {album.cover_photo_id ? (
+                      <img src={thumbUrl(album.cover_photo_id)} alt="" className="album-card__cover" />
+                    ) : (
+                      <span className="album-card__cover album-card__cover--empty" />
+                    )}
+                    <strong>{album.title}</strong>
+                    <span className="muted">{album.photo_count === 1 ? '1 foto' : `${album.photo_count} fotos`}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Module>
       )}
-    </div>
+    </Columns>
   )
 }

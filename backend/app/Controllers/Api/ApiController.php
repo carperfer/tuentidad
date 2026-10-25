@@ -17,6 +17,12 @@ abstract class ApiController extends BaseController
     use ResponseTrait;
 
     /**
+     * Columnas que necesita personData(); la consulta debe unir
+     * welcome_profiles con LEFT JOIN sobre users.id.
+     */
+    protected const PERSON_COLUMNS = 'users.id, users.first_name, users.last_name, users.avatar, users.avatar_visibility, welcome_profiles.avatar AS welcome_avatar';
+
+    /**
      * Cuerpo de la petición (JSON o formulario).
      *
      * @return array<string, mixed>
@@ -74,7 +80,47 @@ abstract class ApiController extends BaseController
             'email'      => $user->email,
             'first_name' => $user->first_name,
             'last_name'  => $user->last_name,
+            'avatar_url' => is_string($user->avatar) && $user->avatar !== '' ? "/api/profiles/{$user->id}/avatar" : null,
         ];
+    }
+
+    /**
+     * Persona en un listado: nombre y foto, esta solo si su privacidad lo permite.
+     *
+     * @param array<string, mixed> $row Fila con PERSON_COLUMNS
+     *
+     * @return array{id: int, first_name: string, last_name: string, avatar_url: string|null}
+     */
+    protected function personData(array $row, bool $isFriend): array
+    {
+        $id         = (int) $row['id'];
+        $visibility = $row['avatar_visibility'] ?? 'public';
+        $avatarUrl  = null;
+
+        if (is_string($row['welcome_avatar'] ?? null) && $row['welcome_avatar'] !== '') {
+            $avatarUrl = $row['welcome_avatar'];
+        } elseif (is_string($row['avatar'] ?? null) && $row['avatar'] !== '' && ($visibility === 'public' || ($visibility === 'friends' && $isFriend))) {
+            $avatarUrl = "/api/profiles/{$id}/avatar";
+        }
+
+        return [
+            'id'         => $id,
+            'first_name' => (string) $row['first_name'],
+            'last_name'  => (string) $row['last_name'],
+            'avatar_url' => $avatarUrl,
+        ];
+    }
+
+    /**
+     * Ids de los amigos del usuario.
+     *
+     * @return list<int>
+     */
+    protected function friendIds(int $userId): array
+    {
+        $rows = db_connect()->table('friendships')->select('friend_id')->where('user_id', $userId)->get()->getResultArray();
+
+        return array_map('intval', array_column($rows, 'friend_id'));
     }
 
     protected function normalizeEmail(mixed $email): string

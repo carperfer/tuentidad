@@ -12,6 +12,9 @@ import {
 } from '../api/photos'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
+import { OwnerCard } from '../components/ProfileSidebar'
+import { Columns } from '../components/ui/Columns'
+import { Counter, Module } from '../components/ui/Module'
 
 /** Fotos de un álbum; el dueño puede subir fotos, editarlo y borrarlo. */
 export function Album() {
@@ -29,19 +32,38 @@ export function Album() {
       .catch((caught: unknown) => setError(errorMessage(caught)))
   }, [albumId])
 
-  if (!Number.isInteger(albumId) || albumId < 1) return <Alert>No se ha encontrado el álbum.</Alert>
-  if (error && album === null) return <Alert>{error}</Alert>
-  if (album === null) return <p className="status">Cargando álbum…</p>
+  if (!Number.isInteger(albumId) || albumId < 1) return <Columns><Alert>No se ha encontrado el álbum.</Alert></Columns>
+  if (error && album === null) return <Columns><Alert>{error}</Alert></Columns>
+  if (album === null) return <Columns><p className="status">Cargando álbum…</p></Columns>
 
   return (
-    <div className="albums-layout">
-      <section className="box">
-        <h1 className="box__title">{album.title}</h1>
-        <p>
+    <Columns
+      left={
+        <>
+          <OwnerCard userId={album.owner.id} />
+          {album.is_owner && (
+            <AlbumOwnerTools
+              album={album}
+              onChange={setAlbum}
+              onDeleted={() => navigate(`/perfil/${album.owner.id}/fotos`)}
+            />
+          )}
+        </>
+      }
+    >
+      <Module
+        title={
+          <>
+            {album.title} <Counter value={album.photos.length} />
+          </>
+        }
+        as="h1"
+        action={
           <Link to={`/perfil/${album.owner.id}/fotos`}>
-            {album.is_owner ? 'Mis fotos' : `Fotos de ${album.owner.first_name}`}
+            {album.is_owner ? 'Mis álbumes' : `Álbumes de ${album.owner.first_name}`}
           </Link>
-        </p>
+        }
+      >
         {album.description && <p>{album.description}</p>}
         {album.photos.length === 0 ? (
           <p className="status">Este álbum todavía no tiene fotos.</p>
@@ -56,16 +78,8 @@ export function Album() {
             ))}
           </ul>
         )}
-      </section>
-
-      {album.is_owner && (
-        <AlbumOwnerTools
-          album={album}
-          onChange={setAlbum}
-          onDeleted={() => navigate(`/perfil/${album.owner.id}/fotos`)}
-        />
-      )}
-    </div>
+      </Module>
+    </Columns>
   )
 }
 
@@ -151,18 +165,19 @@ function AlbumOwnerTools({ album, onChange, onDeleted }: OwnerToolsProps) {
   }
 
   return (
-    <section className="box">
-      <h2 className="box__title">Gestiona el álbum</h2>
-      {notice && <Alert kind="ok">{notice}</Alert>}
-      {error && <Alert>{error}</Alert>}
-
-      <div className="photo-upload">
-        <label htmlFor="photo-upload">Subir fotos (JPG, PNG o WebP; máximo 10 MB cada una)</label>
+    <>
+      <Module title="Subir fotos">
+        {notice && <Alert kind="ok">{notice}</Alert>}
+        <label htmlFor="photo-upload" className="muted">
+          JPG, PNG o WebP; máximo 10 MB cada una. Puedes elegir varias.
+        </label>
         <input
           id="photo-upload"
+          className="file-input"
           type="file"
           accept={PHOTO_TYPES.join(',')}
           multiple
+          aria-label="Subir fotos"
           onChange={handleFiles}
           disabled={progress !== null}
         />
@@ -178,46 +193,49 @@ function AlbumOwnerTools({ album, onChange, onDeleted }: OwnerToolsProps) {
             ))}
           </ul>
         )}
-      </div>
+      </Module>
 
-      <form onSubmit={handleSave} noValidate>
-        <Field
-          label="Título"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          error={errors.title}
-          maxLength={100}
-          required
-        />
-        <Field
-          label="Descripción"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          error={errors.description}
-          maxLength={500}
-        />
-        <button type="submit" className="button" disabled={saving}>
-          {saving ? 'Guardando…' : 'Guardar cambios'}
-        </button>
-      </form>
-
-      <div className="danger-zone">
-        {confirmDelete ? (
-          <>
-            <p>Se borrarán el álbum y todas sus fotos. No se puede deshacer.</p>
-            <button type="button" className="button button--danger" onClick={handleDelete}>
-              Sí, borrar el álbum
-            </button>{' '}
-            <button type="button" className="link-button" onClick={() => setConfirmDelete(false)}>
-              Cancelar
-            </button>
-          </>
-        ) : (
-          <button type="button" className="link-button" onClick={() => setConfirmDelete(true)}>
-            Borrar álbum
+      <Module title="Editar álbum">
+        {error && <Alert>{error}</Alert>}
+        <form onSubmit={handleSave} noValidate>
+          <Field
+            label="Título"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            error={errors.title}
+            maxLength={100}
+            required
+          />
+          <Field
+            label="Descripción"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            error={errors.description}
+            maxLength={500}
+          />
+          <button type="submit" className="button" disabled={saving}>
+            {saving ? 'Guardando…' : 'Guardar cambios'}
           </button>
-        )}
-      </div>
-    </section>
+        </form>
+
+        <div className="danger-zone">
+          {confirmDelete ? (
+            <>
+              <p>Se borrarán el álbum y todas sus fotos. No se puede deshacer.</p>
+              <button type="button" className="button button--danger" onClick={handleDelete}>
+                Sí, borrar el álbum
+              </button>{' '}
+              <button type="button" className="link-button" onClick={() => setConfirmDelete(false)}>
+                Cancelar
+              </button>
+            </>
+          ) : (
+            <button type="button" className="link-button link-button--danger" onClick={() => setConfirmDelete(true)}>
+              Borrar álbum
+            </button>
+          )}
+        </div>
+      </Module>
+    </>
   )
 }

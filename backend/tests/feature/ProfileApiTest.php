@@ -129,4 +129,40 @@ final class ProfileApiTest extends ApiTestCase
         $this->assertSame(1, $summary['invitations_sent']);
         $this->assertSame(0, $summary['invitations_accepted']);
     }
+
+    public function testProfileReportsTheRelationshipWithTheViewer(): void
+    {
+        $ana = $this->createUser();
+        $bea = $this->createUser('bea@example.com', 'Bea');
+        $this->actingAs($ana);
+
+        $this->assertSame('self', $this->json($this->get("api/profiles/{$ana->id}"))['profile']['relationship']);
+        $this->assertSame('none', $this->json($this->get("api/profiles/{$bea->id}"))['profile']['relationship']);
+
+        $this->postJson('api/friend-requests', ['user_id' => $bea->id])->assertStatus(201);
+        $outgoing = $this->json($this->get("api/profiles/{$bea->id}"))['profile'];
+        $this->assertSame('outgoing', $outgoing['relationship']);
+        $this->assertIsInt($outgoing['request_id']);
+
+        $this->actingAs($bea);
+        $incoming = $this->json($this->get("api/profiles/{$ana->id}"))['profile'];
+        $this->assertSame('incoming', $incoming['relationship']);
+        $this->assertSame($outgoing['request_id'], $incoming['request_id']);
+    }
+
+    public function testStatusCanBeChangedOnItsOwn(): void
+    {
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        $result = $this->withBodyFormat('json')->put('api/profile/status', ['status' => '  De exámenes  ']);
+
+        $result->assertOK();
+        $profile = $this->json($result)['profile'];
+        $this->assertSame('De exámenes', $profile['status']);
+        $this->assertNotNull($profile['status_updated_at']);
+        $this->assertSame('1990-01-01', $profile['birthdate']);
+
+        $this->withBodyFormat('json')->put('api/profile/status', ['status' => str_repeat('a', 161)])->assertStatus(422);
+    }
 }

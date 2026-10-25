@@ -3,6 +3,7 @@
 namespace App\Controllers\Api;
 
 use App\Models\FriendshipModel;
+use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -12,23 +13,69 @@ class Friends extends ApiController
 {
     public function index(): ResponseInterface
     {
-        $userId  = (int) auth()->user()->id;
-        $friends = db_connect()->table('friendships')
-            ->select('users.id, users.first_name, users.last_name')
-            ->join('users', 'users.id = friendships.friend_id')
-            ->where('friendships.user_id', $userId)
-            ->orderBy('users.first_name')
-            ->get()
-            ->getResultArray();
+        $rows = $this->friendsQuery((int) auth()->user()->id)->orderBy('users.first_name')->orderBy('users.last_name')->get()->getResultArray();
 
-        return $this->respond(['friends' => $friends]);
+        return $this->respond(['friends' => array_map(fn (array $row): array => $this->personData($row, true), $rows)]);
+    }
+
+    /**
+     * Amigos de un usuario; solo los ven él mismo y sus amigos.
+     * Con ?limit=n devuelve una muestra al azar (para el perfil) y el total.
+     */
+    public function ofUser(int $userId): ResponseInterface
+    {
+        $viewerId = (int) auth()->user()->id;
+        if (db_connect()->table('users')->where('id', $userId)->countAllResults() === 0) {
+            return $this->message('No se ha encontrado el usuario.', 404);
+        }
+        if ($viewerId !== $userId && ! model(FriendshipModel::class)->areFriends($viewerId, $userId)) {
+            return $this->message('Solo sus amigos pueden ver su lista de amigos.', 403);
+        }
+
+        $total = db_connect()->table('friendships')->where('user_id', $userId)->countAllResults();
+        $query = $this->friendsQuery($userId);
+        $this->orderOrSample($query);
+
+        $viewerFriends = $this->friendIds($viewerId);
+        $friends       = array_map(
+            fn (array $row): array => $this->personData($row, $viewerId === $userId || in_array((int) $row['id'], $viewerFriends, true)),
+            $query->get()->getResultArray(),
+        );
+
+        return $this->respond(['friends' => $friends, 'total' => $total]);
+    }
+
+    /**
+     * Amigos que el usuario autenticado tiene en común con otro usuario.
+     */
+    public function mutual(int $userId): ResponseInterface
+    {
+        $viewerId = (int) auth()->user()->id;
+        if ($viewerId === $userId) {
+            return $this->respond(['friends' => [], 'total' => 0]);
+        }
+
+        $query = db_connect()->table('friendships AS mine')
+            ->select(self::PERSON_COLUMNS)
+            ->join('friendships AS theirs', 'theirs.friend_id = mine.friend_id')
+            ->join('users', 'users.id = mine.friend_id')
+            ->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')
+            ->where('mine.user_id', $viewerId)
+            ->where('theirs.user_id', $userId);
+        $total = (clone $query)->countAllResults();
+        $this->orderOrSample($query);
+
+        $friends = array_map(fn (array $row): array => $this->personData($row, true), $query->get()->getResultArray());
+
+        return $this->respond(['friends' => $friends, 'total' => $total]);
     }
 
     public function activity(): ResponseInterface
     {
-        $activity = db_connect()->table('friendships')
-            ->select('users.id, users.first_name, users.last_name, users.profile_status AS status, users.profile_status_updated_at AS updated_at')
+        $rows = db_connect()->table('friendships')
+            ->select(self::PERSON_COLUMNS . ', users.profile_status AS status, users.profile_status_updated_at AS updated_at')
             ->join('users', 'users.id = friendships.friend_id')
+            ->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')
             ->where('friendships.user_id', (int) auth()->user()->id)
             ->where('users.profile_status !=', '')
             ->whereIn('users.status_visibility', ['public', 'friends'])
@@ -36,6 +83,12 @@ class Friends extends ApiController
             ->limit(20)
             ->get()
             ->getResultArray();
+
+        $activity = array_map(fn (array $row): array => [
+            ...$this->personData($row, true),
+            'status'     => $row['status'],
+            'updated_at' => $row['updated_at'],
+        ], $rows);
 
         return $this->respond(['activity' => $activity]);
     }
@@ -51,7 +104,7 @@ class Friends extends ApiController
 
         $db    = db_connect();
         $users = $db->table('users')
-            ->select('users.id, users.first_name, users.last_name')
+            ->select(self::PERSON_COLUMNS)
             ->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')
             ->where('users.id !=', $userId)
             ->where('welcome_profiles.user_id', null)
@@ -64,18 +117,20 @@ class Friends extends ApiController
             ->get()
             ->getResultArray();
 
-        $friendIds   = array_map('intval', array_column($db->table('friendships')->select('friend_id')->where('user_id', $userId)->get()->getResultArray(), 'friend_id'));
+        $friendIds   = $this->friendIds($userId);
         $outgoingIds = array_map('intval', array_column($db->table('friend_requests')->select('recipient_id')->where('sender_id', $userId)->get()->getResultArray(), 'recipient_id'));
         $incomingIds = array_map('intval', array_column($db->table('friend_requests')->select('sender_id')->where('recipient_id', $userId)->get()->getResultArray(), 'sender_id'));
 
-        $users = array_map(static function (array $user) use ($friendIds, $outgoingIds, $incomingIds): array {
-            $id                   = (int) $user['id'];
-            $user['id']           = $id;
-            $user['relationship'] = in_array($id, $friendIds, true)
-              ? 'friend'
-              : (in_array($id, $incomingIds, true) ? 'incoming' : (in_array($id, $outgoingIds, true) ? 'outgoing' : 'none'));
+        $users = array_map(function (array $row) use ($friendIds, $outgoingIds, $incomingIds): array {
+            $id       = (int) $row['id'];
+            $isFriend = in_array($id, $friendIds, true);
 
-            return $user;
+            return [
+                ...$this->personData($row, $isFriend),
+                'relationship' => $isFriend
+                    ? 'friend'
+                    : (in_array($id, $incomingIds, true) ? 'incoming' : (in_array($id, $outgoingIds, true) ? 'outgoing' : 'none')),
+            ];
         }, $users);
 
         return $this->respond(['users' => $users]);
@@ -84,24 +139,11 @@ class Friends extends ApiController
     public function requests(): ResponseInterface
     {
         $userId = (int) auth()->user()->id;
-        $db     = db_connect();
 
-        $incoming = $db->table('friend_requests')
-            ->select('friend_requests.id, users.id AS user_id, users.first_name, users.last_name, friend_requests.created_at')
-            ->join('users', 'users.id = friend_requests.sender_id')
-            ->where('friend_requests.recipient_id', $userId)
-            ->orderBy('friend_requests.created_at', 'DESC')
-            ->get()
-            ->getResultArray();
-        $outgoing = $db->table('friend_requests')
-            ->select('friend_requests.id, users.id AS user_id, users.first_name, users.last_name, friend_requests.created_at')
-            ->join('users', 'users.id = friend_requests.recipient_id')
-            ->where('friend_requests.sender_id', $userId)
-            ->orderBy('friend_requests.created_at', 'DESC')
-            ->get()
-            ->getResultArray();
-
-        return $this->respond(['incoming' => $incoming, 'outgoing' => $outgoing]);
+        return $this->respond([
+            'incoming' => $this->requestList('sender_id', 'recipient_id', $userId),
+            'outgoing' => $this->requestList('recipient_id', 'sender_id', $userId),
+        ]);
     }
 
     public function request(): ResponseInterface
@@ -187,5 +229,55 @@ class Friends extends ApiController
         $deleted = db_connect()->table('friend_requests')->where('id', $requestId)->where($ownerField, (int) auth()->user()->id)->delete();
 
         return $deleted ? $this->message('Solicitud eliminada.') : $this->message('La solicitud no existe o ya fue respondida.', 404);
+    }
+
+    private function friendsQuery(int $userId): BaseBuilder
+    {
+        return db_connect()->table('friendships')
+            ->select(self::PERSON_COLUMNS)
+            ->join('users', 'users.id = friendships.friend_id')
+            ->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')
+            ->where('friendships.user_id', $userId);
+    }
+
+    /**
+     * Lista completa por nombre o, con ?limit=n (1-50), una muestra al azar.
+     */
+    private function orderOrSample(BaseBuilder $query): void
+    {
+        $limit = (int) $this->request->getGet('limit');
+        if ($limit >= 1) {
+            $query->orderBy('', 'RANDOM', false)->limit(min($limit, 50));
+        } else {
+            $query->orderBy('users.first_name')->orderBy('users.last_name');
+        }
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function requestList(string $personField, string $ownerField, int $userId): array
+    {
+        $rows = db_connect()->table('friend_requests')
+            ->select('friend_requests.id AS request_id, friend_requests.created_at, ' . self::PERSON_COLUMNS)
+            ->join('users', "users.id = friend_requests.{$personField}")
+            ->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')
+            ->where("friend_requests.{$ownerField}", $userId)
+            ->orderBy('friend_requests.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        return array_map(function (array $row): array {
+            $person = $this->personData($row, false);
+
+            return [
+                'id'         => (int) $row['request_id'],
+                'user_id'    => $person['id'],
+                'first_name' => $person['first_name'],
+                'last_name'  => $person['last_name'],
+                'avatar_url' => $person['avatar_url'],
+                'created_at' => $row['created_at'],
+            ];
+        }, $rows);
     }
 }

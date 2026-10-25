@@ -4,14 +4,17 @@ import { RequireAuth, RequireGuest } from './components/RequireAuth'
 import { Album } from './pages/Album'
 import { Albums } from './pages/Albums'
 import { ForgotPassword } from './pages/ForgotPassword'
+import { Friends } from './pages/Friends'
 import { Cookies } from './pages/legal/Cookies'
 import { Privacy } from './pages/legal/Privacy'
 import { Terms } from './pages/legal/Terms'
 import { Home } from './pages/Home'
 import { Landing } from './pages/Landing'
 import { NotFound } from './pages/NotFound'
+import { People } from './pages/People'
 import { PhotoViewer } from './pages/PhotoViewer'
 import { Profile } from './pages/Profile'
+import { ProfileEdit } from './pages/ProfileEdit'
 import { Register } from './pages/Register'
 import { ResetPassword } from './pages/ResetPassword'
 
@@ -42,6 +45,30 @@ export function App() {
           element={
             <RequireAuth>
               <Home />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="gente"
+          element={
+            <RequireAuth>
+              <People />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="perfil/editar"
+          element={
+            <RequireAuth>
+              <ProfileEdit />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="perfil/:id/amigos"
+          element={
+            <RequireAuth>
+              <Friends />
             </RequireAuth>
           }
         />

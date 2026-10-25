@@ -5,6 +5,7 @@ import { useAuth } from '../auth/context'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
 import { WelcomeProfiles } from '../components/WelcomeProfiles'
+import { Module } from '../components/ui/Module'
 
 export function Landing() {
   const { login } = useAuth()
@@ -34,22 +35,10 @@ export function Landing() {
   }
 
   return (
-    <div className="landing">
-      <div className="landing__main">
-        <section className="box landing__intro">
-          <h1>Bienvenido a tuentidad</h1>
-          <p>
-            La red social privada para estar en contacto con tus amigos de verdad: comparte fotos, organiza quedadas y
-            habla con tu gente.
-          </p>
-          <p>Solo se entra por invitación. Si un amigo ya está dentro, pídele que te invite.</p>
-        </section>
-        <WelcomeProfiles />
-      </div>
-
-      <aside className="box">
-        <h2 className="box__title">Entra en tuentidad</h2>
-        <form onSubmit={handleSubmit} noValidate>
+    <main className="landing" id="contenido">
+      <h1 className="visually-hidden">Bienvenido a tuentidad</h1>
+      <Module title="Entrar" className="landing__login">
+        <form className="login-form" onSubmit={handleSubmit} noValidate>
           {error && <Alert>{error}</Alert>}
           <Field
             label="Email"
@@ -73,14 +62,25 @@ export function Landing() {
             <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
             Recordarme en este equipo
           </label>
-          <button type="submit" className="button" disabled={sending}>
+          <button type="submit" className="button button--primary" disabled={sending}>
             {sending ? 'Entrando…' : 'Entrar'}
           </button>
-          <p className="form__footer">
-            <Link to="/recuperar-contrasena">¿Has olvidado tu contraseña?</Link>
-          </p>
         </form>
-      </aside>
-    </div>
+      </Module>
+      <p className="landing__forgot">
+        <Link to="/recuperar-contrasena">¿Has olvidado tu contraseña?</Link>
+      </p>
+
+      <div className="landing__intro">
+        <Module title="Bienvenido a tuentidad">
+          <p>
+            La red social privada para estar en contacto con tus amigos de verdad: comparte fotos, organiza quedadas y
+            habla con tu gente.
+          </p>
+          <p>Solo se entra por invitación. Si un amigo ya está dentro, pídele que te invite.</p>
+        </Module>
+        <WelcomeProfiles />
+      </div>
+    </main>
   )
 }

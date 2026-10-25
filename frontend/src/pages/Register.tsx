@@ -6,6 +6,8 @@ import { getInvitation, type PublicInvitation } from '../api/invitations'
 import { useAuth } from '../auth/context'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
+import { Columns } from '../components/ui/Columns'
+import { Module } from '../components/ui/Module'
 
 export function Register() {
   const { token = '' } = useParams()
@@ -53,22 +55,23 @@ export function Register() {
 
   if (invalid) {
     return (
-      <section className="box narrow">
-        <h1>Invitación no válida</h1>
+      <Columns narrow>
+        <Module title="Invitación no válida" as="h1">
         <Alert>{invalid}</Alert>
         <p>Pide a tu amigo que te vuelva a invitar.</p>
         <p>
           <Link to="/">Ir a la portada</Link>
         </p>
-      </section>
+      </Module>
+    </Columns>
     )
   }
 
   if (!invitation) return <p className="status">Comprobando la invitación…</p>
 
   return (
-    <section className="box narrow">
-      <h1>Crea tu cuenta</h1>
+    <Columns narrow>
+      <Module title="Crea tu cuenta" as="h1">
       <p>
         {invitation.inviter && invitation.welcome ? (
           <>
@@ -143,6 +146,7 @@ export function Register() {
           {sending ? 'Creando cuenta…' : 'Crear cuenta'}
         </button>
       </form>
-    </section>
+    </Module>
+    </Columns>
   )
 }
