@@ -98,4 +98,44 @@ final class FriendsApiTest extends ApiTestCase
         $this->assertSame('¡Hola!', $activity[0]['status']);
         $this->assertSame((int) $friend->id, (int) $activity[0]['id']);
     }
+
+    public function testFriendListsOfOtherUsersAreOnlyVisibleToTheirFriends(): void
+    {
+        $ana   = $this->createUser();
+        $bea   = $this->createUser('bea@example.com', 'Bea');
+        $carla = $this->createUser('carla@example.com', 'Carla');
+        $dani  = $this->createUser('dani@example.com', 'Dani');
+        $model = model(FriendshipModel::class);
+        $model->befriend((int) $ana->id, (int) $bea->id);
+        $model->befriend((int) $ana->id, (int) $carla->id);
+        $model->befriend((int) $dani->id, (int) $carla->id);
+
+        $this->actingAs($bea);
+        $result = $this->json($this->get("api/users/{$ana->id}/friends"));
+        $this->assertSame(2, $result['total']);
+        $this->assertSame(['Bea', 'Carla'], array_column($result['friends'], 'first_name'));
+        $this->assertCount(1, $this->json($this->get("api/users/{$ana->id}/friends?limit=1"))['friends']);
+
+        $this->actingAs($dani);
+        $this->get("api/users/{$ana->id}/friends")->assertStatus(403);
+        $mutual = $this->json($this->get("api/users/{$ana->id}/mutual-friends"));
+        $this->assertSame(1, $mutual['total']);
+        $this->assertSame('Carla', $mutual['friends'][0]['first_name']);
+    }
+
+    public function testListsOnlyIncludeAvatarsAllowedByTheirPrivacy(): void
+    {
+        $ana    = $this->createUser();
+        $friend = $this->createUser('bea@example.com', 'Beatriz');
+        $other  = $this->createUser('berta@example.com', 'Berta');
+        model(UserModel::class)->update((int) $friend->id, ['avatar' => str_repeat('a', 32) . '.png', 'avatar_visibility' => 'friends']);
+        model(UserModel::class)->update((int) $other->id, ['avatar' => str_repeat('b', 32) . '.png', 'avatar_visibility' => 'friends']);
+        model(FriendshipModel::class)->befriend((int) $ana->id, (int) $friend->id);
+        $this->actingAs($ana);
+
+        $results = array_column($this->json($this->get('api/friends/search?q=Be'))['users'], 'avatar_url', 'first_name');
+
+        $this->assertSame("/api/profiles/{$friend->id}/avatar", $results['Beatriz']);
+        $this->assertNull($results['Berta']);
+    }
 }

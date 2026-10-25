@@ -1,12 +1,15 @@
 import { Link } from 'react-router'
+import { Columns } from '../components/ui/Columns'
+import { Module } from '../components/ui/Module'
 
 export function NotFound() {
   return (
-    <section className="box">
-      <h1>Página no encontrada</h1>
+    <Columns>
+      <Module title="Página no encontrada" as="h1">
       <p>
         <Link to="/">Volver al inicio</Link>
       </p>
-    </section>
+    </Module>
+    </Columns>
   )
 }

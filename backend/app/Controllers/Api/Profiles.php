@@ -82,6 +82,34 @@ class Profiles extends ApiController
         return $this->respond(['profile' => $this->profileData($updated, true, true)]);
     }
 
+    /**
+     * Cambia solo el estado (barra «¿Cómo va todo?» de la página de inicio).
+     */
+    public function updateStatus(): ResponseInterface
+    {
+        $user   = auth()->user();
+        $input  = $this->input();
+        $status = is_string($input['status'] ?? null) ? trim($input['status']) : '';
+
+        if (! $this->validateData(['status' => $status], ['status' => ['label' => 'Estado', 'rules' => 'permit_empty|max_length[160]']])) {
+            return $this->invalid($this->validator->getErrors());
+        }
+
+        if (($user->profile_status ?? '') !== $status) {
+            $data = ['profile_status' => $status, 'profile_status_updated_at' => date('Y-m-d H:i:s')];
+            if (! model(UserModel::class)->update((int) $user->id, $data)) {
+                return $this->message('No se ha podido guardar el estado.', 500);
+            }
+        }
+
+        $updated = auth()->getProvider()->findById((int) $user->id);
+        if ($updated === null) {
+            throw new RuntimeException('No se ha podido volver a cargar el perfil actualizado.');
+        }
+
+        return $this->respond(['profile' => $this->profileData($updated, true, true)]);
+    }
+
     public function uploadAvatar(): ResponseInterface
     {
         $user = auth()->user();
@@ -186,17 +214,20 @@ class Profiles extends ApiController
             ? $welcome['avatar']
             : $this->visibleValue($user, 'avatar', $isOwner, $isFriend);
 
-        $data = [
-            'id'         => (int) $user->id,
-            'first_name' => $user->first_name,
-            'last_name'  => $user->last_name,
-            'birthdate'  => $this->visibleValue($user, 'birthdate', $isOwner, $isFriend),
-            'bio'        => $bio,
-            'status'     => $this->visibleValue($user, 'profile_status', $isOwner, $isFriend),
-            'avatar_url' => $avatar !== null && $avatar !== ''
+        $status = $this->visibleValue($user, 'profile_status', $isOwner, $isFriend);
+        $data   = [
+            'id'                => (int) $user->id,
+            'first_name'        => $user->first_name,
+            'last_name'         => $user->last_name,
+            'birthdate'         => $this->visibleValue($user, 'birthdate', $isOwner, $isFriend),
+            'bio'               => $bio,
+            'status'            => $status,
+            'status_updated_at' => $status !== null && $status !== '' ? $user->profile_status_updated_at : null,
+            'avatar_url'        => $avatar !== null && $avatar !== ''
                 ? ($welcome !== null ? $welcome['avatar'] : "/api/profiles/{$user->id}/avatar")
                 : null,
             'is_owner' => $isOwner,
+            ...$this->relationship((int) $user->id, $isOwner, $isFriend),
         ];
 
         if ($isOwner) {
@@ -209,6 +240,39 @@ class Profiles extends ApiController
         }
 
         return $data;
+    }
+
+    /**
+     * Relación del usuario autenticado con el perfil y, si hay una solicitud
+     * pendiente entre ambos, su id para aceptarla o cancelarla.
+     *
+     * @return array{relationship: string, request_id: int|null}
+     */
+    private function relationship(int $profileId, bool $isOwner, bool $isFriend): array
+    {
+        $viewer = auth('session')->user();
+        if ($isOwner || $viewer === null) {
+            return ['relationship' => 'self', 'request_id' => null];
+        }
+        if ($isFriend) {
+            return ['relationship' => 'friend', 'request_id' => null];
+        }
+
+        $viewerId = (int) $viewer->id;
+        $request  = db_connect()->table('friend_requests')
+            ->groupStart()->where('sender_id', $viewerId)->where('recipient_id', $profileId)->groupEnd()
+            ->orGroupStart()->where('sender_id', $profileId)->where('recipient_id', $viewerId)->groupEnd()
+            ->get()
+            ->getRowArray();
+
+        if ($request === null) {
+            return ['relationship' => 'none', 'request_id' => null];
+        }
+
+        return [
+            'relationship' => (int) $request['sender_id'] === $viewerId ? 'outgoing' : 'incoming',
+            'request_id'   => (int) $request['id'],
+        ];
     }
 
     private function visibleValue(User $user, string $field, bool $isOwner, bool $isFriend): mixed

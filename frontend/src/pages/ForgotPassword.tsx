@@ -4,6 +4,8 @@ import { forgotPassword } from '../api/auth'
 import { errorMessage, fieldErrors } from '../api/client'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
+import { Columns } from '../components/ui/Columns'
+import { Module } from '../components/ui/Module'
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -29,8 +31,8 @@ export function ForgotPassword() {
   }
 
   return (
-    <section className="box narrow">
-      <h1>¿Has olvidado tu contraseña?</h1>
+    <Columns narrow>
+      <Module title="¿Has olvidado tu contraseña?" as="h1">
       {notice ? (
         <Alert kind="ok">{notice}</Alert>
       ) : (
@@ -54,6 +56,7 @@ export function ForgotPassword() {
       <p className="form__footer">
         <Link to="/">Volver a la portada</Link>
       </p>
-    </section>
+    </Module>
+    </Columns>
   )
 }

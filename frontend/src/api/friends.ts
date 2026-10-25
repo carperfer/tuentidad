@@ -4,6 +4,7 @@ export type Person = {
   id: number;
   first_name: string;
   last_name: string;
+  avatar_url: string | null;
   relationship?: "none" | "incoming" | "outgoing" | "friend";
 };
 
@@ -12,6 +13,7 @@ export type FriendRequest = {
   user_id: number;
   first_name: string;
   last_name: string;
+  avatar_url: string | null;
   created_at: string;
 };
 
@@ -27,6 +29,25 @@ export type FriendActivity = Person & {
 
 export function listFriends(): Promise<{ friends: Person[] }> {
   return api("/api/friends");
+}
+
+export type FriendSample = { friends: Person[]; total: number };
+
+/** Amigos de un usuario; con limit, una muestra al azar y el total. */
+export function listUserFriends(
+  userId: number,
+  limit?: number,
+): Promise<FriendSample> {
+  return api(`/api/users/${userId}/friends${limit ? `?limit=${limit}` : ""}`);
+}
+
+export function listMutualFriends(
+  userId: number,
+  limit?: number,
+): Promise<FriendSample> {
+  return api(
+    `/api/users/${userId}/mutual-friends${limit ? `?limit=${limit}` : ""}`,
+  );
 }
 
 export function listFriendActivity(): Promise<{ activity: FriendActivity[] }> {

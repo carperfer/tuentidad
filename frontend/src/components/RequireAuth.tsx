@@ -7,7 +7,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   const location = useLocation()
 
-  if (loading) return <p className="status">Cargando…</p>
+  if (loading) return <p className="status page-loading">Cargando…</p>
   if (!user) return <Navigate to="/" replace state={{ from: location.pathname }} />
 
   return children
@@ -17,7 +17,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 export function RequireGuest({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
 
-  if (loading) return <p className="status">Cargando…</p>
+  if (loading) return <p className="status page-loading">Cargando…</p>
   if (user) return <Navigate to="/inicio" replace />
 
   return children

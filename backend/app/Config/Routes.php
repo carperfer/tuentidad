@@ -27,6 +27,9 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->get('friends/activity', 'Friends::activity');
         $routes->get('friends/search', 'Friends::search');
         $routes->delete('friends/(:num)', 'Friends::remove/$1');
+        $routes->get('users/(:num)/friends', 'Friends::ofUser/$1');
+        $routes->get('users/(:num)/mutual-friends', 'Friends::mutual/$1');
+        $routes->get('users/(:num)/photos', 'Albums::recentPhotos/$1');
         $routes->get('friend-requests', 'Friends::requests');
         $routes->post('friend-requests', 'Friends::request');
         $routes->post('friend-requests/(:num)/accept', 'Friends::accept/$1');
@@ -35,6 +38,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->get('profiles/(:num)', 'Profiles::show/$1');
         $routes->get('profiles/(:num)/avatar', 'Profiles::avatar/$1');
         $routes->put('profile', 'Profiles::update');
+        $routes->put('profile/status', 'Profiles::updateStatus');
         $routes->post('profile/avatar', 'Profiles::uploadAvatar');
         $routes->get('users/(:num)/albums', 'Albums::index/$1');
         $routes->post('albums', 'Albums::create');

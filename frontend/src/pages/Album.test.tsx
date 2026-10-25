@@ -39,7 +39,7 @@ describe('Album', () => {
     const user = userEvent.setup({ applyAccept: false })
     renderAt('/albumes/5')
 
-    const input = await screen.findByLabelText(/Subir fotos/)
+    const input = await screen.findByLabelText('Subir fotos', { selector: 'input' })
     await user.upload(input, [
       new File(['a'], 'uno.jpg', { type: 'image/jpeg' }),
       new File(['b'], 'dos.png', { type: 'image/png' }),
@@ -62,14 +62,14 @@ describe('Album', () => {
     })
     renderAt('/albumes/5')
 
-    await screen.findByRole('heading', { name: 'Verano' })
-    expect(screen.getByRole('link', { name: 'Fotos de Ana' })).toBeInTheDocument()
-    expect(screen.queryByLabelText(/Subir fotos/)).not.toBeInTheDocument()
+    await screen.findByRole('heading', { name: /Verano/ })
+    expect(screen.getByRole('link', { name: 'Álbumes de Ana' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('Subir fotos', { selector: 'input' })).not.toBeInTheDocument()
   })
 })
 
 describe('PhotoViewer', () => {
-  it('moves between photos with the links and the arrow keys', async () => {
+  it('moves between photos with the pager and the arrow keys', async () => {
     mockApi({
       'GET /api/auth/me': () => ({ body: { user: ana } }),
       'GET /api/albums/5': () => ({ body: { album } }),
@@ -77,18 +77,22 @@ describe('PhotoViewer', () => {
     const user = userEvent.setup()
     renderAt('/albumes/5/fotos/10')
 
-    await screen.findByText(/Foto 1 de 3/)
-    expect(screen.getByText('« Anterior').tagName).toBe('SPAN')
+    await screen.findByText('1 de 3')
+    expect(screen.getByRole('button', { name: 'Anterior' })).toBeDisabled()
 
-    await user.click(screen.getByRole('link', { name: 'Siguiente »' }))
-    expect(screen.getByText(/Foto 2 de 3/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Siguiente' }))
+    expect(screen.getByText('2 de 3')).toBeInTheDocument()
 
     await user.keyboard('{ArrowRight}')
-    expect(screen.getByText(/Foto 3 de 3/)).toBeInTheDocument()
-    expect(screen.getByRole('img')).toHaveAttribute('src', '/api/photos/12/image')
+    expect(screen.getByText('3 de 3')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /del álbum/ })).toHaveAttribute('src', '/api/photos/12/image')
+    expect(screen.getByRole('button', { name: 'Última' })).toBeDisabled()
 
     await user.keyboard('{ArrowLeft}')
-    expect(screen.getByText(/Foto 2 de 3/)).toBeInTheDocument()
+    expect(screen.getByText('2 de 3')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Primera' }))
+    expect(screen.getByText('1 de 3')).toBeInTheDocument()
   })
 
   it('deletes a photo after confirming and shows the next one', async () => {
@@ -103,8 +107,8 @@ describe('PhotoViewer', () => {
     await user.click(await screen.findByRole('button', { name: 'Borrar foto' }))
     await user.click(screen.getByRole('button', { name: 'Sí, borrarla' }))
 
-    await screen.findByText(/Foto 1 de 2/)
-    expect(screen.getByRole('img')).toHaveAttribute('src', '/api/photos/11/image')
+    await screen.findByText('1 de 2')
+    expect(screen.getByRole('img', { name: /del álbum/ })).toHaveAttribute('src', '/api/photos/11/image')
     expect(vi.mocked(fetchMock)).toHaveBeenCalledWith('/api/photos/10', expect.objectContaining({ method: 'DELETE' }))
   })
 })

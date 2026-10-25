@@ -1,9 +1,11 @@
 import { Link } from 'react-router'
 import { OWNER } from './owner'
+import { Columns } from '../../components/ui/Columns'
 
 export function Terms() {
   return (
-    <article className="box legal">
+    <Columns>
+      <article className="module legal">
       <h1>Condiciones de uso</h1>
       <p className="status">Última actualización: {OWNER.updated}</p>
 
@@ -47,5 +49,6 @@ export function Terms() {
         <Link to="/cookies">política de cookies</Link>.
       </p>
     </article>
+    </Columns>
   )
 }

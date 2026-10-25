@@ -161,4 +161,21 @@ final class AlbumApiTest extends ApiTestCase
 
         return (int) model(PhotoModel::class)->insert(['album_id' => $albumId, ...$stored]);
     }
+
+    public function testRecentPhotosAreOnlyVisibleToFriends(): void
+    {
+        [$owner, $albumId] = $this->albumWithPhoto();
+        $latest            = $this->addPhoto($albumId);
+        $friend            = $this->createUser('bea@example.com', 'Bea');
+        $stranger          = $this->createUser('carla@example.com', 'Carla');
+        model(FriendshipModel::class)->befriend((int) $owner->id, (int) $friend->id);
+
+        $this->actingAs($friend);
+        $result = $this->json($this->get("api/users/{$owner->id}/photos?limit=1"));
+        $this->assertSame(2, $result['total']);
+        $this->assertSame([$latest], array_column($result['photos'], 'id'));
+
+        $this->actingAs($stranger);
+        $this->get("api/users/{$owner->id}/photos")->assertStatus(403);
+    }
 }

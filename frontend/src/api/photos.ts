@@ -44,6 +44,10 @@ export function listAlbums(userId: number): Promise<{ albums: AlbumSummary[] }> 
   return api(`/api/users/${userId}/albums`)
 }
 
+export function listRecentPhotos(userId: number, limit: number): Promise<{ photos: Photo[]; total: number }> {
+  return api(`/api/users/${userId}/photos?limit=${limit}`)
+}
+
 export function getAlbum(id: number): Promise<{ album: Album }> {
   return api(`/api/albums/${id}`)
 }
