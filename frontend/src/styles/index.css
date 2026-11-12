@@ -919,6 +919,20 @@ button {
   font-weight: bold;
 }
 
+.notifications__new a {
+  color: var(--c-notify);
+  font-weight: bold;
+}
+
+.topbar__badge {
+  padding: 0 6px;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--c-brand-dark);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+}
+
 .info-list {
   margin: 0;
 }
@@ -1053,14 +1067,120 @@ button {
   color: var(--c-error);
 }
 
+/* El ancho de .photo-stage lo fija PhotoStage según las medidas de la foto */
+.photo-stage {
+  position: relative;
+  margin: 0 auto;
+}
+
+.photo-stage--drawing {
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
 .photo-viewer__image {
   display: block;
-  max-width: 100%;
+  width: 100%;
   height: auto;
-  max-height: 75vh;
-  object-fit: contain;
-  margin: 0 auto;
   background: var(--c-surface-alt);
+}
+
+/* Zona de una etiqueta: visible al pasar por la foto o por el nombre en la lista */
+.photo-tag {
+  position: absolute;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 50%);
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.photo-stage:hover .photo-tag,
+.photo-tag--active {
+  opacity: 1;
+}
+
+/* Sin ratón no hay hover: en pantallas táctiles las zonas se ven siempre */
+@media (hover: none) {
+  .photo-tag {
+    opacity: 1;
+  }
+}
+
+.photo-tag__label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 3px;
+  padding: 1px var(--space-1);
+  border-radius: var(--radius);
+  background: rgb(0 0 0 / 75%);
+  color: #fff;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+
+.photo-tag--new {
+  opacity: 1;
+  border: 2px dashed var(--c-brand-dark);
+  background: rgb(255 255 255 / 20%);
+}
+
+.photo-tags {
+  margin-top: var(--space-3);
+}
+
+.photo-tags p {
+  margin: 0 0 var(--space-2);
+}
+
+.photo-tags__remove {
+  font-size: var(--fs-xs);
+}
+
+.tag-form p {
+  margin: 0 0 var(--space-2);
+}
+
+.composer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-2);
+  background: var(--c-surface-alt);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+}
+
+.composer textarea {
+  flex: 1;
+  min-width: 0;
+  resize: vertical;
+}
+
+.comment__body {
+  margin: 2px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.photo-grid--five {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.notification-list__unread {
+  background: #f3f8ee;
+}
+
+.notification-list__thumb {
+  display: block;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border: 1px solid var(--c-border);
 }
 
 .photo-viewer__hint {

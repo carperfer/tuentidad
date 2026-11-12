@@ -49,6 +49,16 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->get('photos/(:num)/image', 'Albums::image/$1');
         $routes->get('photos/(:num)/thumb', 'Albums::thumb/$1');
         $routes->delete('photos/(:num)', 'Albums::deletePhoto/$1');
+        $routes->get('photos/(:num)', 'Photos::show/$1');
+        $routes->get('photos/(:num)/taggable', 'Photos::taggable/$1');
+        $routes->post('photos/(:num)/tags', 'Photos::tag/$1');
+        $routes->delete('photo-tags/(:num)', 'Photos::untag/$1');
+        $routes->post('photos/(:num)/comments', 'Photos::comment/$1');
+        $routes->delete('photo-comments/(:num)', 'Photos::deleteComment/$1');
+        $routes->get('users/(:num)/tagged-photos', 'Photos::tagged/$1');
+        $routes->get('notifications', 'Notifications::index');
+        $routes->get('notifications/unread', 'Notifications::unread');
+        $routes->post('notifications/read', 'Notifications::markRead');
         $routes->get('invitations', 'Invitations::index');
         $routes->post('invitations', 'Invitations::create');
     });

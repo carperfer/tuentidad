@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import { useAuth } from '../auth/context'
+import { useUnreadCounts } from '../lib/useUnreadCounts'
 import { Avatar } from './ui/Avatar'
 
 type UserCardProps = {
@@ -10,7 +11,11 @@ type UserCardProps = {
 /** Tarjeta del usuario actual con sus avisos (columna izquierda de Inicio, guía §6.1). */
 export function UserCard({ friendsCount, pendingRequests = 0 }: UserCardProps) {
   const { user } = useAuth()
+  const unread = useUnreadCounts()
   if (!user) return null
+
+  const tags = unread?.photo_tag ?? 0
+  const comments = unread?.photo_comment ?? 0
 
   return (
     <section className="module user-card" aria-label="Tu cuenta">
@@ -29,6 +34,16 @@ export function UserCard({ friendsCount, pendingRequests = 0 }: UserCardProps) {
           </div>
         </div>
         <ul className="notifications">
+          {tags > 0 && (
+            <li className="notifications__new">
+              <Link to="/avisos">{tags === 1 ? '1 etiqueta nueva' : `${tags} etiquetas nuevas`}</Link>
+            </li>
+          )}
+          {comments > 0 && (
+            <li className="notifications__new">
+              <Link to="/avisos">{comments === 1 ? '1 comentario nuevo' : `${comments} comentarios nuevos`}</Link>
+            </li>
+          )}
           {pendingRequests > 0 && (
             <li>
               <Link to="/gente">
@@ -38,6 +53,9 @@ export function UserCard({ friendsCount, pendingRequests = 0 }: UserCardProps) {
           )}
           <li>
             <Link to={`/perfil/${user.id}/fotos`}>Mis fotos</Link>
+          </li>
+          <li>
+            <Link to={`/perfil/${user.id}/etiquetas`}>Fotos en las que salgo</Link>
           </li>
           <li>
             <Link to="/perfil/editar">Editar mi perfil</Link>

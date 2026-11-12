@@ -11,12 +11,14 @@ import { Terms } from './pages/legal/Terms'
 import { Home } from './pages/Home'
 import { Landing } from './pages/Landing'
 import { NotFound } from './pages/NotFound'
+import { Notifications } from './pages/Notifications'
 import { People } from './pages/People'
 import { PhotoViewer } from './pages/PhotoViewer'
 import { Profile } from './pages/Profile'
 import { ProfileEdit } from './pages/ProfileEdit'
 import { Register } from './pages/Register'
 import { ResetPassword } from './pages/ResetPassword'
+import { TaggedPhotos } from './pages/TaggedPhotos'
 
 export function App() {
   return (
@@ -53,6 +55,22 @@ export function App() {
           element={
             <RequireAuth>
               <People />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="avisos"
+          element={
+            <RequireAuth>
+              <Notifications />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="perfil/:id/etiquetas"
+          element={
+            <RequireAuth>
+              <TaggedPhotos />
             </RequireAuth>
           }
         />

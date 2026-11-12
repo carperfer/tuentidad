@@ -3,6 +3,7 @@
 namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
+use App\Models\FriendshipModel;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\Exceptions\BadRequestException;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
@@ -121,6 +122,47 @@ abstract class ApiController extends BaseController
         $rows = db_connect()->table('friendships')->select('friend_id')->where('user_id', $userId)->get()->getResultArray();
 
         return array_map('intval', array_column($rows, 'friend_id'));
+    }
+
+    /**
+     * Las fotos de un usuario solo las ven él mismo y sus amigos.
+     * Sin $viewerId, se comprueba para el usuario autenticado.
+     */
+    protected function canSeePhotosOf(int $ownerId, ?int $viewerId = null): bool
+    {
+        $viewerId ??= (int) auth()->user()->id;
+
+        return $viewerId === $ownerId || model(FriendshipModel::class)->areFriends($viewerId, $ownerId);
+    }
+
+    /**
+     * Ids de los usuarios cuyas fotos puede ver alguien: él mismo y sus amigos.
+     *
+     * @return list<int>
+     */
+    protected function photoOwnersVisibleTo(int $viewerId): array
+    {
+        return [$viewerId, ...$this->friendIds($viewerId)];
+    }
+
+    /**
+     * @param array<string, mixed> $photo
+     *
+     * @return array<string, mixed>
+     */
+    protected function photoData(array $photo): array
+    {
+        $id = (int) $photo['id'];
+
+        return [
+            'id'         => $id,
+            'album_id'   => (int) $photo['album_id'],
+            'width'      => (int) $photo['width'],
+            'height'     => (int) $photo['height'],
+            'url'        => "/api/photos/{$id}/image",
+            'thumb_url'  => "/api/photos/{$id}/thumb",
+            'created_at' => $photo['created_at'],
+        ];
     }
 
     protected function normalizeEmail(mixed $email): string

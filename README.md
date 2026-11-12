@@ -105,6 +105,16 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `GET /api/photos/{id}/image`                      | Sí     | Foto a tamaño de visor (solo el dueño y sus amigos)                                                                                                                |
 | `GET /api/photos/{id}/thumb`                      | Sí     | Miniatura cuadrada (solo el dueño y sus amigos)                                                                                                                    |
 | `DELETE /api/photos/{id}`                         | Sí     | Borrar una foto propia                                                                                                                                             |
+| `GET /api/photos/{id}`                            | Sí     | Foto con sus etiquetas (zona en % de la imagen) y comentarios; marca como leídos los avisos de esa foto |
+| `GET /api/photos/{id}/taggable`                   | Sí     | Personas que puedes etiquetar: tú y tus amigos que pueden ver la foto, salvo los ya etiquetados |
+| `POST /api/photos/{id}/tags`                      | Sí     | Etiquetar (`user_id`, `x`, `y`, `width`, `height` en %). Avisa a la persona etiquetada |
+| `DELETE /api/photo-tags/{id}`                     | Sí     | Quitar una etiqueta: la persona etiquetada, quien la puso o el dueño de la foto |
+| `POST /api/photos/{id}/comments`                  | Sí     | Comentar (`body`, hasta 500 caracteres). Avisa al dueño y a quienes salen en la foto |
+| `DELETE /api/photo-comments/{id}`                 | Sí     | Borrar un comentario: su autor o el dueño de la foto |
+| `GET /api/users/{id}/tagged-photos`               | Sí     | Fotos en las que sale un usuario, entre las que puede ver quien consulta, con `total` (`?limit=n` opcional) |
+| `GET /api/notifications`                          | Sí     | Últimos 30 avisos (etiquetas, comentarios y solicitudes de amistad) y los no leídos por tipo |
+| `GET /api/notifications/unread`                   | Sí     | Avisos no leídos por tipo (`total`, `photo_tag`, `photo_comment`, `friend_request`) |
+| `POST /api/notifications/read`                    | Sí     | Marcar todos los avisos como leídos |
 | `GET /api/invitations`                            | Sí     | Invitaciones enviadas y cupo restante                                                                                                                              |
 | `POST /api/invitations`                           | Sí     | Invitar por email (reenviar a una pendiente no gasta cupo)                                                                                                         |
 

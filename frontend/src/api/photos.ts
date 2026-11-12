@@ -1,4 +1,5 @@
 import { api, post } from './client'
+import type { Person } from './friends'
 
 export type AlbumSummary = {
   id: number
@@ -72,4 +73,61 @@ export function uploadPhoto(albumId: number, file: File): Promise<{ photo: Photo
 
 export function deletePhoto(id: number): Promise<{ message: string }> {
   return api(`/api/photos/${id}`, { method: 'DELETE' })
+}
+
+export type PhotoTag = {
+  id: number
+  user: Person
+  /** Zona en porcentajes de la imagen. */
+  x: number
+  y: number
+  width: number
+  height: number
+  can_remove: boolean
+}
+
+export type TagArea = Pick<PhotoTag, 'x' | 'y' | 'width' | 'height'>
+
+export type PhotoComment = {
+  id: number
+  author: Person
+  body: string
+  created_at: string
+  can_delete: boolean
+}
+
+export type PhotoDetail = {
+  photo: Photo & { album_title: string; owner_id: number }
+  tags: PhotoTag[]
+  comments: PhotoComment[]
+}
+
+/** Foto con sus etiquetas y comentarios; marca como leídos sus avisos. */
+export function getPhoto(id: number): Promise<PhotoDetail> {
+  return api(`/api/photos/${id}`)
+}
+
+export function listTaggable(photoId: number): Promise<{ people: Person[] }> {
+  return api(`/api/photos/${photoId}/taggable`)
+}
+
+export function tagPhoto(photoId: number, userId: number, area: TagArea): Promise<{ tags: PhotoTag[] }> {
+  return post(`/api/photos/${photoId}/tags`, { user_id: userId, ...area })
+}
+
+export function removeTag(tagId: number): Promise<{ message: string; tags: PhotoTag[] }> {
+  return api(`/api/photo-tags/${tagId}`, { method: 'DELETE' })
+}
+
+export function commentPhoto(photoId: number, body: string): Promise<{ comments: PhotoComment[] }> {
+  return post(`/api/photos/${photoId}/comments`, { body })
+}
+
+export function deleteComment(commentId: number): Promise<{ message: string; comments: PhotoComment[] }> {
+  return api(`/api/photo-comments/${commentId}`, { method: 'DELETE' })
+}
+
+/** Fotos en las que sale un usuario (solo las que puede ver quien consulta). */
+export function listTaggedPhotos(userId: number, limit?: number): Promise<{ photos: Photo[]; total: number }> {
+  return api(`/api/users/${userId}/tagged-photos${limit ? `?limit=${limit}` : ''}`)
 }

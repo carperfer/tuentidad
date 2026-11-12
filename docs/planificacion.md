@@ -129,11 +129,12 @@ Fuera de alcance: los módulos de funciones que aún no existen (tablón, espaci
 
 ### Sprint 7 — Fotos II: etiquetas y comentarios
 
-- Etiquetado de amigos sobre la foto (seleccionando una zona)
-- El etiquetado puede retirarse por la persona etiquetada
-- Página "fotos en las que sales" y módulo «Fotos en las que sale…» del perfil (§5.2 de la guía de layout)
-- Comentarios en fotos
-- Notificaciones básicas en la web (etiquetas, comentarios, solicitudes de amistad)
+- [x] Etiquetado sobre la foto: se arrastra para marcar la zona (o se usa la zona centrada que aparece por defecto, también con teclado) y se elige a la persona. Se puede etiquetar uno mismo o a sus amigos que pueden ver la foto
+- [x] Quitan una etiqueta la persona etiquetada, quien la puso y el dueño de la foto. Al romper una amistad se borran las etiquetas de cada uno en las fotos del otro
+- [x] Página «Fotos en las que sale…» (`/perfil/{id}/etiquetas`) y módulo del perfil (rejilla de 5 columnas, §5.2 de la guía de layout); solo muestra las fotos que puede ver quien consulta
+- [x] Comentarios en fotos: los borran su autor y el dueño de la foto
+- [x] Avisos en la web (etiquetas, comentarios y solicitudes de amistad): página **Avisos** (`/avisos`), contador en la topbar y novedades en verde en la tarjeta de Inicio. Se marcan como leídos al abrir la página o la foto, y desaparecen si ya no se puede ver la foto o la solicitud se responde
+- [x] Tests: 93 de backend y 45 de frontend; prueba en el navegador (etiquetar arrastrando, comentar y ver los avisos) en escritorio y móvil
 
 **Entregable:** experiencia de fotos completa estilo Tuenti.
 

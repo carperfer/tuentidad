@@ -3,12 +3,15 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { errorMessage } from '../api/client'
 import { deletePhoto, getAlbum, type Album } from '../api/photos'
 import { Alert } from '../components/Alert'
+import { PhotoPanel } from '../components/photos/PhotoPanel'
 import { OwnerCard } from '../components/ProfileSidebar'
 import { Columns } from '../components/ui/Columns'
-import { Module } from '../components/ui/Module'
 import { Pager } from '../components/ui/Pager'
 
-/** Visor de una foto con navegación anterior/siguiente (también con las flechas del teclado). */
+/**
+ * Visor de una foto con navegación anterior/siguiente (también con las flechas
+ * del teclado), sus etiquetas y sus comentarios.
+ */
 export function PhotoViewer() {
   const { albumId: albumParam, photoId: photoParam } = useParams()
   const albumId = Number(albumParam)
@@ -34,7 +37,7 @@ export function PhotoViewer() {
 
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
-      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement) return
       if (event.key === 'ArrowLeft' && previous) navigate(`/albumes/${albumId}/fotos/${previous.id}`)
       if (event.key === 'ArrowRight' && next) navigate(`/albumes/${albumId}/fotos/${next.id}`)
     }
@@ -62,47 +65,47 @@ export function PhotoViewer() {
 
   return (
     <Columns left={<OwnerCard userId={album.owner.id} />}>
-      <Module
+      <PhotoPanel
+        key={photo.id}
+        photo={photo}
+        alt={`Foto ${index + 1} del álbum ${album.title}`}
         title={album.title}
-        as="h1"
-        className="photo-viewer"
         action={<Link to={`/albumes/${album.id}`}>Volver al álbum</Link>}
-      >
-        <Pager
-          index={index}
-          total={photos.length}
-          onChange={(target) => navigate(`/albumes/${album.id}/fotos/${photos[target].id}`)}
-        />
-        {error && <Alert>{error}</Alert>}
-        <img
-          key={photo.id}
-          className="photo-viewer__image"
-          src={photo.url}
-          width={photo.width}
-          height={photo.height}
-          alt={`Foto ${index + 1} del álbum ${album.title}`}
-        />
-        <p className="muted photo-viewer__hint">Usa las flechas del teclado para pasar de foto.</p>
-        {album.is_owner && (
-          <div className="danger-zone">
-            {confirmingId === photoId ? (
-              <>
-                <span>¿Borrar esta foto? </span>
-                <button type="button" className="button button--danger" onClick={handleDelete}>
-                  Sí, borrarla
-                </button>{' '}
-                <button type="button" className="link-button" onClick={() => setConfirmingId(null)}>
-                  Cancelar
-                </button>
-              </>
-            ) : (
-              <button type="button" className="link-button" onClick={() => setConfirmingId(photoId)}>
-                Borrar foto
-              </button>
+        before={
+          <>
+            <Pager
+              index={index}
+              total={photos.length}
+              onChange={(target) => navigate(`/albumes/${album.id}/fotos/${photos[target].id}`)}
+            />
+            {error && <Alert>{error}</Alert>}
+          </>
+        }
+        after={
+          <>
+            <p className="muted photo-viewer__hint">Usa las flechas del teclado para pasar de foto.</p>
+            {album.is_owner && (
+              <div className="danger-zone">
+                {confirmingId === photoId ? (
+                  <>
+                    <span>¿Borrar esta foto? </span>
+                    <button type="button" className="button button--danger" onClick={handleDelete}>
+                      Sí, borrarla
+                    </button>{' '}
+                    <button type="button" className="link-button" onClick={() => setConfirmingId(null)}>
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="link-button" onClick={() => setConfirmingId(photoId)}>
+                    Borrar foto
+                  </button>
+                )}
+              </div>
             )}
-          </div>
-        )}
-      </Module>
+          </>
+        }
+      />
     </Columns>
   )
 }

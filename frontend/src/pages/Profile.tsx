@@ -10,11 +10,12 @@ import {
   sendFriendRequest,
   type FriendSample,
 } from '../api/friends'
-import { listAlbums, listRecentPhotos, type AlbumSummary, type Photo } from '../api/photos'
+import { listAlbums, listRecentPhotos, listTaggedPhotos, type AlbumSummary, type Photo } from '../api/photos'
 import { getProfile, type Profile as ProfileView, type Relationship } from '../api/profile'
 import { Alert } from '../components/Alert'
 import { FriendsGrid } from '../components/people/FriendsGrid'
 import { ProfilePhoto } from '../components/ProfileSidebar'
+import { TaggedPhotosModule } from '../components/TaggedPhotosModule'
 import { Avatar } from '../components/ui/Avatar'
 import { Columns } from '../components/ui/Columns'
 import { Dropdown } from '../components/ui/Dropdown'
@@ -39,23 +40,26 @@ type ProfileData = {
   profile: ProfileView
   social: SocialData | null
   mutual: FriendSample | null
+  tagged: { photos: Photo[]; total: number }
 }
 
 /** Perfil y, si la relación lo permite, sus fotos y amigos. */
 async function fetchProfileData(profileId: number): Promise<ProfileData> {
   const { profile } = await getProfile(profileId)
   const canSeeSocial = profile.relationship === 'self' || profile.relationship === 'friend'
-  const [photos, albums, friends, mutual] = await Promise.all([
+  const [photos, albums, friends, mutual, tagged] = await Promise.all([
     canSeeSocial ? listRecentPhotos(profileId, 6) : null,
     canSeeSocial ? listAlbums(profileId) : null,
     canSeeSocial ? listUserFriends(profileId, 6) : null,
     profile.relationship === 'self' ? null : listMutualFriends(profileId, 6),
+    listTaggedPhotos(profileId, 10),
   ])
 
   return {
     profile,
     social: photos && albums && friends ? { photos, albums: albums.albums, friends } : null,
     mutual,
+    tagged,
   }
 }
 
@@ -67,6 +71,7 @@ export function Profile() {
   const [profile, setProfile] = useState<ProfileView | null>(null)
   const [social, setSocial] = useState<SocialData | null>(null)
   const [mutual, setMutual] = useState<FriendSample | null>(null)
+  const [tagged, setTagged] = useState<ProfileData['tagged'] | null>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
@@ -75,6 +80,7 @@ export function Profile() {
     setProfile(data.profile)
     setSocial(data.social)
     setMutual(data.mutual)
+    setTagged(data.tagged)
   }, [])
 
   useEffect(() => {
@@ -280,6 +286,15 @@ export function Profile() {
             </time>
           )}
         </p>
+      )}
+
+      {tagged && (own || tagged.total > 0) && (
+        <TaggedPhotosModule
+          name={own ? null : profile.first_name}
+          photos={tagged.photos}
+          total={tagged.total}
+          moreTo={`/perfil/${profile.id}/etiquetas`}
+        />
       )}
 
       {!social && <p className="status">Solo sus amigos pueden ver sus fotos y su lista de amigos.</p>}

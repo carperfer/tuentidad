@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { useAuth } from '../auth/context'
+import { useUnreadCounts } from '../lib/useUnreadCounts'
 
 /** Barra superior azul con navegación, buscador y acciones de la cuenta (guía §3). */
 export function Topbar() {
@@ -8,6 +9,7 @@ export function Topbar() {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const unread = useUnreadCounts()?.total ?? 0
 
   if (!user) return null
 
@@ -38,6 +40,14 @@ export function Topbar() {
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span aria-hidden="true">☰</span> Menú
+          {unread > 0 && (
+            <>
+              {' '}
+              <span className="topbar__badge">
+                {unread} <span className="visually-hidden">avisos sin leer</span>
+              </span>
+            </>
+          )}
         </button>
         <div id="topbar-menu" className={`topbar__menu${menuOpen ? ' topbar__menu--open' : ''}`}>
           <nav className="topbar__nav" aria-label="Principal">
@@ -49,6 +59,17 @@ export function Topbar() {
             </NavLink>
             <NavLink to="/gente" onClick={close}>
               Gente
+            </NavLink>
+            <NavLink to="/avisos" onClick={close}>
+              Avisos
+              {unread > 0 && (
+                <>
+                  {' '}
+                  <span className="topbar__badge">
+                    {unread} <span className="visually-hidden">sin leer</span>
+                  </span>
+                </>
+              )}
             </NavLink>
           </nav>
           <form className="topbar__search" role="search" onSubmit={handleSearch}>
@@ -76,3 +97,4 @@ export function Topbar() {
     </header>
   )
 }
+
