@@ -17,6 +17,10 @@ const photo = (id: number) => ({
   created_at: null,
 })
 
+const detail = (id: number) => () => ({
+  body: { photo: { ...photo(id), album_title: 'Verano', owner_id: 1 }, tags: [], comments: [] },
+})
+
 const album = {
   id: 5,
   title: 'Verano',
@@ -73,6 +77,9 @@ describe('PhotoViewer', () => {
     mockApi({
       'GET /api/auth/me': () => ({ body: { user: ana } }),
       'GET /api/albums/5': () => ({ body: { album } }),
+      'GET /api/photos/10': detail(10),
+      'GET /api/photos/11': detail(11),
+      'GET /api/photos/12': detail(12),
     })
     const user = userEvent.setup()
     renderAt('/albumes/5/fotos/10')
@@ -100,6 +107,8 @@ describe('PhotoViewer', () => {
       'GET /api/auth/me': () => ({ body: { user: ana } }),
       'GET /api/albums/5': () => ({ body: { album } }),
       'DELETE /api/photos/10': () => ({ body: { message: 'Foto borrada.' } }),
+      'GET /api/photos/10': detail(10),
+      'GET /api/photos/11': detail(11),
     })
     const user = userEvent.setup()
     renderAt('/albumes/5/fotos/10')

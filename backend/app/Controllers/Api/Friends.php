@@ -3,6 +3,7 @@
 namespace App\Controllers\Api;
 
 use App\Models\FriendshipModel;
+use App\Models\NotificationModel;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -175,6 +176,8 @@ class Friends extends ApiController
             'recipient_id' => $recipientId,
             'created_at'   => date('Y-m-d H:i:s'),
         ]);
+        // El aviso se borra en cascada cuando se acepta, rechaza o cancela la solicitud
+        model(NotificationModel::class)->notify($recipientId, $senderId, 'friend_request', ['friend_request_id' => (int) $db->insertID()]);
 
         return $this->message('Solicitud de amistad enviada.', 201);
     }
@@ -220,6 +223,12 @@ class Friends extends ApiController
         $db     = db_connect();
         $db->table('friendships')->where('user_id', $userId)->where('friend_id', $friendId)->delete();
         $db->table('friendships')->where('user_id', $friendId)->where('friend_id', $userId)->delete();
+
+        // Ninguno de los dos puede ya ver las fotos del otro: se quitan sus etiquetas en ellas
+        foreach ([[$userId, $friendId], [$friendId, $userId]] as [$tagged, $owner]) {
+            $photoIds = $db->table('photos')->select('photos.id')->join('albums', 'albums.id = photos.album_id')->where('albums.user_id', $owner);
+            $db->table('photo_tags')->where('user_id', $tagged)->whereIn('photo_id', $photoIds)->delete();
+        }
 
         return $this->message('Amistad eliminada.');
     }

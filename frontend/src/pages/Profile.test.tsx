@@ -37,6 +37,12 @@ function friendRoutes(overrides = {}) {
     }),
     'GET /api/users/2/friends?limit=6': () => ({ body: { friends: [person(1, 'Ana'), person(3, 'Carla')], total: 9 } }),
     'GET /api/users/2/mutual-friends?limit=6': () => ({ body: { friends: [person(3, 'Carla')], total: 1 } }),
+    'GET /api/users/2/tagged-photos?limit=10': () => ({
+      body: {
+        photos: [{ id: 30, album_id: 7, width: 800, height: 600, url: '/api/photos/30/image', thumb_url: '/api/photos/30/thumb', created_at: null }],
+        total: 14,
+      },
+    }),
     ...overrides,
   }
 }
@@ -59,6 +65,11 @@ describe('Profile', () => {
     expect(within(photos).getByRole('link', { name: /Ver todas/ })).toHaveTextContent('(12)')
     expect(within(right).getByRole('region', { name: 'Amigos en común' })).toHaveTextContent('Carla')
     expect(within(right).getByRole('link', { name: /Ver todos/ })).toHaveAttribute('href', '/perfil/2/amigos')
+
+    const main = screen.getByRole('main')
+    const tagged = within(main).getByRole('region', { name: /Fotos en las que sale Bea/ })
+    expect(within(tagged).getByRole('link', { name: /foto 1/ })).toHaveAttribute('href', '/albumes/7/fotos/30')
+    expect(within(tagged).getByRole('link', { name: /Ver todas/ })).toHaveAttribute('href', '/perfil/2/etiquetas')
   })
 
   it('opens the albums dropdown', async () => {
@@ -105,6 +116,7 @@ describe('Profile', () => {
       'GET /api/users/1/photos?limit=6': () => ({ body: { photos: [], total: 0 } }),
       'GET /api/users/1/albums': () => ({ body: { albums: [] } }),
       'GET /api/users/1/friends?limit=6': () => ({ body: { friends: [], total: 0 } }),
+      'GET /api/users/1/tagged-photos?limit=10': () => ({ body: { photos: [], total: 0 } }),
     })
     renderProfile('/perfil/1')
 
@@ -112,6 +124,9 @@ describe('Profile', () => {
     expect(screen.getByRole('link', { name: /Mis álbumes de fotos/ })).toHaveTextContent('(0)')
     expect(await screen.findByRole('region', { name: 'Mis amigos' })).toHaveTextContent('Todavía no tienes amigos.')
     expect(screen.queryByRole('region', { name: 'Amigos en común' })).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: /Fotos en las que salgo/ })).toHaveTextContent(
+      'Todavía no te han etiquetado en ninguna foto.',
+    )
   })
 })
 

@@ -25,10 +25,13 @@ export function mockApi(routes: Record<string, Handler>) {
   return fetchMock
 }
 
+export const noUnread = { total: 0, photo_tag: 0, photo_comment: 0, friend_request: 0 }
+
 const defaults: Record<string, Handler> = {
   'GET /api/csrf': () => ({ body: { header: 'X-CSRF-TOKEN', token: 'csrf' } }),
   'GET /api/auth/me': () => ({ body: { user: null } }),
   'GET /api/welcome-profiles': () => ({ body: { profiles: [] } }),
+  'GET /api/notifications/unread': () => ({ body: { unread: noUnread } }),
 }
 
 export const ana = { id: 1, email: 'ana@example.com', first_name: 'Ana', last_name: 'García' }

@@ -4,7 +4,6 @@ namespace App\Controllers\Api;
 
 use App\Libraries\PhotoProcessor;
 use App\Models\AlbumModel;
-use App\Models\FriendshipModel;
 use App\Models\PhotoModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use InvalidArgumentException;
@@ -24,7 +23,7 @@ class Albums extends ApiController
         if (auth()->getProvider()->findById($userId) === null) {
             return $this->message('No se ha encontrado el usuario.', 404);
         }
-        if (! $this->canView($userId)) {
+        if (! $this->canSeePhotosOf($userId)) {
             return $this->message('Solo sus amigos pueden ver sus fotos.', 403);
         }
 
@@ -58,7 +57,7 @@ class Albums extends ApiController
         if (auth()->getProvider()->findById($userId) === null) {
             return $this->message('No se ha encontrado el usuario.', 404);
         }
-        if (! $this->canView($userId)) {
+        if (! $this->canSeePhotosOf($userId)) {
             return $this->message('Solo sus amigos pueden ver sus fotos.', 403);
         }
 
@@ -241,7 +240,7 @@ class Albums extends ApiController
     {
         $album = model(AlbumModel::class)->find($id);
 
-        return $album !== null && $this->canView((int) $album['user_id']) ? $album : null;
+        return $album !== null && $this->canSeePhotosOf((int) $album['user_id']) ? $album : null;
     }
 
     /**
@@ -252,13 +251,6 @@ class Albums extends ApiController
         $album = model(AlbumModel::class)->find($id);
 
         return $album !== null && (int) $album['user_id'] === (int) auth()->user()->id ? $album : null;
-    }
-
-    private function canView(int $ownerId): bool
-    {
-        $viewerId = (int) auth()->user()->id;
-
-        return $viewerId === $ownerId || model(FriendshipModel::class)->areFriends($viewerId, $ownerId);
     }
 
     private function processor(): PhotoProcessor
@@ -317,25 +309,5 @@ class Albums extends ApiController
         $data['photos'] = array_map($this->photoData(...), $photos);
 
         return $data;
-    }
-
-    /**
-     * @param array<string, mixed> $photo
-     *
-     * @return array<string, mixed>
-     */
-    private function photoData(array $photo): array
-    {
-        $id = (int) $photo['id'];
-
-        return [
-            'id'         => $id,
-            'album_id'   => (int) $photo['album_id'],
-            'width'      => (int) $photo['width'],
-            'height'     => (int) $photo['height'],
-            'url'        => "/api/photos/{$id}/image",
-            'thumb_url'  => "/api/photos/{$id}/thumb",
-            'created_at' => $photo['created_at'],
-        ];
     }
 }

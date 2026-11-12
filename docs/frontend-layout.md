@@ -441,7 +441,7 @@ Primitivos compartidos: Module, Avatar, Button, Dropdown, Pager, MediaObject, Co
 - [x] Tokens de §10 definidos como variables CSS.
 - [x] Componente `Module` en variante `boxed` (la `plain` no se usa por ahora).
 - [x] Layout de tres columnas con sus dos puntos de corte.
-- [x] Topbar sticky con pestaña activa. Pendiente: badge de notificaciones (con los mensajes y las notificaciones).
+- [x] Topbar sticky con pestaña activa y badge de avisos sin leer en «Avisos» (y en el botón «Menú» en móvil). Pendiente: badge de mensajes (con el chat).
 - [x] Primitivos: `Avatar` (tamaños), `Button`, `Dropdown`, `Pager`, `MediaObject`. Pendiente: indicador de conexión del avatar (con el chat).
 - [x] Plantillas: Inicio, Perfil ajeno, Perfil propio.
 - [ ] Chat: lista, ventana flotante y dock. Pendiente: chat (Sprint 9).
