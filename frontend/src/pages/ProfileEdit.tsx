@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { errorMessage, fieldErrors } from '../api/client'
 import { getProfile, updateProfile, uploadAvatar, type Profile, type ProfileData, type Visibility } from '../api/profile'
 import { useAuth } from '../auth/context'
+import { AccountData } from '../components/AccountData'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
 import { ProfilePhoto } from '../components/ProfileSidebar'
@@ -189,6 +190,7 @@ export function ProfileEdit() {
           </button>
         </form>
       </Module>
+      <AccountData />
     </Columns>
   )
 }

@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Database\Migrations\StripAvatarMetadata;
 use App\Models\FriendshipModel;
 use App\Models\UserModel;
 use App\Models\WelcomeProfileModel;
+use Config\Database;
 use Tests\Support\ApiTestCase;
+use Tests\Support\TestImages;
 
 /**
  * @internal
@@ -164,5 +167,26 @@ final class ProfileApiTest extends ApiTestCase
         $this->assertSame('1990-01-01', $profile['birthdate']);
 
         $this->withBodyFormat('json')->put('api/profile/status', ['status' => str_repeat('a', 161)])->assertStatus(422);
+    }
+
+    public function testMigrationStripsMetadataFromExistingAvatars(): void
+    {
+        $user      = $this->createUser();
+        $directory = WRITEPATH . 'uploads/avatars';
+        if (! is_dir($directory)) {
+            mkdir($directory, 0750, true);
+        }
+        $old = bin2hex(random_bytes(16)) . '.jpg';
+        TestImages::jpeg("{$directory}/{$old}", 900, 300, 6);
+        model(UserModel::class)->update((int) $user->id, ['avatar' => $old]);
+
+        (new StripAvatarMetadata(Database::forge()))->up();
+
+        $new = (string) model(UserModel::class)->find($user->id)->avatar;
+        $this->assertNotSame($old, $new);
+        $this->assertFileDoesNotExist("{$directory}/{$old}");
+        $this->assertStringNotContainsString('Exif', (string) file_get_contents("{$directory}/{$new}"));
+        $this->assertSame([200, 600], array_slice((array) getimagesize("{$directory}/{$new}"), 0, 2));
+        unlink("{$directory}/{$new}");
     }
 }

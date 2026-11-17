@@ -2,11 +2,13 @@
 
 namespace App\Controllers\Api;
 
+use App\Libraries\PhotoProcessor;
 use App\Models\FriendshipModel;
 use App\Models\UserModel;
 use App\Models\WelcomeProfileModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Shield\Entities\User;
+use InvalidArgumentException;
 use RuntimeException;
 
 /**
@@ -20,6 +22,7 @@ class Profiles extends ApiController
         'image/webp' => 'webp',
     ];
     private const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+    private const AVATAR_SIZE     = 600;
 
     public function show(int $id): ResponseInterface
     {
@@ -131,13 +134,14 @@ class Profiles extends ApiController
             return $this->invalid(['avatar' => 'Usa una imagen JPG, PNG o WebP de hasta 4000 × 4000 píxeles.']);
         }
 
+        // Se vuelve a generar en JPEG: así se descartan los metadatos EXIF (ubicación incluida)
         $directory = WRITEPATH . 'uploads/avatars';
-        if (! is_dir($directory) && ! mkdir($directory, 0750, true) && ! is_dir($directory)) {
-            throw new RuntimeException('No se ha podido crear el directorio para las fotos de perfil.');
-        }
 
-        $filename = bin2hex(random_bytes(16)) . '.' . self::IMAGE_TYPES[$mime];
-        $file->move($directory, $filename);
+        try {
+            $filename = (new PhotoProcessor($directory))->processSingle($file->getTempName(), self::AVATAR_SIZE);
+        } catch (InvalidArgumentException $e) {
+            return $this->invalid(['avatar' => $e->getMessage()]);
+        }
 
         $previous = $user->avatar;
         if (! model(UserModel::class)->update((int) $user->id, ['avatar' => $filename])) {

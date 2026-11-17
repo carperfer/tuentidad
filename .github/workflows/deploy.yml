@@ -130,6 +130,18 @@ jobs:
           SFTP_KNOWN_HOSTS: ${{ vars.SFTP_KNOWN_HOSTS }}
         run: ./scripts/subir-sftp.sh sitio/www "$FTP_PUBLIC_DIR"
 
+      # Despliegue controlado: copia de la base de datos antes de tocar su estructura.
+      # Si la copia falla, no se migra (el código nuevo ya está subido, pero las
+      # migraciones pendientes se aplicarán en el siguiente despliegue)
+      - name: Copia de seguridad de la base de datos
+        if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'https://tuentidad.es/' }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" "${APP_BASE_URL%/}/api/deploy/backup"
+
       # Sin consola en el servidor, las migraciones se lanzan por HTTP con el token de despliegue
       - name: Aplicar migraciones
         if: steps.ftp.outputs.configurado == 'true' && env.DESPLIEGUE == 'app'

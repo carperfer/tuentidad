@@ -84,6 +84,8 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `PUT /api/profile/status`                         | Sí     | Cambiar solo el estado (`status`), desde la barra «¿Cómo va todo?»                                                                                                 |
 | `POST /api/profile/avatar`                        | Sí     | Subir foto JPG, PNG o WebP de hasta 2 MB (máximo 4000 × 4000 px)                                                                                                   |
 | `GET /api/dashboard`                              | Sí     | Resumen de amistades e invitaciones propias                                                                                                                        |
+| `GET /api/account/export`                         | Sí     | Descarga en JSON de todos los datos de la cuenta (RGPD) |
+| `DELETE /api/account`                             | Sí     | Borra la cuenta y todos sus datos y fotos (`password`). Cierra la sesión |
 | `GET /api/friends`                                | Sí     | Lista de amistades confirmadas                                                                                                                                     |
 | `GET /api/friends/search?q=...`                   | Sí     | Busca usuarios por nombre o apellido sin exponer su email                                                                                                          |
 | `GET /api/friends/activity`                       | Sí     | Estados visibles publicados por amistades confirmadas                                                                                                              |
@@ -223,6 +225,7 @@ Si faltan los secrets de acceso, el workflow avisa y no despliega. Si falta o es
 El alojamiento no tiene SSH, así que lo que normalmente se haría con `php spark` se lanza por HTTP con el token de despliegue (`Authorization: Bearer <DEPLOY_TOKEN>`). Sin `tuentidad.deployToken` en el `.env`, estos endpoints responden 404.
 
 - `POST /api/deploy/migrate`: aplica las migraciones pendientes. El workflow lo llama en cada despliegue.
+- `POST /api/deploy/backup`: copia de la base de datos (ver abajo). El workflow la hace antes de migrar.
 - `POST /api/deploy/first-user`: crea el primer usuario. Solo funciona mientras no exista ninguno; se lanza una vez a mano:
 
 ```bash
@@ -231,6 +234,17 @@ curl -X POST https://tuentidad.es/api/deploy/first-user \
   -H "Authorization: Bearer $DEPLOY_TOKEN" -H 'Content-Type: application/json' \
   -d '{"email":"tu@email.com","first_name":"Nombre","last_name":"Apellidos","birthdate":"AAAA-MM-DD","password":"…"}'
 ```
+
+### Copias de seguridad
+
+La aplicación vuelca la base de datos en `tuentidad/writable/backups/tuentidad-AAAAMMDD-HHMMSS.sql.gz` (fuera de la web) y conserva las 14 más recientes. Se hacen:
+
+- en cada despliegue, antes de aplicar las migraciones (si la copia falla, no se migra);
+- cada día a las 03:30 UTC con el workflow **Copia de seguridad**, que también se puede lanzar a mano (Actions → Copia de seguridad → Run workflow).
+
+Las copias no se suben a GitHub: en un repositorio público, cualquiera podría descargar los artefactos de un workflow. Para sacar una, descárgala por SFTP. Para restaurarla, impórtala desde phpMyAdmin (panel de OVH → Bases de datos), que acepta el `.sql.gz` tal cual, o con `gunzip -c copia.sql.gz | mysql …`. La copia borra y vuelve a crear cada tabla.
+
+Las fotos (`writable/uploads`) no entran en estas copias; el despliegue nunca borra nada del servidor, y OVH guarda sus propias copias del alojamiento (conviene comprobar en el panel cuántos días).
 
 ### Diagnóstico del alojamiento
 

@@ -63,6 +63,19 @@ final class PhotoProcessorTest extends CIUnitTestCase
         $this->assertLessThan(60, $top['blue']);
     }
 
+    public function testSingleVersionForAvatarsIsReducedWithoutMetadata(): void
+    {
+        $source = TestImages::jpeg($this->directory . '/source.jpg', 1200, 800, 6);
+
+        $filename = $this->processor->processSingle($source, 600);
+
+        $this->assertMatchesRegularExpression('/\A[a-f0-9]{32}\.jpg\z/', $filename);
+        $path = $this->directory . '/' . $filename;
+        $this->assertSame([400, 600], array_slice((array) getimagesize($path), 0, 2));
+        $this->assertStringNotContainsString('Exif', (string) file_get_contents($path));
+        $this->assertFileDoesNotExist($this->processor->thumbPath(substr($filename, 0, 32)));
+    }
+
     public function testFilesThatAreNotImagesAreRejected(): void
     {
         $source = $this->directory . '/fake.jpg';

@@ -35,30 +35,7 @@ class PhotoProcessor
      */
     public function process(string $sourcePath): array
     {
-        $info = @getimagesize($sourcePath);
-        if ($info === false || ! in_array($info[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)) {
-            throw new InvalidArgumentException('Usa imágenes JPG, PNG o WebP.');
-        }
-        [$width, $height, $type] = $info;
-        if ($width < 1 || $height < 1 || $width * $height > self::MAX_PIXELS) {
-            throw new InvalidArgumentException('La imagen no puede superar los 25 megapíxeles.');
-        }
-
-        $source = match ($type) {
-            IMAGETYPE_JPEG => @imagecreatefromjpeg($sourcePath),
-            IMAGETYPE_PNG  => @imagecreatefrompng($sourcePath),
-            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($sourcePath) : false,
-        };
-        if ($source === false) {
-            throw new InvalidArgumentException('No se ha podido leer la imagen.');
-        }
-
-        // Se reduce antes de girar para no tener dos copias del original en memoria
-        $large = $this->resize($source, self::LARGE_SIZE);
-        imagedestroy($source);
-        if ($type === IMAGETYPE_JPEG) {
-            $large = $this->orient($large, $sourcePath);
-        }
+        $large = $this->load($sourcePath, self::LARGE_SIZE);
         $thumb = $this->squareThumb($large);
 
         $this->ensureDirectory();
@@ -71,6 +48,25 @@ class PhotoProcessor
         imagedestroy($thumb);
 
         return $result;
+    }
+
+    /**
+     * Guarda una sola versión reducida (para las fotos de perfil).
+     *
+     * @return string nombre del archivo, con extensión .jpg
+     *
+     * @throws InvalidArgumentException si el archivo no es una imagen admitida
+     */
+    public function processSingle(string $sourcePath, int $maxSide): string
+    {
+        $image = $this->load($sourcePath, $maxSide);
+
+        $this->ensureDirectory();
+        $filename = bin2hex(random_bytes(16));
+        $this->save($image, $this->largePath($filename));
+        imagedestroy($image);
+
+        return $filename . '.jpg';
     }
 
     public function largePath(string $filename): string
@@ -99,6 +95,38 @@ class PhotoProcessor
         }
 
         return $this->directory . DIRECTORY_SEPARATOR . $filename . $suffix . '.jpg';
+    }
+
+    /**
+     * Abre la imagen, la reduce y la endereza según su orientación EXIF.
+     *
+     * @throws InvalidArgumentException si el archivo no es una imagen admitida
+     */
+    private function load(string $sourcePath, int $maxSide): GdImage
+    {
+        $info = @getimagesize($sourcePath);
+        if ($info === false || ! in_array($info[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)) {
+            throw new InvalidArgumentException('Usa imágenes JPG, PNG o WebP.');
+        }
+        [$width, $height, $type] = $info;
+        if ($width < 1 || $height < 1 || $width * $height > self::MAX_PIXELS) {
+            throw new InvalidArgumentException('La imagen no puede superar los 25 megapíxeles.');
+        }
+
+        $source = match ($type) {
+            IMAGETYPE_JPEG => @imagecreatefromjpeg($sourcePath),
+            IMAGETYPE_PNG  => @imagecreatefrompng($sourcePath),
+            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($sourcePath) : false,
+        };
+        if ($source === false) {
+            throw new InvalidArgumentException('No se ha podido leer la imagen.');
+        }
+
+        // Se reduce antes de girar para no tener dos copias del original en memoria
+        $image = $this->resize($source, $maxSide);
+        imagedestroy($source);
+
+        return $type === IMAGETYPE_JPEG ? $this->orient($image, $sourcePath) : $image;
     }
 
     /**
