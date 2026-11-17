@@ -157,11 +157,13 @@ Fuera de alcance: los módulos de funciones que aún no existen (tablón, espaci
 
 ### Sprint 9 — Chat
 
-- Conversaciones 1 a 1 entre amigos
-- Polling AJAX con intervalo adaptativo (más frecuente con el chat abierto)
-- Indicador de amigos conectados y mensajes no leídos
-- Transporte encapsulado en un servicio para poder sustituirlo
-- Interfaz según §8 de la guía de layout: lista de contactos, ventana flotante y dock inferior
+- [x] Conversaciones 1 a 1 entre amigos (no con los perfiles de bienvenida); mensajes de hasta 1000 caracteres
+- [x] Sondeo con intervalo adaptativo: estado cada 30 s, conversaciones abiertas cada 4 s y todo cada 60 s con la pestaña en segundo plano; al volver a la pestaña se actualiza enseguida
+- [x] Amigos conectados (han consultado el chat en los últimos 2 minutos) y mensajes no leídos, por amigo y en total
+- [x] Transporte encapsulado: `ChatService` recibe un `ChatTransport` (ahora HTTP) que se puede sustituir sin tocar el resto
+- [x] Interfaz según §8 de la guía de layout: «Chat (n)» en la topbar con la lista de amigos, módulo «Chat (n)» en Inicio, ventanas flotantes (hasta 3) con dock inferior, botón «Mensaje privado» en el perfil y conversación a pantalla completa en móvil. Las ventanas abiertas se recuerdan durante la sesión del navegador
+- [x] Los mensajes entran en la exportación de datos y se borran con la cuenta
+- [x] Tests: 111 de backend y 54 de frontend; prueba en el navegador con dos usuarios chateando
 
 ### Sprint 10 — Eventos
 

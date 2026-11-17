@@ -92,6 +92,12 @@ class Account extends ApiController
                 ->join('users AS tagged', 'tagged.id = photo_tags.user_id')
                 ->where('photo_tags.tagger_id', $userId)
                 ->get()->getResultArray(), 'photo_id'),
+            'messages' => $db->table('messages')
+                ->select("IF(messages.sender_id = {$userId}, 'sent', 'received') AS direction, {$name('other')} AS person, messages.body, messages.created_at", false)
+                ->join('users AS other', "other.id = IF(messages.sender_id = {$userId}, messages.recipient_id, messages.sender_id)", 'inner', false)
+                ->groupStart()->where('messages.sender_id', $userId)->orWhere('messages.recipient_id', $userId)->groupEnd()
+                ->orderBy('messages.id')
+                ->get()->getResultArray(),
         ];
 
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
