@@ -19,7 +19,9 @@ DirectoryIndex index.html
 	Header always set X-Frame-Options "DENY"
 	Header always set Referrer-Policy "same-origin"
 	Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
-	Header always set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
+	# Sin condición: en OVH el HTTPS lo termina un proxy y Apache ve HTTP;
+	# los navegadores ignoran esta cabecera si llega por HTTP
+	Header always set Strict-Transport-Security "max-age=31536000"
 </IfModule>
 
 # ----------------------------------------------------------------------
