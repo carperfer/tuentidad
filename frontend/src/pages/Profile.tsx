@@ -20,6 +20,7 @@ import { Avatar } from '../components/ui/Avatar'
 import { Columns } from '../components/ui/Columns'
 import { Dropdown } from '../components/ui/Dropdown'
 import { Counter, Module } from '../components/ui/Module'
+import { useChat } from '../lib/chat/context'
 import { formatDay, timeAgo } from '../lib/dates'
 
 const RELATIONSHIP_LABEL: Record<Relationship, string> = {
@@ -75,6 +76,7 @@ export function Profile() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
+  const chat = useChat()
 
   const apply = useCallback((data: ProfileData) => {
     setProfile(data.profile)
@@ -234,9 +236,16 @@ export function Profile() {
             </>
           )}
           {profile.relationship === 'friend' && (
-            <Link to={`/perfil/${profile.id}/fotos`}>
-              Ver álbumes de fotos <Counter value={albumCount} />
-            </Link>
+            <>
+              <Link to={`/perfil/${profile.id}/fotos`}>
+                Ver álbumes de fotos <Counter value={albumCount} />
+              </Link>
+              {chat?.state.contacts.some((contact) => contact.id === profile.id) && (
+                <button type="button" className="button" onClick={() => chat.service.open(profile.id)}>
+                  <span aria-hidden="true">✉</span> Mensaje privado
+                </button>
+              )}
+            </>
           )}
           {profile.relationship === 'none' && (
             <button type="button" className="button" disabled={busy} onClick={() => perform(() => sendFriendRequest(profile.id))}>

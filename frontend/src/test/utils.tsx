@@ -32,6 +32,7 @@ const defaults: Record<string, Handler> = {
   'GET /api/auth/me': () => ({ body: { user: null } }),
   'GET /api/welcome-profiles': () => ({ body: { profiles: [] } }),
   'GET /api/notifications/unread': () => ({ body: { unread: noUnread } }),
+  'GET /api/chat': () => ({ body: { contacts: [], online: 0, unread: 0 } }),
 }
 
 export const ana = { id: 1, email: 'ana@example.com', first_name: 'Ana', last_name: 'García' }

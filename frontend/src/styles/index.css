@@ -1371,3 +1371,256 @@ button {
     padding-top: var(--space-5);
   }
 }
+
+/* --- Chat (§8) --------------------------------------------------------------- */
+
+.topbar__chat {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  margin-left: auto;
+}
+
+.topbar__chat + .topbar__account {
+  margin-left: 0;
+}
+
+.topbar__chat .dropdown__trigger {
+  padding: 0 var(--space-3);
+  color: #fff;
+  font-size: var(--fs-md);
+}
+
+.topbar__counter {
+  font-weight: normal;
+}
+
+.chat-panel {
+  width: 220px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: var(--space-1) 0;
+  color: var(--c-text);
+}
+
+.chat-panel .status {
+  padding: 0 10px;
+}
+
+.chat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-list__contact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: var(--space-1) 10px;
+  border: 0;
+  background: none;
+  color: var(--c-link);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-list__contact:hover {
+  background: var(--c-header-bg);
+}
+
+.chat-list__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-list__unread {
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--c-notify);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: bold;
+}
+
+/* Punto de conexión: gris si no está conectado; el texto oculto lo acompaña */
+.presence {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #bbb;
+}
+
+.presence--online {
+  background: var(--c-online);
+}
+
+.chat-dock {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 150;
+  pointer-events: none;
+}
+
+.chat-dock__windows {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+}
+
+.chat-dock__bar {
+  display: flex;
+  gap: 2px;
+  height: 32px;
+  margin: 0;
+  padding: 0 var(--space-2);
+  list-style: none;
+  background: var(--c-surface-alt);
+  border-top: 1px solid var(--c-border);
+  pointer-events: auto;
+}
+
+.chat-dock__tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-left: 1px solid var(--c-border);
+  border-right: 1px solid var(--c-border);
+  background: none;
+  font: inherit;
+  font-weight: bold;
+  color: var(--c-text);
+  cursor: pointer;
+}
+
+.chat-dock__tab--open {
+  background: var(--c-surface);
+}
+
+/* Con conversaciones abiertas, el pie no queda tapado por el dock */
+.shell:has(.chat-dock) {
+  padding-bottom: 32px;
+}
+
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  width: 230px;
+  height: 300px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-brand-dark);
+  border-bottom: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 -2px 8px rgb(0 0 0 / 15%);
+  pointer-events: auto;
+}
+
+.chat-window__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2);
+  background: linear-gradient(var(--c-brand), var(--c-brand-dark));
+  color: #fff;
+}
+
+.chat-window__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--fs-md);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-window__button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.chat-window__button:hover {
+  background: rgb(0 0 0 / 15%);
+}
+
+.chat-window__messages {
+  flex: 1;
+  margin: 0;
+  padding: var(--space-2);
+  overflow-y: auto;
+  list-style: none;
+  font-size: var(--fs-md);
+  overflow-wrap: anywhere;
+}
+
+.chat-window__messages li + li {
+  margin-top: 3px;
+}
+
+.chat-window__error {
+  margin: 0;
+  padding: 0 var(--space-2);
+  color: var(--c-error);
+  font-size: var(--fs-sm);
+}
+
+.chat-window__form {
+  padding: var(--space-1);
+  border-top: 1px solid var(--c-border);
+}
+
+.chat-window__form input {
+  width: 100%;
+}
+
+@media (max-width: 759px) {
+  .topbar__chat {
+    margin-left: 0;
+  }
+
+  .topbar__chat .dropdown__trigger {
+    padding: var(--space-2);
+  }
+
+  .topbar__chat .dropdown__panel {
+    position: static;
+  }
+
+  .chat-panel {
+    width: auto;
+  }
+
+  /* En móvil la conversación ocupa toda la pantalla por encima del dock */
+  .chat-dock__windows {
+    padding: 0;
+  }
+
+  .chat-window {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 32px;
+    left: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+  }
+}

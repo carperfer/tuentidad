@@ -4,6 +4,7 @@ import { errorMessage } from '../api/client'
 import { listFriendActivity, listFriendRequests, type FriendActivity, type FriendRequests } from '../api/friends'
 import { getDashboardSummary, type DashboardSummary } from '../api/profile'
 import { ActivityFeed } from '../components/ActivityFeed'
+import { ChatModule } from '../components/chat/ChatModule'
 import { Alert } from '../components/Alert'
 import { InviteFriends } from '../components/InviteFriends'
 import { RequestsModule } from '../components/people/RequestsModule'
@@ -56,6 +57,7 @@ export function Home() {
               </Link>
             </Module>
             <RequestsModule kind="incoming" requests={requests.incoming} onChange={handleRequestChange} showEmpty={false} />
+            <ChatModule />
           </>
         }
       >

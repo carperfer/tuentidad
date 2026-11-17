@@ -117,6 +117,9 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `GET /api/notifications`                          | Sí     | Últimos 30 avisos (etiquetas, comentarios y solicitudes de amistad) y los no leídos por tipo |
 | `GET /api/notifications/unread`                   | Sí     | Avisos no leídos por tipo (`total`, `photo_tag`, `photo_comment`, `friend_request`) |
 | `POST /api/notifications/read`                    | Sí     | Marcar todos los avisos como leídos |
+| `GET /api/chat`                                   | Sí     | Estado del chat: amigos (primero los conectados), mensajes sin leer de cada uno y totales. Marca al usuario como conectado (2 min) |
+| `GET /api/chat/{id}/messages`                     | Sí     | Últimos 50 mensajes con un amigo; con `?after=<id>`, solo los posteriores. Marca como leídos los recibidos |
+| `POST /api/chat/{id}/messages`                    | Sí     | Enviar un mensaje a un amigo (`body`, hasta 1000 caracteres) |
 | `GET /api/invitations`                            | Sí     | Invitaciones enviadas y cupo restante                                                                                                                              |
 | `POST /api/invitations`                           | Sí     | Invitar por email (reenviar a una pendiente no gasta cupo)                                                                                                         |
 

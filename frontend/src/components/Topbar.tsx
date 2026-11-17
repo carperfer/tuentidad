@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { useAuth } from '../auth/context'
 import { useUnreadCounts } from '../lib/useUnreadCounts'
+import { ChatToggle } from './chat/ChatToggle'
 
 /** Barra superior azul con navegación, buscador y acciones de la cuenta (guía §3). */
 export function Topbar() {
@@ -84,6 +85,7 @@ export function Topbar() {
           <Link to={`/perfil/${user.id}/fotos`} className="button button--primary topbar__upload" onClick={close}>
             Subir fotos <span aria-hidden="true">⬆</span>
           </Link>
+          <ChatToggle onOpen={close} />
           <nav className="topbar__account" aria-label="Cuenta">
             <NavLink to="/perfil/editar" onClick={close}>
               Mi cuenta

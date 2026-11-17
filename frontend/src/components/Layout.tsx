@@ -1,5 +1,7 @@
 import { Link, Outlet } from 'react-router'
 import { useAuth } from '../auth/context'
+import { ChatProvider } from '../lib/chat/ChatProvider'
+import { ChatDock } from './chat/ChatDock'
 import { Topbar } from './Topbar'
 
 const YEAR = new Date().getFullYear()
@@ -12,7 +14,7 @@ export function Layout() {
   const { user, loading } = useAuth()
   const guest = !loading && !user
 
-  return (
+  const shell = (
     <div className={guest ? 'shell shell--guest' : 'shell'}>
       <a className="skip-link" href="#contenido">
         Saltar al contenido
@@ -39,6 +41,14 @@ export function Layout() {
           </nav>
         </div>
       </footer>
+      {user && <ChatDock />}
     </div>
+  )
+
+  // El chat vive mientras dura la sesión; una sesión nueva empieza con un chat nuevo
+  return user ? (
+    <ChatProvider key={user.id}>{shell}</ChatProvider>
+  ) : (
+    shell
   )
 }
