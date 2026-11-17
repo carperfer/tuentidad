@@ -20,9 +20,12 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
 
     $routes->post('deploy/migrate', 'Deploy::migrate');
     $routes->post('deploy/first-user', 'Deploy::firstUser');
+    $routes->post('deploy/backup', 'Deploy::backup');
 
     $routes->group('', ['filter' => 'apiauth'], static function (RouteCollection $routes): void {
         $routes->get('dashboard', 'Dashboard::index');
+        $routes->get('account/export', 'Account::export');
+        $routes->delete('account', 'Account::delete');
         $routes->get('friends', 'Friends::index');
         $routes->get('friends/activity', 'Friends::activity');
         $routes->get('friends/search', 'Friends::search');

@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Api;
 
+use App\Libraries\DatabaseBackup;
 use App\Libraries\UserCreator;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -34,6 +35,26 @@ class Deploy extends ApiController
             'message'    => 'Migraciones aplicadas.',
             'migrations' => count($runner->getHistory('')),
         ]);
+    }
+
+    /**
+     * Copia de la base de datos en writable/backups (fuera de la web).
+     * Se conservan las 14 más recientes; se descargan por SFTP.
+     */
+    public function backup(): ResponseInterface
+    {
+        if (($denied = $this->authorize()) !== null) {
+            return $denied;
+        }
+
+        $backup = new DatabaseBackup(db_connect(), WRITEPATH . 'backups');
+        $result = $backup->create();
+
+        return $this->respond([
+            'message' => 'Copia creada.',
+            ...$result,
+            'backups' => count($backup->list()),
+        ], 201);
     }
 
     /**

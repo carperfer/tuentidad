@@ -53,10 +53,16 @@ export function Privacy() {
       <h2>Cuánto tiempo se guardan</h2>
       <p>
         Los datos de tu cuenta se conservan mientras la mantengas. Las invitaciones y solicitudes no aceptadas se
-        borran como se indica arriba.
+        borran como se indica arriba. Si borras tu cuenta, sus datos y tus fotos se eliminan en ese momento; pueden
+        seguir hasta 14 días en las copias de seguridad diarias de la base de datos, que se borran solas pasado ese
+        plazo.
       </p>
 
       <h2>Tus derechos</h2>
+      <p>
+        Desde <Link to="/perfil/editar">Mi cuenta</Link> puedes corregir tus datos, descargar una copia de todos ellos
+        y borrar tu cuenta cuando quieras.
+      </p>
       <p>
         Puedes pedir el acceso, la rectificación, la supresión, la limitación, la portabilidad de tus datos u oponerte
         a su tratamiento escribiendo a {OWNER.email}. Si das tu consentimiento, puedes retirarlo en cualquier momento.

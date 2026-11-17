@@ -59,3 +59,13 @@ export async function resetPassword(token: string, password: string, passwordCon
   })
   return message
 }
+
+/** Borra la cuenta y todos sus datos (pide la contraseña). La sesión termina. */
+export async function deleteAccount(password: string): Promise<MessageResponse> {
+  const result = await api<MessageResponse>('/api/account', { method: 'DELETE', body: JSON.stringify({ password }) })
+  resetCsrf()
+  return result
+}
+
+/** Descarga de todos los datos de la cuenta en JSON (enlace directo). */
+export const ACCOUNT_EXPORT_URL = '/api/account/export'

@@ -17,6 +17,8 @@ export function Landing() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
+  // Aviso que deja otra página al llegar aquí (p. ej. tras borrar la cuenta)
+  const notice = (location.state as { notice?: string } | null)?.notice
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -39,6 +41,7 @@ export function Landing() {
       <h1 className="visually-hidden">Bienvenido a tuentidad</h1>
       <Module title="Entrar" className="landing__login">
         <form className="login-form" onSubmit={handleSubmit} noValidate>
+          {notice && <Alert kind="ok">{notice}</Alert>}
           {error && <Alert>{error}</Alert>}
           <Field
             label="Email"

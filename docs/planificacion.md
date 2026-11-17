@@ -140,11 +140,16 @@ Fuera de alcance: los módulos de funciones que aún no existen (tablón, espaci
 
 ### Sprint 8 — Calidad y lanzamiento del MVP
 
-- Revisión de seguridad (OWASP: XSS, CSRF, IDOR, subidas de archivos)
-- RGPD: borrado de cuenta y exportación de datos
-- Pruebas de integración de los flujos principales
-- Revisión UX y responsive
-- Despliegue controlado en OVH y copias de seguridad de la base de datos
+- [x] Revisión de seguridad (OWASP). XSS: React escapa todo y los emails usan `esc()`. CSRF: activo en todas las peticiones que modifican datos. IDOR: cada endpoint comprueba dueño, amistad o destinatario. Cambios:
+  - Cabeceras de seguridad también para la SPA (`.htaccess`): CSP solo con el propio dominio, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy` y HSTS
+  - Las fotos de perfil se vuelven a generar con GD, como las de los álbumes, para quitar el EXIF (ubicación incluida); una migración limpia las ya subidas
+- [x] RGPD: en «Mi cuenta», descarga de todos los datos en JSON y borrado de la cuenta con contraseña (datos, fotos en disco, invitaciones y registros de acceso). La política de privacidad lo explica
+- [x] Prueba de integración del recorrido principal por la API: invitación, registro, amistad, foto, etiqueta, comentario, avisos, exportación y baja
+- [x] Revisión de usabilidad y diseño adaptable: todas las páginas en escritorio, tableta y móvil con la SPA compilada servida por Apache (sin errores de CSP ni desbordes)
+- [x] Despliegue controlado y copias de seguridad: copia de la base de datos antes de cada migración y cada día (workflow «Copia de seguridad»), guardada fuera de la web; se conservan 14
+- [x] Tests: 103 de backend y 48 de frontend
+- [ ] Datos del responsable en `frontend/src/pages/legal/owner.ts` y revisión de los textos legales con asesoría
+- [ ] Publicar en tuentidad.es y comprobar en producción la primera copia de seguridad
 
 **Entregable:** MVP publicado en tuentidad.es.
 

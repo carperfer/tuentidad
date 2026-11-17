@@ -22,7 +22,7 @@ mkdir -p "$RELEASE"
 cp -r "$ROOT/backend/app" "$ROOT/backend/public" "$ROOT/backend/composer.json" \
       "$ROOT/backend/composer.lock" "$ROOT/backend/spark" "$ROOT/backend/preload.php" "$RELEASE/"
 mkdir -p "$RELEASE/writable"
-for dir in cache logs session uploads debugbar; do
+for dir in cache logs session uploads debugbar backups; do
   mkdir -p "$RELEASE/writable/$dir"
   cp "$ROOT/backend/writable/index.html" "$RELEASE/writable/$dir/" 2>/dev/null || true
 done
