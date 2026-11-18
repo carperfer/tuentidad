@@ -268,3 +268,17 @@ Para cada entrada registrar:
 - **Resultado esperado:** Conversaciones 1 a 1 con sondeo adaptativo, amigos conectados, mensajes no leídos y la interfaz de §8 de la guía.
 - **Resultado obtenido:** Tabla `messages` y controlador `Chat` (estado, mensajes y envío; solo entre amigos). La conexión se calcula con `users.last_active`, que actualiza cada consulta del estado. En la SPA, `ChatService` (sondeo y estado, sin React) con transporte HTTP inyectable, `ChatProvider` en el layout, «Chat (n)» en la topbar, módulo en Inicio, ventanas flotantes con dock y «Mensaje privado» en el perfil. Los mensajes se exportan y se borran con la cuenta. Tests: 111 de backend y 54 de frontend; probado en el navegador con dos usuarios (la respuesta llega en menos de 4 s).
 - **Decisión:** Sondeo en lugar de WebSockets porque OVH no los permite; intervalos de 30 s (estado), 4 s (conversación abierta) y 60 s en segundo plano. Conectado = ha consultado en los últimos 2 minutos. No se puede chatear con los perfiles de bienvenida ni con antiguos amigos (sus mensajes sin leer no cuentan). Máximo 3 ventanas abiertas. Sin «Ajustes» del chat por ahora.
+
+### 2026-11-18 — Amistad automática al aceptar una invitación
+
+- **Objetivo:** Que quien se registra con la invitación de un usuario quede como su amigo, como ya pasaba con los perfiles de bienvenida.
+- **Prompt utilizado:** "haz una corrección, cuando invitas por correo a alguien y este acepta, se convierte inmediatamente en tu amigo".
+- **Resultado obtenido:** El registro crea la amistad con quien invita, sea una persona o un perfil de bienvenida. El email de invitación y el formulario de registro lo avisan («En cuanto crees tu cuenta, seréis amigos»). Si la cuenta que invitó ya no existe, el registro sigue funcionando sin amistad. La prueba de integración deja de pedir amistad tras registrarse. Tests: 113 de backend y 54 de frontend.
+- **Decisión:** Sin aviso nuevo para quien invita: verá a la persona en su lista de amigos.
+
+### 2026-11-18 — Álbum por defecto en cada cuenta
+
+- **Objetivo:** Que cada usuario tenga ya un álbum para subir fotos sin tener que crear el primero.
+- **Prompt utilizado:** "Otra corrección, por defecto para el perfil de cada usuario debe haber un album ya creado para que pueda subir fotos y no tenga que crear el primero".
+- **Resultado obtenido:** Las cuentas nuevas (registro con invitación, primer usuario y comando de consola) empiezan con el álbum vacío «Mis fotos» (`AlbumModel::createDefault`). Una migración lo crea para las cuentas existentes sin ningún álbum, salvo los perfiles de bienvenida. Tests: 115 de backend y 54 de frontend.
+- **Decisión:** Es un álbum normal: se puede renombrar o borrar. La migración no se deshace, porque el álbum puede tener ya fotos.

@@ -3,9 +3,9 @@
 namespace App\Controllers\Api;
 
 use App\Libraries\Tokens;
+use App\Models\AlbumModel;
 use App\Models\FriendshipModel;
 use App\Models\InvitationModel;
-use App\Models\WelcomeProfileModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Shield\Entities\User;
 use Throwable;
@@ -88,9 +88,12 @@ class Registration extends ApiController
                 return $this->message('La invitación no existe, ya se ha usado o ha caducado.', 404);
             }
 
-            // Quien entra pidiendo amistad a un perfil de bienvenida, queda como su amigo
+            model(AlbumModel::class)->createDefault((int) $user->id);
+
+            // Quien entra con una invitación queda como amigo de quien le invitó
+            // (una persona o un perfil de bienvenida). Si esa cuenta ya no existe, inviter_id es null
             $inviterId = (int) $invitation['inviter_id'];
-            if ($inviterId > 0 && model(WelcomeProfileModel::class)->isWelcomeUser($inviterId)) {
+            if ($inviterId > 0) {
                 model(FriendshipModel::class)->befriend((int) $user->id, $inviterId);
             }
 

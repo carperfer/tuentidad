@@ -2,6 +2,7 @@
 
 namespace App\Libraries;
 
+use App\Models\AlbumModel;
 use CodeIgniter\Shield\Entities\User;
 
 /**
@@ -53,6 +54,7 @@ class UserCreator
         $user = $users->findById($users->getInsertID());
         $users->addToDefaultGroup($user);
         $user->activate();
+        model(AlbumModel::class)->createDefault((int) $user->id);
 
         return $user;
     }

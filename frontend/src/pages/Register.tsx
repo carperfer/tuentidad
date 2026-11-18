@@ -80,7 +80,7 @@ export function Register() {
           </>
         ) : invitation.inviter ? (
           <>
-            <strong>{invitation.inviter}</strong> te ha invitado a tuentidad.{' '}
+            <strong>{invitation.inviter}</strong> te ha invitado a tuentidad: en cuanto crees tu cuenta, seréis amigos.{' '}
           </>
         ) : null}
         Tu cuenta usará el email <strong>{invitation.email}</strong>.
