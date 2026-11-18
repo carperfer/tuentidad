@@ -24,17 +24,25 @@ class Events extends ApiController
 
     private const MAX_INVITEES = 200;
 
+    private const PAST_PAGE = 20;
+
+    /**
+     * Próximos eventos y los pasados de 20 en 20 (?past_offset=n para los siguientes).
+     */
     public function index(): ResponseInterface
     {
         $userId = (int) auth()->user()->id;
         $limit  = $this->ongoingLimit();
+        $offset = max(0, (int) $this->request->getGet('past_offset'));
 
         $upcoming = $this->mine($userId)->where('events.starts_at >=', $limit)->orderBy('events.starts_at')->get()->getResultArray();
-        $past     = $this->mine($userId)->where('events.starts_at <', $limit)->orderBy('events.starts_at', 'DESC')->limit(20)->get()->getResultArray();
+        $past     = $this->mine($userId)->where('events.starts_at <', $limit)->orderBy('events.starts_at', 'DESC')->limit(self::PAST_PAGE + 1, $offset)->get()->getResultArray();
+        $more     = count($past) > self::PAST_PAGE;
 
         return $this->respond([
-            'upcoming' => array_map(fn (array $event): array => $this->eventData($event, $userId), $upcoming),
-            'past'     => array_map(fn (array $event): array => $this->eventData($event, $userId), $past),
+            'upcoming'  => $this->eventList($upcoming, $userId),
+            'past'      => $this->eventList(array_slice($past, 0, self::PAST_PAGE), $userId),
+            'past_more' => $more,
         ]);
     }
 
@@ -80,7 +88,7 @@ class Events extends ApiController
         usort($birthdays, static fn (array $a, array $b): int => $a['date'] <=> $b['date']);
 
         return $this->respond([
-            'events'    => array_map(fn (array $event): array => $this->eventData($event, $userId), $events),
+            'events'    => $this->eventList($events, $userId),
             'birthdays' => $birthdays,
         ]);
     }
@@ -432,18 +440,58 @@ class Events extends ApiController
     }
 
     /**
-     * @param array<string, mixed> $event Fila de mine()
+     * Varios eventos con dos consultas en total (respuestas y amigos), no dos por evento.
+     *
+     * @param list<array<string, mixed>> $events Filas de mine()
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function eventList(array $events, int $userId): array
+    {
+        if ($events === []) {
+            return [];
+        }
+
+        $counts  = $this->counts(array_map('intval', array_column($events, 'event_id')));
+        $friends = $this->friendIds($userId);
+
+        return array_map(fn (array $event): array => $this->eventData($event, $userId, $counts[(int) $event['event_id']], $friends), $events);
+    }
+
+    /**
+     * Respuestas de cada evento: yes, maybe, no y pending.
+     *
+     * @param list<int> $eventIds
+     *
+     * @return array<int, array<string, int>>
+     */
+    private function counts(array $eventIds): array
+    {
+        $counts = array_fill_keys($eventIds, array_fill_keys(['yes', 'maybe', 'no', 'pending'], 0));
+        $rows   = db_connect()->table('event_invitations')
+            ->select('event_id, status, COUNT(*) AS total')
+            ->whereIn('event_id', $eventIds)
+            ->groupBy(['event_id', 'status'])
+            ->get()
+            ->getResultArray();
+
+        foreach ($rows as $row) {
+            $counts[(int) $row['event_id']][$row['status']] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
+
+    /**
+     * @param array<string, mixed> $event   Fila de mine()
+     * @param array<string, int>   $counts  Respuestas del evento (ver counts())
+     * @param list<int>            $friends Amigos de quien consulta
      *
      * @return array<string, mixed>
      */
-    private function eventData(array $event, int $userId): array
+    private function eventData(array $event, int $userId, array $counts, array $friends): array
     {
         $isOrganizer = (int) $event['user_id'] === $userId;
-        $counts      = array_fill_keys(['yes', 'maybe', 'no', 'pending'], 0);
-
-        foreach (db_connect()->table('event_invitations')->select('status, COUNT(*) AS total')->where('event_id', $event['event_id'])->groupBy('status')->get()->getResultArray() as $row) {
-            $counts[$row['status']] = (int) $row['total'];
-        }
 
         return [
             'id'           => (int) $event['event_id'],
@@ -451,7 +499,7 @@ class Events extends ApiController
             'place'        => $event['place'],
             'description'  => $event['description'],
             'starts_at'    => $event['starts_at'],
-            'organizer'    => $this->personData($event, $isOrganizer || in_array((int) $event['user_id'], $this->friendIds($userId), true)),
+            'organizer'    => $this->personData($event, $isOrganizer || in_array((int) $event['user_id'], $friends, true)),
             'is_organizer' => $isOrganizer,
             'my_status'    => $isOrganizer ? 'organizer' : $event['my_status'],
             // Quien organiza cuenta entre los que van
@@ -481,7 +529,7 @@ class Events extends ApiController
             ->getResultArray();
 
         return [
-            ...$this->eventData($event, $userId),
+            ...$this->eventList([$event], $userId)[0],
             'invitees' => array_map(fn (array $row): array => [
                 'person' => $this->personData($row, in_array((int) $row['id'], $friends, true)),
                 'status' => $row['status'],

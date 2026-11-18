@@ -88,6 +88,34 @@ class Profiles extends ApiController
     /**
      * Cambia solo el estado (barra «¿Cómo va todo?» de la página de inicio).
      */
+    /**
+     * Ajustes de la cuenta: por ahora, la frecuencia de los emails de resumen.
+     */
+    public function updateSettings(): ResponseInterface
+    {
+        $user   = auth()->user();
+        $digest = $this->input()['digest'] ?? null;
+        if (! in_array($digest, ['none', 'daily', 'weekly'], true)) {
+            return $this->invalid(['digest' => 'Elige nunca, cada día o cada semana.']);
+        }
+
+        // Al activarlo, el primer resumen solo incluye lo que llegue a partir de ahora
+        $data = ['digest' => $digest];
+        if (($user->digest ?? 'none') === 'none' && $digest !== 'none') {
+            $data['digest_sent_at'] = date('Y-m-d H:i:s');
+        }
+        if (! model(UserModel::class)->update((int) $user->id, $data)) {
+            return $this->message('No se han podido guardar los ajustes.', 500);
+        }
+
+        $updated = auth()->getProvider()->findById((int) $user->id);
+        if ($updated === null) {
+            throw new RuntimeException('No se ha podido volver a cargar el perfil actualizado.');
+        }
+
+        return $this->respond(['profile' => $this->profileData($updated, true, true)]);
+    }
+
     public function updateStatus(): ResponseInterface
     {
         $user   = auth()->user();
@@ -241,6 +269,7 @@ class Profiles extends ApiController
                 'status'    => $user->status_visibility ?? 'public',
                 'avatar'    => $user->avatar_visibility ?? 'public',
             ];
+            $data['digest'] = $user->digest ?? 'none';
         }
 
         return $data;

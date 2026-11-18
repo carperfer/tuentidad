@@ -4,6 +4,7 @@ import { errorMessage, fieldErrors } from '../api/client'
 import { getProfile, updateProfile, uploadAvatar, type Profile, type ProfileData, type Visibility } from '../api/profile'
 import { useAuth } from '../auth/context'
 import { AccountData } from '../components/AccountData'
+import { DigestSettings } from '../components/DigestSettings'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
 import { ProfilePhoto } from '../components/ProfileSidebar'
@@ -190,6 +191,7 @@ export function ProfileEdit() {
           </button>
         </form>
       </Module>
+      <DigestSettings initial={profile.digest ?? 'none'} />
       <AccountData />
     </Columns>
   )

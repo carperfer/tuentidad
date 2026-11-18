@@ -5,6 +5,7 @@ namespace App\Controllers\Api;
 use App\Libraries\DatabaseBackup;
 use App\Libraries\EventReminders;
 use App\Libraries\Mailer;
+use App\Libraries\NotificationDigest;
 use App\Libraries\UserCreator;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -70,6 +71,19 @@ class Deploy extends ApiController
         }
 
         return $this->respond((new EventReminders(db_connect(), new Mailer()))->send());
+    }
+
+    /**
+     * Envía los emails de resumen a quien los tiene activados y le toca.
+     * Lo lanza cada día el workflow «Resumen por email».
+     */
+    public function digests(): ResponseInterface
+    {
+        if (($denied = $this->authorize()) !== null) {
+            return $denied;
+        }
+
+        return $this->respond((new NotificationDigest(db_connect(), new Mailer()))->send());
     }
 
     /**

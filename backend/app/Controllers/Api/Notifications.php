@@ -12,18 +12,36 @@ use CodeIgniter\HTTP\ResponseInterface;
  */
 class Notifications extends ApiController
 {
-    private const LIST_LIMIT = 30;
+    private const PAGE = 20;
 
+    /**
+     * Avisos del más reciente al más antiguo, de 20 en 20.
+     * ?group=photos|friends|events filtra; ?before=<id> trae la página siguiente.
+     */
     public function index(): ResponseInterface
     {
-        $rows = $this->visible()
+        $group  = (string) $this->request->getGet('group');
+        $before = (int) $this->request->getGet('before');
+        if ($group !== '' && ! isset(NotificationModel::GROUPS[$group])) {
+            return $this->invalid(['group' => 'Filtro no válido.']);
+        }
+
+        $query = $this->visible()
             ->select('notifications.id AS notification_id, notifications.type, notifications.photo_id, notifications.event_id, notifications.created_at, notifications.read_at, photos.album_id, events.title AS event_title, ' . self::PERSON_COLUMNS)
             ->join('users', 'users.id = notifications.actor_id')
             ->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')
             ->orderBy('notifications.id', 'DESC')
-            ->limit(self::LIST_LIMIT)
-            ->get()
-            ->getResultArray();
+            // Uno de más para saber si hay otra página
+            ->limit(self::PAGE + 1);
+        if ($group !== '') {
+            $query->whereIn('notifications.type', NotificationModel::GROUPS[$group]);
+        }
+        if ($before > 0) {
+            $query->where('notifications.id <', $before);
+        }
+        $rows = $query->get()->getResultArray();
+        $more = count($rows) > self::PAGE;
+        $rows = array_slice($rows, 0, self::PAGE);
 
         $friends       = $this->friendIds((int) auth()->user()->id);
         $notifications = array_map(fn (array $row): array => [
@@ -40,7 +58,26 @@ class Notifications extends ApiController
             'read'       => $row['read_at'] !== null,
         ], $rows);
 
-        return $this->respond(['notifications' => $notifications, 'unread' => $this->unreadCounts()]);
+        return $this->respond([
+            'notifications' => $notifications,
+            'next_before'   => $more ? end($notifications)['id'] : null,
+            'unread'        => $this->unreadCounts(),
+        ]);
+    }
+
+    /**
+     * Marca un aviso como leído (al abrirlo desde la lista).
+     */
+    public function markOneRead(int $id): ResponseInterface
+    {
+        model(NotificationModel::class)
+            ->where('id', $id)
+            ->where('user_id', (int) auth()->user()->id)
+            ->where('read_at', null)
+            ->set('read_at', date('Y-m-d H:i:s'))
+            ->update();
+
+        return $this->respond(['unread' => $this->unreadCounts()]);
     }
 
     /**

@@ -82,6 +82,7 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `GET /api/profiles/{id}/avatar`                   | Sí     | Ver la foto solo si la privacidad del perfil lo permite                                                                                                            |
 | `PUT /api/profile`                                | Sí     | Actualizar datos personales, estado, biografía y visibilidad (`public`, `friends` o `private`)                                                                     |
 | `PUT /api/profile/status`                         | Sí     | Cambiar solo el estado (`status`), desde la barra «¿Cómo va todo?»                                                                                                 |
+| `PUT /api/profile/settings`                       | Sí     | Ajustes de la cuenta: emails de resumen (`digest`: `none`, `daily` o `weekly`) |
 | `POST /api/profile/avatar`                        | Sí     | Subir foto JPG, PNG o WebP de hasta 2 MB (máximo 4000 × 4000 px)                                                                                                   |
 | `GET /api/dashboard`                              | Sí     | Resumen de amistades e invitaciones propias                                                                                                                        |
 | `GET /api/account/export`                         | Sí     | Descarga en JSON de todos los datos de la cuenta (RGPD) |
@@ -114,13 +115,14 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `POST /api/photos/{id}/comments`                  | Sí     | Comentar (`body`, hasta 500 caracteres). Avisa al dueño y a quienes salen en la foto |
 | `DELETE /api/photo-comments/{id}`                 | Sí     | Borrar un comentario: su autor o el dueño de la foto |
 | `GET /api/users/{id}/tagged-photos`               | Sí     | Fotos en las que sale un usuario, entre las que puede ver quien consulta, con `total` (`?limit=n` opcional) |
-| `GET /api/notifications`                          | Sí     | Últimos 30 avisos (etiquetas, comentarios y solicitudes de amistad) y los no leídos por tipo |
-| `GET /api/notifications/unread`                   | Sí     | Avisos no leídos por tipo (`total`, `photo_tag`, `photo_comment`, `friend_request`) |
+| `GET /api/notifications`                          | Sí     | Avisos de 20 en 20 (`?before=<id>` para la página siguiente, `?group=` con `photos`, `friends` o `events` para filtrar), `next_before` y los no leídos por tipo |
+| `GET /api/notifications/unread`                   | Sí     | Avisos no leídos: `total` y uno por tipo |
 | `POST /api/notifications/read`                    | Sí     | Marcar todos los avisos como leídos |
+| `POST /api/notifications/{id}/read`               | Sí     | Marcar un aviso como leído |
 | `GET /api/chat`                                   | Sí     | Estado del chat: amigos (primero los conectados), mensajes sin leer de cada uno y totales. Marca al usuario como conectado (2 min) |
 | `GET /api/chat/{id}/messages`                     | Sí     | Últimos 50 mensajes con un amigo; con `?after=<id>`, solo los posteriores. Marca como leídos los recibidos |
 | `POST /api/chat/{id}/messages`                    | Sí     | Enviar un mensaje a un amigo (`body`, hasta 1000 caracteres) |
-| `GET /api/events`                                 | Sí     | Eventos propios y a los que estás invitado: próximos y pasados (los 20 últimos) |
+| `GET /api/events`                                 | Sí     | Eventos propios y a los que estás invitado: próximos y pasados de 20 en 20 (`?past_offset=n`, `past_more`) |
 | `POST /api/events`                                | Sí     | Crear un evento (`title`, `place`, `description`, `starts_at` en ISO UTC, `invite`: ids de amigos). Avisa a los invitados |
 | `GET /api/events/{id}`                            | Sí     | Evento con invitados, respuestas y comentarios (solo quien organiza y sus invitados). Marca como leídos sus avisos |
 | `PUT /api/events/{id}`                            | Sí     | Editar un evento propio; si cambia la fecha, se volverá a recordar |
@@ -241,6 +243,7 @@ El alojamiento no tiene SSH, así que lo que normalmente se haría con `php spar
 - `POST /api/deploy/migrate`: aplica las migraciones pendientes. El workflow lo llama en cada despliegue.
 - `POST /api/deploy/backup`: copia de la base de datos (ver abajo). El workflow la hace antes de migrar.
 - `POST /api/deploy/reminders`: recordatorios de los eventos de las próximas 24 horas (aviso en la web y email a quienes van o quizás van). Lo lanza cada hora el workflow **Recordatorios de eventos**; cada evento se recuerda una sola vez.
+- `POST /api/deploy/digests`: emails de resumen (avisos y mensajes sin leer) para quien los ha activado, cada día o cada semana, solo si hay novedades. Lo lanza cada día a las 07:00 UTC el workflow **Resumen por email**.
 - `POST /api/deploy/first-user`: crea el primer usuario. Solo funciona mientras no exista ninguno; se lanza una vez a mano:
 
 ```bash

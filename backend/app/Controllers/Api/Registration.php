@@ -6,6 +6,8 @@ use App\Libraries\Tokens;
 use App\Models\AlbumModel;
 use App\Models\FriendshipModel;
 use App\Models\InvitationModel;
+use App\Models\NotificationModel;
+use App\Models\WelcomeProfileModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Shield\Entities\User;
 use Throwable;
@@ -95,6 +97,10 @@ class Registration extends ApiController
             $inviterId = (int) $invitation['inviter_id'];
             if ($inviterId > 0) {
                 model(FriendshipModel::class)->befriend((int) $user->id, $inviterId);
+                // Los perfiles de bienvenida no tienen cuenta: no leerían el aviso
+                if (! model(WelcomeProfileModel::class)->isWelcomeUser($inviterId)) {
+                    model(NotificationModel::class)->notify($inviterId, (int) $user->id, 'invitation_accepted');
+                }
             }
 
             $db->transCommit();

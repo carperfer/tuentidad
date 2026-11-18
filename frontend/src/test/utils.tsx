@@ -25,7 +25,17 @@ export function mockApi(routes: Record<string, Handler>) {
   return fetchMock
 }
 
-export const noUnread = { total: 0, photo_tag: 0, photo_comment: 0, friend_request: 0, event_invite: 0, event_comment: 0, event_reminder: 0 }
+export const noUnread = {
+  total: 0,
+  photo_tag: 0,
+  photo_comment: 0,
+  friend_request: 0,
+  friend_accepted: 0,
+  invitation_accepted: 0,
+  event_invite: 0,
+  event_comment: 0,
+  event_reminder: 0,
+}
 
 const defaults: Record<string, Handler> = {
   'GET /api/csrf': () => ({ body: { header: 'X-CSRF-TOKEN', token: 'csrf' } }),
