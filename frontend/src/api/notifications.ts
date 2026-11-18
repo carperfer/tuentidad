@@ -1,7 +1,17 @@
 import { api, post } from './client'
 import type { Person } from './friends'
 
-export type NotificationType = 'photo_tag' | 'photo_comment' | 'friend_request' | 'event_invite' | 'event_comment' | 'event_reminder'
+export type NotificationType =
+  | 'photo_tag'
+  | 'photo_comment'
+  | 'friend_request'
+  | 'friend_accepted'
+  | 'invitation_accepted'
+  | 'event_invite'
+  | 'event_comment'
+  | 'event_reminder'
+
+export type NotificationGroup = 'photos' | 'friends' | 'events'
 
 export type Notification = {
   id: number
@@ -15,8 +25,19 @@ export type Notification = {
 
 export type UnreadCounts = Record<NotificationType | 'total', number>
 
-export function listNotifications(): Promise<{ notifications: Notification[]; unread: UnreadCounts }> {
-  return api('/api/notifications')
+export type NotificationPage = { notifications: Notification[]; next_before: number | null; unread: UnreadCounts }
+
+/** Avisos de 20 en 20, del más reciente al más antiguo; before trae la página siguiente. */
+export function listNotifications(options: { group?: NotificationGroup; before?: number } = {}): Promise<NotificationPage> {
+  const params = new URLSearchParams()
+  if (options.group) params.set('group', options.group)
+  if (options.before) params.set('before', String(options.before))
+  const query = params.toString()
+  return api(`/api/notifications${query ? `?${query}` : ''}`)
+}
+
+export function markNotificationRead(id: number): Promise<{ unread: UnreadCounts }> {
+  return post(`/api/notifications/${id}/read`)
 }
 
 export function getUnreadCounts(): Promise<{ unread: UnreadCounts }> {

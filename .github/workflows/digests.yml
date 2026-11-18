@@ -1,0 +1,28 @@
+name: Resumen por email
+
+# Cada mañana, la aplicación envía el email de resumen (avisos y mensajes sin
+# leer) a quien lo ha activado en «Mi cuenta», cada día o cada semana
+# (POST /api/deploy/digests con el token de despliegue). Si no hay nada
+# nuevo, no se envía; una ejecución de más no repite el email.
+
+on:
+  schedule:
+    # 07:00 UTC: las 8 o las 9 en España
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  resumen:
+    runs-on: ubuntu-latest
+    environment: produccion
+    if: vars.DESPLIEGUE == 'app'
+    steps:
+      - name: Enviar resúmenes
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'https://tuentidad.es/' }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          curl -fsS --retry 3 --retry-delay 10 --retry-all-errors -X POST \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" "${APP_BASE_URL%/}/api/deploy/digests"

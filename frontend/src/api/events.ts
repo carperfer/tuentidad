@@ -33,8 +33,9 @@ export type EventData = {
 
 export type Birthday = { person: Person; date: string }
 
-export function listEvents(): Promise<{ upcoming: EventSummary[]; past: EventSummary[] }> {
-  return api('/api/events')
+/** Próximos eventos y pasados de 20 en 20 (pastOffset para los siguientes). */
+export function listEvents(pastOffset = 0): Promise<{ upcoming: EventSummary[]; past: EventSummary[]; past_more: boolean }> {
+  return api(`/api/events${pastOffset > 0 ? `?past_offset=${pastOffset}` : ''}`)
 }
 
 export function getCalendar(): Promise<{ events: EventSummary[]; birthdays: Birthday[] }> {

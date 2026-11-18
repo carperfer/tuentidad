@@ -195,6 +195,7 @@ class Friends extends ApiController
         $db->transBegin();
         model(FriendshipModel::class)->befriend($userId, (int) $request['sender_id']);
         $db->table('friend_requests')->where('id', $requestId)->delete();
+        model(NotificationModel::class)->notify((int) $request['sender_id'], $userId, 'friend_accepted');
 
         if (! $db->transStatus()) {
             $db->transRollback();

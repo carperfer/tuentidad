@@ -23,7 +23,11 @@ export type Profile = {
     status: Visibility
     avatar: Visibility
   }
+  /** Solo para el dueño: frecuencia de los emails de resumen. */
+  digest?: Digest
 }
+
+export type Digest = 'none' | 'daily' | 'weekly'
 
 export type ProfileData = {
   first_name: string
@@ -49,6 +53,10 @@ export function getProfile(id: number): Promise<{ profile: Profile }> {
 
 export function updateProfile(data: ProfileData): Promise<{ profile: Profile }> {
   return api('/api/profile', { method: 'PUT', body: JSON.stringify(data) })
+}
+
+export function updateSettings(settings: { digest: Digest }): Promise<{ profile: Profile }> {
+  return api('/api/profile/settings', { method: 'PUT', body: JSON.stringify(settings) })
 }
 
 export function updateStatus(status: string): Promise<{ profile: Profile }> {

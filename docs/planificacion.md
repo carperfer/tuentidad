@@ -177,9 +177,10 @@ Fuera de alcance: los módulos de funciones que aún no existen (tablón, espaci
 
 ### Sprint 11 — Notificaciones y pulido
 
-- Centro de notificaciones unificado
-- Emails de resumen opcionales
-- Mejoras de rendimiento (índices, caché, paginación)
+- [x] Centro de notificaciones unificado: página Avisos con todos los tipos (fotos, amistad y eventos), filtros, paginación («Ver más») y «Marcar todos como leídos»; cada aviso se marca como leído al abrirlo. Avisos nuevos: «ha aceptado tu solicitud de amistad» y «ha aceptado tu invitación»
+- [x] Emails de resumen opcionales (desactivados por defecto): cada día o cada semana desde «Mi cuenta», con los avisos y mensajes sin leer; solo se envían si hay novedades (workflow diario «Resumen por email»)
+- [x] Rendimiento: índice para paginar los avisos, caché de un año para los archivos del frontend con hash (e `index.html` siempre revalidado), listas de eventos sin consultas por cada evento y eventos pasados paginados
+- [x] Tests: 131 de backend y 61 de frontend; prueba en el navegador del centro de avisos y del ajuste del resumen
 
 ## Seguimiento obligatorio de prompts
 

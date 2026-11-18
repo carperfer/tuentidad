@@ -22,6 +22,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
     $routes->post('deploy/first-user', 'Deploy::firstUser');
     $routes->post('deploy/backup', 'Deploy::backup');
     $routes->post('deploy/reminders', 'Deploy::reminders');
+    $routes->post('deploy/digests', 'Deploy::digests');
 
     $routes->group('', ['filter' => 'apiauth'], static function (RouteCollection $routes): void {
         $routes->get('dashboard', 'Dashboard::index');
@@ -43,6 +44,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->get('profiles/(:num)/avatar', 'Profiles::avatar/$1');
         $routes->put('profile', 'Profiles::update');
         $routes->put('profile/status', 'Profiles::updateStatus');
+        $routes->put('profile/settings', 'Profiles::updateSettings');
         $routes->post('profile/avatar', 'Profiles::uploadAvatar');
         $routes->get('users/(:num)/albums', 'Albums::index/$1');
         $routes->post('albums', 'Albums::create');
@@ -77,6 +79,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->get('notifications', 'Notifications::index');
         $routes->get('notifications/unread', 'Notifications::unread');
         $routes->post('notifications/read', 'Notifications::markRead');
+        $routes->post('notifications/(:num)/read', 'Notifications::markOneRead/$1');
         $routes->get('invitations', 'Invitations::index');
         $routes->post('invitations', 'Invitations::create');
     });

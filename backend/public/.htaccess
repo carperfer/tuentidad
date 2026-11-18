@@ -24,6 +24,17 @@ DirectoryIndex index.html
 	Header always set Strict-Transport-Security "max-age=31536000"
 </IfModule>
 
+# Caché del frontend: los archivos de /assets/ llevan un hash en el nombre y
+# no cambian nunca; index.html (también cuando sirve una ruta de la SPA) se
+# revalida siempre para que tras un despliegue se cargue la versión nueva
+<IfModule mod_headers.c>
+	SetEnvIf Request_URI "^/assets/" TUENTIDAD_ASSET
+	Header set Cache-Control "public, max-age=31536000, immutable" env=TUENTIDAD_ASSET
+	<Files "index.html">
+		Header set Cache-Control "no-cache"
+	</Files>
+</IfModule>
+
 # ----------------------------------------------------------------------
 # Rewrite engine
 # ----------------------------------------------------------------------

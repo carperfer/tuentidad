@@ -17,6 +17,7 @@ export function UserCard({ friendsCount, pendingRequests = 0 }: UserCardProps) {
   const tags = unread?.photo_tag ?? 0
   const comments = unread?.photo_comment ?? 0
   const events = (unread?.event_invite ?? 0) + (unread?.event_comment ?? 0) + (unread?.event_reminder ?? 0)
+  const friends = (unread?.friend_accepted ?? 0) + (unread?.invitation_accepted ?? 0)
 
   return (
     <section className="module user-card" aria-label="Tu cuenta">
@@ -50,6 +51,11 @@ export function UserCard({ friendsCount, pendingRequests = 0 }: UserCardProps) {
               <Link to="/gente">
                 {pendingRequests === 1 ? '1 solicitud de amistad' : `${pendingRequests} solicitudes de amistad`}
               </Link>
+            </li>
+          )}
+          {friends > 0 && (
+            <li className="notifications__new">
+              <Link to="/avisos">{friends === 1 ? '1 amigo nuevo' : `${friends} amigos nuevos`}</Link>
             </li>
           )}
           {events > 0 && (

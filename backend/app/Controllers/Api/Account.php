@@ -55,7 +55,8 @@ class Account extends ApiController
                     'status'    => $user->status_visibility,
                     'avatar'    => $user->avatar_visibility,
                 ],
-                'created_at' => $user->created_at?->format('Y-m-d H:i:s'),
+                'email_digest' => $user->digest ?? 'none',
+                'created_at'   => $user->created_at?->format('Y-m-d H:i:s'),
             ],
             'friends' => $this->withIntIds($db->table('friendships')
                 ->select("users.id, {$name('users')} AS name, friendships.created_at AS since", false)

@@ -1729,3 +1729,33 @@ button {
   padding: 3px 0;
   cursor: pointer;
 }
+
+/* --- Centro de avisos ------------------------------------------------------ */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.filters__option {
+  padding: 2px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  background: var(--c-surface);
+  color: var(--c-link);
+  font: inherit;
+  cursor: pointer;
+}
+
+.filters__option--active {
+  background: var(--c-brand-dark);
+  border-color: var(--c-brand-dark);
+  color: #fff;
+}
+
+.load-more {
+  margin: var(--space-3) 0 0;
+  text-align: center;
+}
