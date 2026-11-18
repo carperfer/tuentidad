@@ -1,22 +1,26 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
-import { errorMessage, fieldErrors } from '../../api/client'
-import { commentPhoto, deleteComment, type PhotoComment } from '../../api/photos'
-import { useAuth } from '../../auth/context'
-import { timeAgo } from '../../lib/dates'
-import { Alert } from '../Alert'
-import { Avatar } from '../ui/Avatar'
-import { MediaObject } from '../ui/MediaObject'
-import { Counter, Module } from '../ui/Module'
+import { errorMessage, fieldErrors } from '../api/client'
+import type { Comment } from '../api/comments'
+import { useAuth } from '../auth/context'
+import { timeAgo } from '../lib/dates'
+import { Alert } from './Alert'
+import { Avatar } from './ui/Avatar'
+import { MediaObject } from './ui/MediaObject'
+import { Counter, Module } from './ui/Module'
 
-type PhotoCommentsProps = {
-  photoId: number
-  comments: PhotoComment[]
-  onChange: (comments: PhotoComment[]) => void
+type CommentsProps = {
+  /** Identifica la caja de texto (p. ej. "photo-10"). */
+  id: string
+  comments: Comment[]
+  /** Publican o borran y devuelven la lista actualizada. */
+  onSubmit: (body: string) => Promise<Comment[]>
+  onDelete: (commentId: number) => Promise<Comment[]>
+  onChange: (comments: Comment[]) => void
 }
 
-/** Comentarios de una foto y caja para escribir uno (guía §7.3 y §7.4). */
-export function PhotoComments({ photoId, comments, onChange }: PhotoCommentsProps) {
+/** Comentarios (de una foto o un evento) y caja para escribir uno (guía §7.3 y §7.4). */
+export function Comments({ id, comments, onSubmit, onDelete, onChange }: CommentsProps) {
   const { user } = useAuth()
   const [body, setBody] = useState('')
   const [error, setError] = useState('')
@@ -28,8 +32,7 @@ export function PhotoComments({ photoId, comments, onChange }: PhotoCommentsProp
     setSending(true)
     setError('')
     try {
-      const result = await commentPhoto(photoId, body)
-      onChange(result.comments)
+      onChange(await onSubmit(body))
       setBody('')
     } catch (caught) {
       setError(fieldErrors(caught).body ?? errorMessage(caught))
@@ -41,7 +44,7 @@ export function PhotoComments({ photoId, comments, onChange }: PhotoCommentsProp
   async function handleDelete(commentId: number) {
     setError('')
     try {
-      onChange((await deleteComment(commentId)).comments)
+      onChange(await onDelete(commentId))
     } catch (caught) {
       setError(errorMessage(caught))
     }
@@ -54,7 +57,7 @@ export function PhotoComments({ photoId, comments, onChange }: PhotoCommentsProp
           Comentarios <Counter value={comments.length} />
         </>
       }
-      className="photo-comments"
+      className="comments"
     >
       {error && <Alert>{error}</Alert>}
       {comments.length === 0 ? (
@@ -98,11 +101,11 @@ export function PhotoComments({ photoId, comments, onChange }: PhotoCommentsProp
       )}
       <form className="composer" onSubmit={handleSubmit}>
         <Avatar src={user?.avatar_url} name={user?.first_name ?? ''} size={32} decorative />
-        <label className="visually-hidden" htmlFor={`comment-${photoId}`}>
+        <label className="visually-hidden" htmlFor={`comment-${id}`}>
           Escribe un comentario
         </label>
         <textarea
-          id={`comment-${photoId}`}
+          id={`comment-${id}`}
           rows={2}
           maxLength={500}
           placeholder="Escribe un comentario…"

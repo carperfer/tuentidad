@@ -444,6 +444,7 @@ Primitivos compartidos: Module, Avatar, Button, Dropdown, Pager, MediaObject, Co
 - [x] Topbar sticky con pestaña activa, badge de avisos sin leer en «Avisos» (y en el botón «Menú» en móvil) y «Chat (n)» con badge de mensajes sin leer.
 - [x] Primitivos: `Avatar` (tamaños), `Button`, `Dropdown`, `Pager`, `MediaObject` e indicador de conexión (punto verde con texto oculto) en el chat.
 - [x] Plantillas: Inicio, Perfil ajeno, Perfil propio.
+- [x] Módulo «Calendario» en Inicio (Hoy / Mañana / Esta semana) con «Crear evento». Sin «Eventos patrocinados».
 - [x] Chat: lista (topbar e Inicio), ventana flotante y dock; a pantalla completa en móvil. Sin «Ajustes» en el pie de la lista hasta que haya ajustes de chat.
 - [x] Footer (sin selector de idioma: solo castellano por ahora).
 - [x] Revisión de accesibilidad (§12).

@@ -21,6 +21,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
     $routes->post('deploy/migrate', 'Deploy::migrate');
     $routes->post('deploy/first-user', 'Deploy::firstUser');
     $routes->post('deploy/backup', 'Deploy::backup');
+    $routes->post('deploy/reminders', 'Deploy::reminders');
 
     $routes->group('', ['filter' => 'apiauth'], static function (RouteCollection $routes): void {
         $routes->get('dashboard', 'Dashboard::index');
@@ -59,6 +60,17 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->post('photos/(:num)/comments', 'Photos::comment/$1');
         $routes->delete('photo-comments/(:num)', 'Photos::deleteComment/$1');
         $routes->get('users/(:num)/tagged-photos', 'Photos::tagged/$1');
+        $routes->get('calendar', 'Events::calendar');
+        $routes->get('events', 'Events::index');
+        $routes->post('events', 'Events::create');
+        $routes->get('events/invitable', 'Events::invitable');
+        $routes->get('events/(:num)', 'Events::show/$1');
+        $routes->put('events/(:num)', 'Events::update/$1');
+        $routes->delete('events/(:num)', 'Events::delete/$1');
+        $routes->post('events/(:num)/invitations', 'Events::inviteMore/$1');
+        $routes->put('events/(:num)/rsvp', 'Events::rsvp/$1');
+        $routes->post('events/(:num)/comments', 'Events::comment/$1');
+        $routes->delete('event-comments/(:num)', 'Events::deleteComment/$1');
         $routes->get('chat', 'Chat::status');
         $routes->get('chat/(:num)/messages', 'Chat::messages/$1');
         $routes->post('chat/(:num)/messages', 'Chat::send/$1');

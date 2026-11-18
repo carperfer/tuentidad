@@ -1,4 +1,5 @@
 import { api, post } from './client'
+import type { Comment } from './comments'
 import type { Person } from './friends'
 
 export type AlbumSummary = {
@@ -88,13 +89,7 @@ export type PhotoTag = {
 
 export type TagArea = Pick<PhotoTag, 'x' | 'y' | 'width' | 'height'>
 
-export type PhotoComment = {
-  id: number
-  author: Person
-  body: string
-  created_at: string
-  can_delete: boolean
-}
+export type PhotoComment = Comment
 
 export type PhotoDetail = {
   photo: Photo & { album_title: string; owner_id: number }

@@ -20,10 +20,14 @@ const TEXT: Record<NotificationType, string> = {
   photo_tag: 'te ha etiquetado en una foto',
   photo_comment: 'ha comentado una foto',
   friend_request: 'te ha enviado una solicitud de amistad',
+  event_invite: 'te ha invitado a',
+  event_comment: 'ha comentado en',
+  event_reminder: 'te recuerda que mañana es',
 }
 
 function target(notification: Notification): string {
   if (notification.photo) return `/albumes/${notification.photo.album_id}/fotos/${notification.photo.id}`
+  if (notification.event) return `/eventos/${notification.event.id}`
   return '/gente'
 }
 
@@ -70,7 +74,10 @@ export function Notifications() {
                     <Link to={`/perfil/${notification.actor.id}`} className="person-name">
                       {notification.actor.first_name} {notification.actor.last_name}
                     </Link>{' '}
-                    <Link to={target(notification)}>{TEXT[notification.type]}</Link>
+                    <Link to={target(notification)}>
+                      {TEXT[notification.type]}
+                      {notification.event && ` «${notification.event.title}»`}
+                    </Link>
                     {!notification.read && <span className="visually-hidden"> (nuevo)</span>}
                   </p>
                   <time className="muted" dateTime={notification.created_at}>

@@ -120,6 +120,17 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `GET /api/chat`                                   | Sí     | Estado del chat: amigos (primero los conectados), mensajes sin leer de cada uno y totales. Marca al usuario como conectado (2 min) |
 | `GET /api/chat/{id}/messages`                     | Sí     | Últimos 50 mensajes con un amigo; con `?after=<id>`, solo los posteriores. Marca como leídos los recibidos |
 | `POST /api/chat/{id}/messages`                    | Sí     | Enviar un mensaje a un amigo (`body`, hasta 1000 caracteres) |
+| `GET /api/events`                                 | Sí     | Eventos propios y a los que estás invitado: próximos y pasados (los 20 últimos) |
+| `POST /api/events`                                | Sí     | Crear un evento (`title`, `place`, `description`, `starts_at` en ISO UTC, `invite`: ids de amigos). Avisa a los invitados |
+| `GET /api/events/{id}`                            | Sí     | Evento con invitados, respuestas y comentarios (solo quien organiza y sus invitados). Marca como leídos sus avisos |
+| `PUT /api/events/{id}`                            | Sí     | Editar un evento propio; si cambia la fecha, se volverá a recordar |
+| `DELETE /api/events/{id}`                         | Sí     | Borrar un evento propio |
+| `GET /api/events/invitable`                       | Sí     | Amigos que se pueden invitar (`?event=<id>`: los que aún no lo están) |
+| `POST /api/events/{id}/invitations`               | Sí     | Invitar a más amigos (`user_ids`) |
+| `PUT /api/events/{id}/rsvp`                       | Sí     | Responder (`status`: `yes`, `no` o `maybe`) |
+| `POST /api/events/{id}/comments`                  | Sí     | Comentar; avisa a quien organiza y a quienes van o quizás van |
+| `DELETE /api/event-comments/{id}`                 | Sí     | Borrar un comentario: su autor o quien organiza |
+| `GET /api/calendar`                               | Sí     | Eventos de los próximos 8 días (salvo los que has rechazado) y cumpleaños de amigos que lo dejan ver |
 | `GET /api/invitations`                            | Sí     | Invitaciones enviadas y cupo restante                                                                                                                              |
 | `POST /api/invitations`                           | Sí     | Invitar por email (reenviar a una pendiente no gasta cupo)                                                                                                         |
 
@@ -229,6 +240,7 @@ El alojamiento no tiene SSH, así que lo que normalmente se haría con `php spar
 
 - `POST /api/deploy/migrate`: aplica las migraciones pendientes. El workflow lo llama en cada despliegue.
 - `POST /api/deploy/backup`: copia de la base de datos (ver abajo). El workflow la hace antes de migrar.
+- `POST /api/deploy/reminders`: recordatorios de los eventos de las próximas 24 horas (aviso en la web y email a quienes van o quizás van). Lo lanza cada hora el workflow **Recordatorios de eventos**; cada evento se recuerda una sola vez.
 - `POST /api/deploy/first-user`: crea el primer usuario. Solo funciona mientras no exista ninguno; se lanza una vez a mano:
 
 ```bash

@@ -758,6 +758,7 @@ button {
 }
 
 .field input,
+.field textarea,
 .inline-form input,
 .privacy-fields select {
   width: 100%;
@@ -807,14 +808,16 @@ button {
   margin-top: var(--space-1);
 }
 
-.privacy-fields {
+.privacy-fields,
+.fieldset {
   border: 1px solid var(--c-border);
   border-radius: var(--radius);
   margin: 0 0 12px;
   padding: var(--space-2);
 }
 
-.privacy-fields legend {
+.privacy-fields legend,
+.fieldset legend {
   font-weight: bold;
 }
 
@@ -1623,4 +1626,106 @@ button {
     height: auto;
     border-radius: 0;
   }
+}
+
+/* --- Eventos y calendario (§6.1) --------------------------------------------- */
+
+.calendar__group + .calendar__group {
+  margin-top: var(--space-2);
+}
+
+.calendar__title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+}
+
+.calendar__list,
+.attendees__list,
+.friend-picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.calendar__list li + li {
+  margin-top: 3px;
+}
+
+.date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface);
+  overflow: hidden;
+  text-align: center;
+}
+
+.date-badge__month {
+  width: 100%;
+  background: var(--c-brand-dark);
+  color: #fff;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+}
+
+.date-badge__day {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 24px;
+}
+
+.event-status {
+  margin: 2px 0 0;
+  color: var(--c-notify);
+  font-size: var(--fs-sm);
+}
+
+.event-status--pending {
+  color: var(--c-brand-dark);
+  font-weight: bold;
+}
+
+.event-status--no {
+  color: var(--c-text-muted);
+}
+
+.event-header {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.event-description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rsvp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.attendees + .attendees {
+  margin-top: var(--space-2);
+}
+
+.friend-picker__list {
+  max-height: 260px;
+  overflow-y: auto;
+  margin-bottom: var(--space-2);
+}
+
+.friend-picker__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 3px 0;
+  cursor: pointer;
 }
