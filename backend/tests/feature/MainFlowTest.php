@@ -10,7 +10,7 @@ use Tests\Support\TestImages;
 
 /**
  * Prueba de integración del recorrido principal de tuentidad, solo con la API:
- * invitación, registro, amistad, fotos, etiquetas, comentarios, avisos y baja.
+ * invitación (que crea la amistad), registro, fotos, etiquetas, comentarios, avisos y baja.
  *
  * @internal
  */
@@ -39,7 +39,7 @@ final class MainFlowTest extends ApiTestCase
         $token = $this->tokenFromEmail('registro');
         $this->post('api/auth/logout')->assertStatus(204);
 
-        // Bea se registra con la invitación y pide amistad a Ana
+        // Bea se registra con la invitación y queda como amiga de Ana
         $this->get("api/invitations/{$token}")->assertOK();
         $registered = $this->postJson('api/auth/register', [
             'token'            => $token,
@@ -52,15 +52,11 @@ final class MainFlowTest extends ApiTestCase
         ]);
         $registered->assertStatus(201);
         $beaId = $this->json($registered)['user']['id'];
-        $anaId = $this->json($this->get('api/friends/search?q=Ana'))['users'][0]['id'];
-        $this->postJson('api/friend-requests', ['user_id' => $anaId])->assertStatus(201);
+        $this->assertSame(['Ana'], array_column($this->json($this->get('api/friends'))['friends'], 'first_name'));
         $this->post('api/auth/logout')->assertStatus(204);
 
-        // Ana ve el aviso, acepta y sube una foto en la que etiqueta a Bea
+        // Ana ya tiene a Bea como amiga y sube una foto en la que la etiqueta
         $this->login('ana@example.com', self::PASSWORD);
-        $this->assertSame(1, $this->json($this->get('api/notifications/unread'))['unread']['friend_request']);
-        $requestId = $this->json($this->get('api/friend-requests'))['incoming'][0]['id'];
-        $this->post("api/friend-requests/{$requestId}/accept")->assertOK();
         $albumId = $this->json($this->postJson('api/albums', ['title' => 'Verano']))['album']['id'];
         $photoId = $this->storePhoto($albumId);
         $this->postJson("api/photos/{$photoId}/tags", ['user_id' => $beaId, 'x' => 30, 'y' => 20, 'width' => 25, 'height' => 40])->assertStatus(201);

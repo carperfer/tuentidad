@@ -8,7 +8,7 @@ Construir un ejemplo real y didáctico de la cásica red social, documentando ta
 
 ## Alcance funcional
 
-- Red social de acceso por invitación
+- Red social de acceso por invitación: al registrarse con una invitación, quien entra queda como amigo de quien le invitó
 - Perfiles de bienvenida en la landing: 2 perfiles de demostración visibles públicamente a los que cualquier visitante puede solicitar amistad indicando su email; recibe una invitación para registrarse y, al completar el registro, queda como amigo de ese perfil
 - Enfoque en amigos reales
 - Subida y gestión de álbumes de fotos

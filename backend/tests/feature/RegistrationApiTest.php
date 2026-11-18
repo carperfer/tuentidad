@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\FriendshipModel;
 use App\Models\InvitationModel;
+use App\Models\UserModel;
 use Tests\Support\ApiTestCase;
 
 /**
@@ -38,6 +40,32 @@ final class RegistrationApiTest extends ApiTestCase
         $invitation = model(InvitationModel::class)->first();
         $this->assertNotNull($invitation['accepted_at']);
         $this->assertSame((string) $user->id, (string) $invitation['user_id']);
+    }
+
+    public function testRegisteringMakesTheInviterAFriend(): void
+    {
+        $this->postJson('api/auth/register', $this->validData())->assertStatus(201);
+
+        $user = auth()->getProvider()->findByCredentials(['email' => 'bea@example.com']);
+        $this->assertTrue(model(FriendshipModel::class)->areFriends((int) $user->id, $this->inviterId));
+        $this->assertTrue(model(FriendshipModel::class)->areFriends($this->inviterId, (int) $user->id));
+    }
+
+    public function testNewAccountsStartWithAnEmptyAlbum(): void
+    {
+        $user = $this->json($this->postJson('api/auth/register', $this->validData()))['user'];
+
+        $albums = $this->json($this->get("api/users/{$user['id']}/albums"))['albums'];
+        $this->assertSame([['Mis fotos', 0]], array_map(static fn (array $album): array => [$album['title'], $album['photo_count']], $albums));
+    }
+
+    public function testRegistersWhenTheInviterNoLongerExists(): void
+    {
+        model(UserModel::class)->delete($this->inviterId, true);
+
+        $this->postJson('api/auth/register', $this->validData())->assertStatus(201);
+
+        $this->dontSeeInDatabase('friendships', ['friend_id' => $this->inviterId]);
     }
 
     public function testInvitationCanOnlyBeUsedOnce(): void

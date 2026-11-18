@@ -5,7 +5,7 @@
  * @var int    $days
  */
 ?>
-<p><strong><?= esc($inviterName) ?></strong> te ha invitado a tuentidad, la red social privada para estar en contacto con tus amigos de verdad.</p>
+<p><strong><?= esc($inviterName) ?></strong> te ha invitado a tuentidad, la red social privada para estar en contacto con tus amigos de verdad. En cuanto crees tu cuenta, seréis amigos.</p>
 <p style="text-align:center;margin:24px 0;">
   <a href="<?= esc($url, 'attr') ?>" style="background:#3b6db3;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:bold;">Crear mi cuenta</a>
 </p>

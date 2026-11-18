@@ -108,6 +108,7 @@ final class DeployApiTest extends ApiTestCase
 
         $result->assertStatus(201);
         $this->assertSame('admin@example.com', $this->json($result)['user']['email']);
+        $this->seeInDatabase('albums', ['user_id' => $this->json($result)['user']['id'], 'title' => 'Mis fotos']);
         $this->sendCsrf = true;
         $this->postJson('api/auth/login', ['email' => 'admin@example.com', 'password' => 'Faro.Viejo.Sur.31'])->assertOK();
 

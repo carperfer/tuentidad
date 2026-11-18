@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Database\Migrations\CreateDefaultAlbums;
 use App\Libraries\PhotoProcessor;
 use App\Models\AlbumModel;
 use App\Models\FriendshipModel;
 use App\Models\PhotoModel;
 use CodeIgniter\Shield\Entities\User;
+use Config\Database;
 use Tests\Support\ApiTestCase;
 use Tests\Support\TestImages;
 
@@ -177,5 +179,21 @@ final class AlbumApiTest extends ApiTestCase
 
         $this->actingAs($stranger);
         $this->get("api/users/{$owner->id}/photos")->assertStatus(403);
+    }
+
+    public function testMigrationGivesExistingAccountsWithoutAlbumsTheDefaultOne(): void
+    {
+        $withoutAlbums = $this->createUser('ana@example.com', 'Ana');
+        $withAlbum     = $this->createUser('bea@example.com', 'Bea');
+        model(AlbumModel::class)->insert(['user_id' => $withAlbum->id, 'title' => 'Verano']);
+        $welcomeIds = array_column(db_connect()->table('welcome_profiles')->select('user_id')->get()->getResultArray(), 'user_id');
+
+        (new CreateDefaultAlbums(Database::forge()))->up();
+
+        $this->seeInDatabase('albums', ['user_id' => $withoutAlbums->id, 'title' => 'Mis fotos']);
+        $this->dontSeeInDatabase('albums', ['user_id' => $withAlbum->id, 'title' => 'Mis fotos']);
+        foreach ($welcomeIds as $welcomeId) {
+            $this->dontSeeInDatabase('albums', ['user_id' => $welcomeId]);
+        }
     }
 }
