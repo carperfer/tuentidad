@@ -47,6 +47,12 @@ export function Cookies() {
       </p>
 
       <p>
+        Además, mientras tienes la pestaña abierta, el navegador recuerda qué conversaciones del chat tienes abiertas
+        (almacenamiento de sesión <code>tuentidad:chat-windows</code>). Solo guarda a qué amigos corresponden las
+        ventanas, no los mensajes, y se borra al cerrar la pestaña.
+      </p>
+
+      <p>
         Más información en la <Link to="/privacidad">política de privacidad</Link>.
       </p>
     </article>
