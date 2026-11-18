@@ -3,11 +3,21 @@ import { Link } from 'react-router'
 import { errorMessage } from '../../api/client'
 import type { Person } from '../../api/friends'
 import { notifyNotificationsChanged } from '../../api/notifications'
-import { getPhoto, listTaggable, removeTag, tagPhoto, type Photo, type PhotoDetail, type TagArea } from '../../api/photos'
+import {
+  commentPhoto,
+  deleteComment,
+  getPhoto,
+  listTaggable,
+  removeTag,
+  tagPhoto,
+  type Photo,
+  type PhotoDetail,
+  type TagArea,
+} from '../../api/photos'
 import { useAuth } from '../../auth/context'
 import { Alert } from '../Alert'
+import { Comments } from '../Comments'
 import { Module } from '../ui/Module'
-import { PhotoComments } from './PhotoComments'
 import { areaAround } from '../../lib/tagArea'
 import { PhotoStage } from './PhotoStage'
 
@@ -180,9 +190,11 @@ export function PhotoPanel({ photo, alt, title, action, before, after }: PhotoPa
       </Module>
 
       {detail && (
-        <PhotoComments
-          photoId={photo.id}
+        <Comments
+          id={`photo-${photo.id}`}
           comments={detail.comments}
+          onSubmit={async (body) => (await commentPhoto(photo.id, body)).comments}
+          onDelete={async (commentId) => (await deleteComment(commentId)).comments}
           onChange={(comments) => setDetail((current) => current && { ...current, comments })}
         />
       )}

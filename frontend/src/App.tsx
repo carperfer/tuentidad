@@ -5,6 +5,9 @@ import { Album } from './pages/Album'
 import { Albums } from './pages/Albums'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Friends } from './pages/Friends'
+import { Event } from './pages/Event'
+import { EventForm } from './pages/EventForm'
+import { Events } from './pages/Events'
 import { Cookies } from './pages/legal/Cookies'
 import { Privacy } from './pages/legal/Privacy'
 import { Terms } from './pages/legal/Terms'
@@ -56,6 +59,38 @@ export function App() {
           element={
             <RequireAuth>
               <People />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="eventos"
+          element={
+            <RequireAuth>
+              <Events />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="eventos/nuevo"
+          element={
+            <RequireAuth>
+              <EventForm />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="eventos/:id"
+          element={
+            <RequireAuth>
+              <Event />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="eventos/:id/editar"
+          element={
+            <RequireAuth>
+              <EventForm />
             </RequireAuth>
           }
         />

@@ -98,6 +98,23 @@ class Account extends ApiController
                 ->groupStart()->where('messages.sender_id', $userId)->orWhere('messages.recipient_id', $userId)->groupEnd()
                 ->orderBy('messages.id')
                 ->get()->getResultArray(),
+            'events_organized' => $this->withIntIds($db->table('events')
+                ->select('id, title, place, description, starts_at, created_at')
+                ->where('user_id', $userId)
+                ->orderBy('starts_at')
+                ->get()->getResultArray(), 'id'),
+            'event_invitations' => $db->table('event_invitations')
+                ->select('events.title, events.starts_at, event_invitations.status, event_invitations.responded_at')
+                ->join('events', 'events.id = event_invitations.event_id')
+                ->where('event_invitations.user_id', $userId)
+                ->orderBy('events.starts_at')
+                ->get()->getResultArray(),
+            'event_comments' => $db->table('event_comments')
+                ->select('events.title AS event, event_comments.body, event_comments.created_at')
+                ->join('events', 'events.id = event_comments.event_id')
+                ->where('event_comments.user_id', $userId)
+                ->orderBy('event_comments.id')
+                ->get()->getResultArray(),
         ];
 
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);

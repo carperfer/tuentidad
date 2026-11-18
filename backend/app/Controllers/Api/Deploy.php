@@ -3,6 +3,8 @@
 namespace App\Controllers\Api;
 
 use App\Libraries\DatabaseBackup;
+use App\Libraries\EventReminders;
+use App\Libraries\Mailer;
 use App\Libraries\UserCreator;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -55,6 +57,19 @@ class Deploy extends ApiController
             ...$result,
             'backups' => count($backup->list()),
         ], 201);
+    }
+
+    /**
+     * Envía los recordatorios de los eventos de las próximas 24 horas.
+     * Lo lanza cada hora el workflow «Recordatorios de eventos».
+     */
+    public function reminders(): ResponseInterface
+    {
+        if (($denied = $this->authorize()) !== null) {
+            return $denied;
+        }
+
+        return $this->respond((new EventReminders(db_connect(), new Mailer()))->send());
     }
 
     /**

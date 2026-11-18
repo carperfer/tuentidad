@@ -167,10 +167,13 @@ Fuera de alcance: los módulos de funciones que aún no existen (tablón, espaci
 
 ### Sprint 10 — Eventos
 
-- Crear eventos (cumpleaños, fiestas, quedadas) con fecha, lugar y descripción
-- Invitar amigos y confirmar asistencia (sí / no / quizás)
-- Comentarios en el evento y recordatorios por cron
-- Módulo «Calendario» en la columna izquierda de Inicio (§6.1 de la guía de layout)
+- [x] Crear eventos (cumpleaños, fiestas, quedadas) con fecha y hora, lugar y descripción; editarlos y borrarlos. Solo los ven quien organiza y sus invitados
+- [x] Invitar amigos al crear el evento o después, y confirmar asistencia (voy / quizás / no voy); lista de asistentes agrupada por respuesta
+- [x] Comentarios en el evento (avisan a quien organiza y a quienes van o quizás van)
+- [x] Avisos en la web de invitaciones, comentarios y recordatorios; recordatorio por email el día antes con el workflow horario «Recordatorios de eventos» (sin consola en OVH, como las copias)
+- [x] Módulo «Calendario» en la columna izquierda de Inicio (§6.1 de la guía de layout): Hoy / Mañana / Esta semana, con eventos y cumpleaños de amigos que dejan ver su fecha, y «Crear evento»
+- [x] Páginas `/eventos`, `/eventos/nuevo`, `/eventos/{id}` y `/eventos/{id}/editar`; los eventos entran en la exportación de datos y se borran con la cuenta
+- [x] Tests: 125 de backend y 59 de frontend; prueba en el navegador con dos usuarios (crear, invitar, aviso, responder y comentar)
 
 ### Sprint 11 — Notificaciones y pulido
 

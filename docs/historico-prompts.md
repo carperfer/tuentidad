@@ -289,3 +289,11 @@ Para cada entrada registrar:
 - **Prompt utilizado:** "si" (a la propuesta de llevar «Subir fotos» directamente al álbum cuando solo hay uno).
 - **Resultado obtenido:** Nueva ruta `/subir-fotos` a la que apuntan los botones de la topbar y de la barra de estado: con un álbum abre ese álbum; con varios o ninguno, la lista de álbumes. Usa `replace`, así que «atrás» vuelve a la página anterior. Tests: 56 de frontend; comprobado en el navegador con un usuario de un álbum y otro de dos.
 - **Decisión:** Una ruta intermedia en lugar de pedir los álbumes desde la topbar en cada página.
+
+### 2026-11-18 — Sprint 10: eventos
+
+- **Objetivo:** Implementar el Sprint 10 de la planificación (eventos).
+- **Prompt utilizado:** "Continuamos con el Sprint 10".
+- **Resultado esperado:** Eventos con invitaciones, confirmación de asistencia, comentarios, recordatorios y el módulo «Calendario» de Inicio.
+- **Resultado obtenido:** Tablas `events`, `event_invitations` y `event_comments`, y dos columnas nuevas en `notifications` (`event_id`, `event_comment_id`). Controlador `Events` y librería `EventReminders` con `POST /api/deploy/reminders`, lanzado cada hora por un workflow. En la SPA, páginas de lista, formulario y detalle, módulo «Calendario» en Inicio y avisos de eventos. Los comentarios de fotos y eventos comparten el componente `Comments`. Tests: 125 de backend y 59 de frontend; probado en el navegador con dos usuarios.
+- **Decisión:** Eventos privados (quien organiza y sus invitados); solo se puede invitar a amigos, no a perfiles de bienvenida. Fechas en UTC y mostradas en la hora local; los emails, en hora de España. Recordatorio una vez, en las 24 horas previas, a quienes van o quizás van; si cambia la fecha, se vuelve a recordar. Quien dice que no va deja de verlo en su calendario. El calendario incluye cumpleaños solo si el amigo deja ver su fecha de nacimiento. Sin «Eventos patrocinados».

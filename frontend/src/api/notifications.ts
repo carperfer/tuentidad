@@ -1,13 +1,14 @@
 import { api, post } from './client'
 import type { Person } from './friends'
 
-export type NotificationType = 'photo_tag' | 'photo_comment' | 'friend_request'
+export type NotificationType = 'photo_tag' | 'photo_comment' | 'friend_request' | 'event_invite' | 'event_comment' | 'event_reminder'
 
 export type Notification = {
   id: number
   type: NotificationType
   actor: Person
   photo: { id: number; album_id: number; thumb_url: string } | null
+  event: { id: number; title: string } | null
   created_at: string
   read: boolean
 }

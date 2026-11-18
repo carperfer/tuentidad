@@ -5,6 +5,7 @@ import { listFriendActivity, listFriendRequests, type FriendActivity, type Frien
 import { getDashboardSummary, type DashboardSummary } from '../api/profile'
 import { ActivityFeed } from '../components/ActivityFeed'
 import { ChatModule } from '../components/chat/ChatModule'
+import { CalendarModule } from '../components/events/CalendarModule'
 import { Alert } from '../components/Alert'
 import { InviteFriends } from '../components/InviteFriends'
 import { RequestsModule } from '../components/people/RequestsModule'
@@ -46,6 +47,7 @@ export function Home() {
           <>
             <UserCard friendsCount={summary?.friends_count} pendingRequests={requests.incoming.length} />
             <InviteFriends />
+            <CalendarModule />
           </>
         }
         right={

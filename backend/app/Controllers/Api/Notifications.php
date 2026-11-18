@@ -8,7 +8,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 /**
  * Avisos del usuario autenticado. Los de una foto solo cuentan mientras
- * el usuario puede verla.
+ * el usuario puede verla, y los de un evento mientras siga invitado.
  */
 class Notifications extends ApiController
 {
@@ -17,7 +17,7 @@ class Notifications extends ApiController
     public function index(): ResponseInterface
     {
         $rows = $this->visible()
-            ->select('notifications.id AS notification_id, notifications.type, notifications.photo_id, notifications.created_at, notifications.read_at, photos.album_id, ' . self::PERSON_COLUMNS)
+            ->select('notifications.id AS notification_id, notifications.type, notifications.photo_id, notifications.event_id, notifications.created_at, notifications.read_at, photos.album_id, events.title AS event_title, ' . self::PERSON_COLUMNS)
             ->join('users', 'users.id = notifications.actor_id')
             ->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')
             ->orderBy('notifications.id', 'DESC')
@@ -35,6 +35,7 @@ class Notifications extends ApiController
                 'album_id'  => (int) $row['album_id'],
                 'thumb_url' => "/api/photos/{$row['photo_id']}/thumb",
             ],
+            'event'      => $row['event_id'] === null ? null : ['id' => (int) $row['event_id'], 'title' => $row['event_title']],
             'created_at' => $row['created_at'],
             'read'       => $row['read_at'] !== null,
         ], $rows);
@@ -83,7 +84,8 @@ class Notifications extends ApiController
     }
 
     /**
-     * Avisos del usuario sobre nada o sobre fotos que puede ver.
+     * Avisos del usuario sobre fotos que puede ver, eventos a los que sigue
+     * invitado (o que organiza) o sobre nada en concreto.
      */
     private function visible(): BaseBuilder
     {
@@ -92,10 +94,16 @@ class Notifications extends ApiController
         return db_connect()->table('notifications')
             ->join('photos', 'photos.id = notifications.photo_id', 'left')
             ->join('albums', 'albums.id = photos.album_id', 'left')
+            ->join('events', 'events.id = notifications.event_id', 'left')
             ->where('notifications.user_id', $userId)
             ->groupStart()
             ->where('notifications.photo_id', null)
             ->orWhereIn('albums.user_id', $this->photoOwnersVisibleTo($userId))
+            ->groupEnd()
+            ->groupStart()
+            ->where('notifications.event_id', null)
+            ->orWhere('events.user_id', $userId)
+            ->orWhereIn('notifications.event_id', db_connect()->table('event_invitations')->select('event_id')->where('user_id', $userId))
             ->groupEnd();
     }
 }
