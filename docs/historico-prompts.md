@@ -282,3 +282,10 @@ Para cada entrada registrar:
 - **Prompt utilizado:** "Otra corrección, por defecto para el perfil de cada usuario debe haber un album ya creado para que pueda subir fotos y no tenga que crear el primero".
 - **Resultado obtenido:** Las cuentas nuevas (registro con invitación, primer usuario y comando de consola) empiezan con el álbum vacío «Mis fotos» (`AlbumModel::createDefault`). Una migración lo crea para las cuentas existentes sin ningún álbum, salvo los perfiles de bienvenida. Tests: 115 de backend y 54 de frontend.
 - **Decisión:** Es un álbum normal: se puede renombrar o borrar. La migración no se deshace, porque el álbum puede tener ya fotos.
+
+### 2026-11-18 — «Subir fotos» directo al álbum
+
+- **Objetivo:** Que los botones «Subir fotos» lleven directamente al álbum cuando el usuario solo tiene uno (normalmente «Mis fotos»).
+- **Prompt utilizado:** "si" (a la propuesta de llevar «Subir fotos» directamente al álbum cuando solo hay uno).
+- **Resultado obtenido:** Nueva ruta `/subir-fotos` a la que apuntan los botones de la topbar y de la barra de estado: con un álbum abre ese álbum; con varios o ninguno, la lista de álbumes. Usa `replace`, así que «atrás» vuelve a la página anterior. Tests: 56 de frontend; comprobado en el navegador con un usuario de un álbum y otro de dos.
+- **Decisión:** Una ruta intermedia en lugar de pedir los álbumes desde la topbar en cada página.

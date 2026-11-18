@@ -30,7 +30,7 @@ describe('Topbar', () => {
     const nav = await screen.findByRole('navigation', { name: 'Principal' })
     expect(screen.getByRole('link', { name: 'Perfil' })).toHaveClass('active')
     expect(nav).not.toHaveTextContent('Mensajes')
-    expect(screen.getByRole('link', { name: /Subir fotos/ })).toHaveAttribute('href', '/perfil/1/fotos')
+    expect(screen.getByRole('link', { name: /Subir fotos/ })).toHaveAttribute('href', '/subir-fotos')
 
     await user.type(screen.getByRole('searchbox', { name: 'Buscar personas' }), 'Bea{Enter}')
 
