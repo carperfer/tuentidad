@@ -82,7 +82,7 @@ export function Topbar() {
               onChange={(event) => setQuery(event.target.value)}
             />
           </form>
-          <Link to={`/perfil/${user.id}/fotos`} className="button button--primary topbar__upload" onClick={close}>
+          <Link to="/subir-fotos" className="button button--primary topbar__upload" onClick={close}>
             Subir fotos <span aria-hidden="true">⬆</span>
           </Link>
           <ChatToggle onOpen={close} />

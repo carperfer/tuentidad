@@ -19,6 +19,7 @@ import { ProfileEdit } from './pages/ProfileEdit'
 import { Register } from './pages/Register'
 import { ResetPassword } from './pages/ResetPassword'
 import { TaggedPhotos } from './pages/TaggedPhotos'
+import { UploadPhotos } from './pages/UploadPhotos'
 
 export function App() {
   return (
@@ -55,6 +56,14 @@ export function App() {
           element={
             <RequireAuth>
               <People />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="subir-fotos"
+          element={
+            <RequireAuth>
+              <UploadPhotos />
             </RequireAuth>
           }
         />

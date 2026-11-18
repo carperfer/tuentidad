@@ -71,7 +71,7 @@ export function StatusBar() {
             {error}
           </span>
         )}
-        <Link to={`/perfil/${user.id}/fotos`} className="button statusbar__upload">
+        <Link to="/subir-fotos" className="button statusbar__upload">
           <span aria-hidden="true">⬆</span> Subir fotos
         </Link>
       </form>
