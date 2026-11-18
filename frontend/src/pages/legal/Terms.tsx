@@ -39,7 +39,10 @@ export function Terms() {
       <p>Los perfiles marcados como «Perfil de demostración» no son personas reales: existen para ayudarte a entrar.</p>
 
       <h2>Darte de baja</h2>
-      <p>Puedes pedir el borrado de tu cuenta en cualquier momento escribiendo a {OWNER.email}.</p>
+      <p>
+        Puedes borrar tu cuenta en cualquier momento desde <Link to="/perfil/editar">Mi cuenta</Link>, después de
+        descargar tus datos si quieres conservarlos. También puedes pedirlo escribiendo a {OWNER.email}.
+      </p>
 
       <h2>Legislación</h2>
       <p>Estas condiciones se rigen por la legislación española.</p>

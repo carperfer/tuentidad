@@ -305,3 +305,10 @@ Para cada entrada registrar:
 - **Resultado esperado:** Centro de notificaciones unificado, emails de resumen opcionales y mejoras de rendimiento.
 - **Resultado obtenido:** Avisos `friend_accepted` e `invitation_accepted`; la API de avisos pagina por cursor (`before`), filtra por grupo y marca avisos de uno en uno. Columnas `users.digest` y `digest_sent_at`, ajuste en «Mi cuenta» y librería `NotificationDigest` con `POST /api/deploy/digests` y un workflow diario. Índice `notifications (user_id, id)`, cabeceras de caché para `/assets/` e `index.html`, recuentos de eventos en una sola consulta y eventos pasados paginados. Tests: 131 de backend y 61 de frontend; probado en el navegador.
 - **Decisión:** Los resúmenes son opcionales y empiezan desactivados (RGPD); al activarlos solo cuentan las novedades desde ese momento, y no se envía nada si no hay novedades. La página Avisos ya no marca todo como leído al abrirse: se marca cada aviso al abrirlo o todos con el botón. Paginación por cursor en los avisos (no se descuadra si llegan nuevos) y por desplazamiento en los eventos pasados.
+
+### 2026-11-18 — Textos legales al día con la versión 2
+
+- **Objetivo:** Que la política de privacidad cubra el chat, los eventos y los emails de resumen.
+- **Prompt utilizado:** "si" (a añadir esos puntos a la política de privacidad).
+- **Resultado obtenido:** La política de privacidad describe ahora también el perfil, los amigos, las fotos, las etiquetas y los comentarios (que faltaban desde la versión 1), el chat (mensajes y estado de conexión), los eventos (y los cumpleaños en el calendario de los amigos), los recordatorios y el resumen por email (con consentimiento). La política de cookies menciona el almacenamiento de sesión de las ventanas del chat. En las condiciones, la baja se hace desde «Mi cuenta». Fecha de actualización: 18 de noviembre de 2026.
+- **Decisión:** Siguen pendientes los datos del responsable y la revisión por alguien con conocimientos legales.

@@ -26,6 +26,32 @@ export function Privacy() {
           del servicio que solicitas al registrarte.
         </li>
         <li>
+          <strong>Tu perfil:</strong> biografía, estado y foto de perfil, si decides añadirlos. Tú eliges quién ve cada
+          dato (todos los usuarios, solo tus amigos o solo tú). Base legal: la ejecución del servicio.
+        </li>
+        <li>
+          <strong>Amigos, fotos, etiquetas y comentarios:</strong> tus amistades y solicitudes, los álbumes y fotos que
+          subes (solo los ven tus amigos; al subirlas se eliminan sus metadatos, como la ubicación), las etiquetas en
+          las que sales (puedes quitarlas tú) y los comentarios que escribes. Base legal: la ejecución del servicio.
+        </li>
+        <li>
+          <strong>Chat:</strong> los mensajes que envías y recibes, que solo ven las dos personas de la conversación, y
+          la hora de tu última actividad, para mostrar a tus amigos si estás conectado (en los últimos 2 minutos). Base
+          legal: la ejecución del servicio.
+        </li>
+        <li>
+          <strong>Eventos:</strong> los eventos que organizas, a quién invitas, tus respuestas y tus comentarios. Solo los
+          ven quien organiza y sus invitados. Si dejas ver tu fecha de nacimiento a tus amigos, tu cumpleaños aparece en
+          su calendario. Si dices que vas o que quizás vas, te enviamos un recordatorio por email el día antes. Base
+          legal: la ejecución del servicio.
+        </li>
+        <li>
+          <strong>Avisos y emails de resumen:</strong> los avisos de la web (etiquetas, comentarios, amistades y
+          eventos). El email de resumen de avisos y mensajes sin leer solo se envía si lo activas en Mi cuenta, y
+          puedes desactivarlo cuando quieras. Base legal: la ejecución del servicio para los avisos y tu consentimiento
+          para el resumen.
+        </li>
+        <li>
           <strong>Invitaciones:</strong> el email de las personas a las que invitas, para enviarles la invitación.
           Base legal: interés legítimo en permitir que invites a tus amigos. Si la invitación no se acepta, se borra
           como máximo 30 días después de caducar.
