@@ -10,6 +10,7 @@ export type NotificationType =
   | 'event_invite'
   | 'event_comment'
   | 'event_reminder'
+  | 'wall_post'
 
 export type NotificationGroup = 'photos' | 'friends' | 'events'
 

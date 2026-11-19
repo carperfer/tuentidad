@@ -45,6 +45,11 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->put('profile', 'Profiles::update');
         $routes->put('profile/status', 'Profiles::updateStatus');
         $routes->put('profile/settings', 'Profiles::updateSettings');
+        $routes->put('profile/networks', 'Profiles::updateNetworks');
+        $routes->put('profile/links', 'Profiles::updateLinks');
+        $routes->get('users/(:num)/wall', 'Wall::index/$1');
+        $routes->post('users/(:num)/wall', 'Wall::create/$1');
+        $routes->delete('wall-posts/(:num)', 'Wall::delete/$1');
         $routes->post('profile/avatar', 'Profiles::uploadAvatar');
         $routes->get('users/(:num)/albums', 'Albums::index/$1');
         $routes->post('albums', 'Albums::create');
