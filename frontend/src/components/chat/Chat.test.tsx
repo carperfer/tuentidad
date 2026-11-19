@@ -22,7 +22,7 @@ function renderShell() {
 describe('Chat', () => {
   beforeEach(() => sessionStorage.clear())
 
-  it('opens a conversation from the topbar and sends a message', async () => {
+  it('opens a conversation from the dock and sends a message', async () => {
     const fetchMock = mockApi({
       'GET /api/auth/me': () => ({ body: { user: ana } }),
       'GET /api/chat': () => ({ body: { contacts: [bea, carla], online: 1, unread: 1 } }),
@@ -37,7 +37,8 @@ describe('Chat', () => {
     const user = userEvent.setup()
     renderShell()
 
-    const toggle = await screen.findByRole('button', { name: /Chat \(1\) amigo conectado 1 mensaje sin leer/ })
+    const toggle = await screen.findByRole('button', { name: /Chat \(1\) amigo conectado/ })
+    expect(screen.getByRole('link', { name: 'Mensajes 1 sin leer' })).toHaveAttribute('href', '/mensajes')
     await user.click(toggle)
     expect(screen.getByRole('button', { name: /Carla Ruiz \(desconectado\)/ })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Bea López \(conectado\)/ }))
@@ -67,9 +68,9 @@ describe('Chat', () => {
     await user.click(screen.getByRole('button', { name: 'Minimizar el chat con Bea López' }))
     expect(screen.queryByRole('region', { name: 'Chat con Bea López' })).not.toBeInTheDocument()
 
-    const tab = screen.getByRole('button', { name: /Bea/, expanded: false })
+    const tab = screen.getByRole('button', { name: /Chat con Bea López/, expanded: false })
     await user.click(tab)
     await user.click(await screen.findByRole('button', { name: 'Cerrar el chat con Bea López' }))
-    expect(screen.queryByRole('region', { name: 'Conversaciones abiertas' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Chat con Bea López/ })).not.toBeInTheDocument()
   })
 })

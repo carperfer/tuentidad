@@ -67,8 +67,9 @@ class Chat extends ApiController
     }
 
     /**
-     * Mensajes con un amigo. Sin ?after, los últimos 50; con ?after=<id>, los
-     * posteriores a ese mensaje. Marca como leídos los recibidos.
+     * Mensajes con un amigo. Sin parámetros, los últimos 50; con ?after=<id>, los
+     * posteriores a ese mensaje, y con ?before=<id>, los 50 anteriores.
+     * Marca como leídos los recibidos.
      */
     public function messages(int $friendId): ResponseInterface
     {
@@ -77,12 +78,17 @@ class Chat extends ApiController
             return $this->message('Solo puedes chatear con tus amigos.', 403);
         }
 
-        $after = (int) $this->request->getGet('after');
-        $query = $this->conversation($userId, $friendId);
+        $after  = (int) $this->request->getGet('after');
+        $before = (int) $this->request->getGet('before');
+        $query  = $this->conversation($userId, $friendId);
 
         if ($after > 0) {
             $rows = $query->where('id >', $after)->orderBy('id')->limit(self::PAGE)->get()->getResultArray();
         } else {
+            // Los últimos 50, o los 50 anteriores a ?before (historial en Mensajes)
+            if ($before > 0) {
+                $query->where('id <', $before);
+            }
             $rows = array_reverse($query->orderBy('id', 'DESC')->limit(self::PAGE)->get()->getResultArray());
         }
 
@@ -92,6 +98,61 @@ class Chat extends ApiController
         }
 
         return $this->respond(['messages' => array_map(fn (array $row): array => $this->messageData($row, $userId), $rows)]);
+    }
+
+    /**
+     * Bandeja de Mensajes: una fila por amigo con el que hay conversación,
+     * con el último mensaje y los no leídos, de la más reciente a la más antigua.
+     */
+    public function conversations(): ResponseInterface
+    {
+        $userId = (int) auth()->user()->id;
+        $db     = db_connect();
+        $last   = $db->query(
+            'SELECT other_id, MAX(id) AS last_id FROM ('
+            . ' SELECT recipient_id AS other_id, id FROM messages WHERE sender_id = ?'
+            . ' UNION ALL SELECT sender_id AS other_id, id FROM messages WHERE recipient_id = ?'
+            . ') AS mine GROUP BY other_id',
+            [$userId, $userId],
+        )->getResultArray();
+
+        $friends = $this->friendIds($userId);
+        $lastIds = [];
+
+        foreach ($last as $row) {
+            // Solo se puede seguir la conversación con los amigos actuales
+            if (in_array((int) $row['other_id'], $friends, true)) {
+                $lastIds[(int) $row['other_id']] = (int) $row['last_id'];
+            }
+        }
+        if ($lastIds === []) {
+            return $this->respond(['conversations' => []]);
+        }
+
+        $messages = array_column($db->table('messages')->whereIn('id', array_values($lastIds))->get()->getResultArray(), null, 'id');
+        $people   = array_column(
+            $db->table('users')->select(self::PERSON_COLUMNS)->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')->whereIn('users.id', array_keys($lastIds))->get()->getResultArray(),
+            null,
+            'id',
+        );
+        $unread = [];
+
+        foreach ($db->table('messages')->select('sender_id, COUNT(*) AS total')->where('recipient_id', $userId)->where('read_at', null)->groupBy('sender_id')->get()->getResultArray() as $row) {
+            $unread[(int) $row['sender_id']] = (int) $row['total'];
+        }
+
+        arsort($lastIds);
+        $conversations = [];
+
+        foreach ($lastIds as $otherId => $messageId) {
+            $conversations[] = [
+                'person'       => $this->personData($people[$otherId], true),
+                'last_message' => $this->messageData($messages[$messageId], $userId),
+                'unread'       => $unread[$otherId] ?? 0,
+            ];
+        }
+
+        return $this->respond(['conversations' => $conversations]);
     }
 
     public function send(int $friendId): ResponseInterface

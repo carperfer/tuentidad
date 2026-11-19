@@ -441,10 +441,10 @@ Primitivos compartidos: Module, Avatar, Button, Dropdown, Pager, MediaObject, Co
 - [x] Tokens de §10 definidos como variables CSS.
 - [x] Componente `Module` en variante `boxed` (la `plain` no se usa por ahora).
 - [x] Layout de tres columnas con sus dos puntos de corte.
-- [x] Topbar sticky con pestaña activa, badge de avisos sin leer en «Avisos» (y en el botón «Menú» en móvil) y «Chat (n)» con badge de mensajes sin leer.
+- [x] Topbar sticky en el orden original (Inicio, Perfil, Mensajes, Gente, Vídeos) con badge de mensajes sin leer junto a «Mensajes»; los avisos van en la tarjeta de usuario de Inicio.
 - [x] Primitivos: `Avatar` (tamaños), `Button`, `Dropdown`, `Pager`, `MediaObject` e indicador de conexión (punto verde con texto oculto) en el chat.
 - [x] Plantillas: Inicio, Perfil ajeno, Perfil propio.
-- [x] Módulo «Calendario» en Inicio (Hoy / Mañana / Esta semana) con «Crear evento». Sin «Eventos patrocinados».
-- [x] Chat: lista (topbar e Inicio), ventana flotante y dock; a pantalla completa en móvil. Sin «Ajustes» en el pie de la lista hasta que haya ajustes de chat.
+- [x] Módulos «Eventos» y, debajo, «Calendario» (Hoy / Mañana / Esta semana, con «Crear evento») en Inicio. Sin «Eventos patrocinados».
+- [x] Chat: dock inferior siempre visible con «Chat (n)» (lista de amigos) y los iconos de las conversaciones, ventana flotante y módulo en Inicio; a pantalla completa en móvil. Sin «Ajustes» hasta que haya ajustes de chat.
 - [x] Footer (sin selector de idioma: solo castellano por ahora).
 - [x] Revisión de accesibilidad (§12).

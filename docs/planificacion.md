@@ -182,6 +182,27 @@ Fuera de alcance: los módulos de funciones que aún no existen (tablón, espaci
 - [x] Rendimiento: índice para paginar los avisos, caché de un año para los archivos del frontend con hash (e `index.html` siempre revalidado), listas de eventos sin consultas por cada evento y eventos pasados paginados
 - [x] Tests: 131 de backend y 61 de frontend; prueba en el navegador del centro de avisos y del ajuste del resumen
 
+## Versión 3 — Fidelidad al diseño original
+
+Secciones que faltaban respecto a las capturas de `docs/sourceimages/`.
+
+### Sprint 12 — Barra superior, Inicio, chat, Mensajes y Vídeos
+
+- [x] Barra superior en el orden original: Inicio, Perfil, Mensajes (n), Gente, Vídeos, buscador y «Subir fotos»; a la derecha, Mi cuenta y Salir. En móvil, el botón «Menú» suma avisos y mensajes sin leer
+- [x] Mensajes (`/mensajes`): bandeja con las conversaciones del chat (último mensaje y no leídos), «Escribir a» un amigo y página de cada conversación con su historial completo («Ver mensajes anteriores»)
+- [x] Chat siempre en la barra inferior: «Chat (n)» abre hacia arriba la lista de amigos y cada conversación abierta queda como el icono de la persona, con su punto de conexión
+- [x] Avisos en la tarjeta de usuario de Inicio («Avisos (n)»), enlazados a su página
+- [x] Inicio: módulo «Eventos» (próximos, primero las invitaciones sin responder) y, debajo, «Calendario»
+- [x] Vídeos (`/videos`): compartir enlaces de YouTube, que solo ven tus amigos; se reproducen desde youtube-nocookie.com al pulsar, sin cargar nada de YouTube antes (la CSP solo permite ese dominio en marcos). Entran en la exportación de datos y en la política de privacidad
+- [x] Tests: 137 de backend y 64 de frontend; prueba en el navegador con dos usuarios
+
+### Sprint 13 — Perfil
+
+- Escribir el estado desde el propio perfil
+- Tablón: los amigos escriben en tu perfil; borran sus mensajes el autor y el dueño del perfil
+- Redes: estudios, trayectoria profesional y colegios con sus años, y enlaces a redes sociales; cada apartado con su privacidad
+- Espacio personal: los vídeos de la persona en su perfil, con paginador
+
 ## Seguimiento obligatorio de prompts
 
 En cada sprint:

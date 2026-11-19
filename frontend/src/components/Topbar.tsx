@@ -1,16 +1,21 @@
 import { useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { useAuth } from '../auth/context'
+import { useChat } from '../lib/chat/context'
 import { useUnreadCounts } from '../lib/useUnreadCounts'
-import { ChatToggle } from './chat/ChatToggle'
 
-/** Barra superior azul con navegación, buscador y acciones de la cuenta (guía §3). */
+/**
+ * Barra superior azul en el orden del Tuenti original: Inicio, Perfil, Mensajes,
+ * Gente, Vídeos, buscador y «Subir fotos»; a la derecha, Mi cuenta y Salir (guía §3).
+ */
 export function Topbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  // Los avisos ya no están en la barra (van en la tarjeta de Inicio), pero cuentan en el botón del menú móvil
   const unread = useUnreadCounts()?.total ?? 0
+  const messages = useChat()?.state.unread ?? 0
 
   if (!user) return null
 
@@ -41,11 +46,11 @@ export function Topbar() {
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span aria-hidden="true">☰</span> Menú
-          {unread > 0 && (
+          {unread + messages > 0 && (
             <>
               {' '}
               <span className="topbar__badge">
-                {unread} <span className="visually-hidden">avisos sin leer</span>
+                {unread + messages} <span className="visually-hidden">novedades sin leer</span>
               </span>
             </>
           )}
@@ -58,19 +63,22 @@ export function Topbar() {
             <NavLink to={`/perfil/${user.id}`} onClick={close}>
               Perfil
             </NavLink>
-            <NavLink to="/gente" onClick={close}>
-              Gente
-            </NavLink>
-            <NavLink to="/avisos" onClick={close}>
-              Avisos
-              {unread > 0 && (
+            <NavLink to="/mensajes" onClick={close}>
+              Mensajes
+              {messages > 0 && (
                 <>
                   {' '}
                   <span className="topbar__badge">
-                    {unread} <span className="visually-hidden">sin leer</span>
+                    {messages} <span className="visually-hidden">sin leer</span>
                   </span>
                 </>
               )}
+            </NavLink>
+            <NavLink to="/gente" onClick={close}>
+              Gente
+            </NavLink>
+            <NavLink to="/videos" onClick={close}>
+              Vídeos
             </NavLink>
           </nav>
           <form className="topbar__search" role="search" onSubmit={handleSearch}>
@@ -85,7 +93,6 @@ export function Topbar() {
           <Link to="/subir-fotos" className="button button--primary topbar__upload" onClick={close}>
             Subir fotos <span aria-hidden="true">⬆</span>
           </Link>
-          <ChatToggle onOpen={close} />
           <nav className="topbar__account" aria-label="Cuenta">
             <NavLink to="/perfil/editar" onClick={close}>
               Mi cuenta

@@ -1,10 +1,13 @@
 import { useChat } from '../../lib/chat/context'
 import { Avatar } from '../ui/Avatar'
+import { Dropdown } from '../ui/Dropdown'
+import { ChatList } from './ChatList'
 import { ChatWindow } from './ChatWindow'
 
 /**
- * Barra fija al pie con las conversaciones abiertas y sus ventanas flotantes
- * encima (guía §8). En móvil, la ventana ocupa toda la pantalla.
+ * Barra fija al pie, siempre visible con la sesión iniciada (guía §8): «Chat (n)»
+ * abre la lista de amigos y cada conversación abierta queda como el icono de la
+ * persona; encima, sus ventanas flotantes. En móvil, la ventana ocupa la pantalla.
  */
 export function ChatDock() {
   const chat = useChat()
@@ -16,10 +19,9 @@ export function ChatDock() {
     const contact = state.contacts.find((item) => item.id === window.friendId)
     return contact ? [{ ...window, contact }] : []
   })
-  if (windows.length === 0) return null
 
   return (
-    <div className="chat-dock" role="region" aria-label="Conversaciones abiertas">
+    <div className="chat-dock" role="region" aria-label="Chat">
       <div className="chat-dock__windows">
         {windows
           .filter((window) => !window.minimized)
@@ -34,27 +36,49 @@ export function ChatDock() {
             />
           ))}
       </div>
-      <ul className="chat-dock__bar">
-        {windows.map(({ friendId, minimized, contact }) => (
-          <li key={friendId}>
-            <button
-              type="button"
-              className={`chat-dock__tab${minimized ? '' : ' chat-dock__tab--open'}`}
-              aria-expanded={!minimized}
-              onClick={() => service.toggleMinimized(friendId)}
-            >
-              <Avatar src={contact.avatar_url} name={contact.first_name} size={24} decorative />
-              <span className={`presence${contact.online ? ' presence--online' : ''}`} aria-hidden="true" />
-              <span>{contact.first_name}</span>
-              {minimized && contact.unread > 0 && (
-                <span className="chat-list__unread">
-                  {contact.unread} <span className="visually-hidden">sin leer</span>
+      <div className="chat-dock__bar">
+        <div className="chat-dock__toggle">
+          <Dropdown
+            align="left"
+            up
+            label={
+              <>
+                Chat <span className="topbar__counter">({state.online})</span>{' '}
+                <span className="visually-hidden">{state.online === 1 ? 'amigo conectado' : 'amigos conectados'}</span>
+              </>
+            }
+          >
+            <div className="chat-panel">
+              <ChatList contacts={state.contacts} onOpen={(friendId) => service.open(friendId)} />
+            </div>
+          </Dropdown>
+        </div>
+        <ul className="chat-dock__tabs" aria-label="Conversaciones abiertas">
+          {windows.map(({ friendId, minimized, contact }) => (
+            <li key={friendId}>
+              <button
+                type="button"
+                className={`chat-dock__tab${minimized ? '' : ' chat-dock__tab--open'}`}
+                aria-expanded={!minimized}
+                title={`${contact.first_name} ${contact.last_name}`}
+                onClick={() => service.toggleMinimized(friendId)}
+              >
+                <Avatar src={contact.avatar_url} name={contact.first_name} size={24} decorative />
+                <span className={`presence chat-dock__presence${contact.online ? ' presence--online' : ''}`} aria-hidden="true" />
+                <span className="visually-hidden">
+                  Chat con {contact.first_name} {contact.last_name}
+                  {contact.online ? ' (conectado)' : ''}
                 </span>
-              )}
-            </button>
-          </li>
-        ))}
-      </ul>
+                {minimized && contact.unread > 0 && (
+                  <span className="chat-list__unread chat-dock__unread">
+                    {contact.unread} <span className="visually-hidden">sin leer</span>
+                  </span>
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

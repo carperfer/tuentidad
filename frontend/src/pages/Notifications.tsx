@@ -164,7 +164,12 @@ export function Notifications() {
                         {TEXT[notification.type]}
                         {notification.event && ` «${notification.event.title}»`}
                       </Link>
-                      {!notification.read && <span className="visually-hidden"> (nuevo)</span>}
+                      {!notification.read && (
+                        <>
+                          {' '}
+                          <span className="visually-hidden">(nuevo)</span>
+                        </>
+                      )}
                     </p>
                     <time className="muted" dateTime={notification.created_at}>
                       {timeAgo(notification.created_at)}

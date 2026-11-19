@@ -1,7 +1,18 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 
 /** Disparador con triángulo y panel flotante; se cierra con Escape o al pulsar fuera (guía §7.9). */
-export function Dropdown({ label, children, align = 'right' }: { label: ReactNode; children: ReactNode; align?: 'left' | 'right' }) {
+export function Dropdown({
+  label,
+  children,
+  align = 'right',
+  up = false,
+}: {
+  label: ReactNode
+  children: ReactNode
+  align?: 'left' | 'right'
+  /** Abre el panel hacia arriba (p. ej. desde la barra inferior del chat). */
+  up?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const panelId = useId()
@@ -34,7 +45,7 @@ export function Dropdown({ label, children, align = 'right' }: { label: ReactNod
       >
         {label} <span aria-hidden="true">▾</span>
       </button>
-      <div id={panelId} className={`dropdown__panel dropdown__panel--${align}`} hidden={!open} onClick={() => setOpen(false)}>
+      <div id={panelId} className={`dropdown__panel dropdown__panel--${align}${up ? ' dropdown__panel--up' : ''}`} hidden={!open} onClick={() => setOpen(false)}>
         {children}
       </div>
     </div>
