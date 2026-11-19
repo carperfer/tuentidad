@@ -26,13 +26,15 @@ export function Privacy() {
           del servicio que solicitas al registrarte.
         </li>
         <li>
-          <strong>Tu perfil:</strong> biografía, estado y foto de perfil, si decides añadirlos. Tú eliges quién ve cada
-          dato (todos los usuarios, solo tus amigos o solo tú). Base legal: la ejecución del servicio.
+          <strong>Tu perfil:</strong> biografía, estado, foto de perfil, «Redes» (estudios, trayectoria profesional y
+          colegios con sus años) y enlaces a tus perfiles en otras redes sociales, si decides añadirlos. Tú eliges quién
+          ve cada dato (todos los usuarios, solo tus amigos o solo tú). Base legal: la ejecución del servicio.
         </li>
         <li>
           <strong>Amigos, fotos, etiquetas y comentarios:</strong> tus amistades y solicitudes, los álbumes y fotos que
           subes (solo los ven tus amigos; al subirlas se eliminan sus metadatos, como la ubicación), las etiquetas en
-          las que sales (puedes quitarlas tú) y los comentarios que escribes. Base legal: la ejecución del servicio.
+          las que sales (puedes quitarlas tú), los comentarios que escribes y los mensajes del tablón (los ven la persona
+          y sus amigos; los borran su autor y el dueño del tablón). Base legal: la ejecución del servicio.
         </li>
         <li>
           <strong>Chat:</strong> los mensajes que envías y recibes, que solo ven las dos personas de la conversación, y

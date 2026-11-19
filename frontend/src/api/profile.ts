@@ -22,12 +22,26 @@ export type Profile = {
     bio: Visibility
     status: Visibility
     avatar: Visibility
+    networks: Visibility
+    links: Visibility
   }
+  /** «Redes»; null si su privacidad no deja verlas. */
+  networks?: Networks | null
+  /** Enlaces a redes sociales; null si su privacidad no deja verlos. */
+  links?: SocialLink[] | null
   /** Solo para el dueño: frecuencia de los emails de resumen. */
   digest?: Digest
 }
 
 export type Digest = 'none' | 'daily' | 'weekly'
+
+export type NetworkKind = 'university' | 'work' | 'school'
+
+export type NetworkItem = { name: string; detail: string; start_year: number | null; end_year: number | null }
+
+export type Networks = Record<NetworkKind, NetworkItem[]>
+
+export type SocialLink = { url: string; network: string }
 
 export type ProfileData = {
   first_name: string
@@ -57,6 +71,19 @@ export function updateProfile(data: ProfileData): Promise<{ profile: Profile }> 
 
 export function updateSettings(settings: { digest: Digest }): Promise<{ profile: Profile }> {
   return api('/api/profile/settings', { method: 'PUT', body: JSON.stringify(settings) })
+}
+
+/** Sustituye los estudios y trabajos del perfil. */
+export function updateNetworks(
+  visibility: Visibility,
+  items: (NetworkItem & { kind: NetworkKind })[],
+): Promise<{ profile: Profile }> {
+  return api('/api/profile/networks', { method: 'PUT', body: JSON.stringify({ visibility, items }) })
+}
+
+/** Sustituye los enlaces a redes sociales. */
+export function updateLinks(visibility: Visibility, links: string[]): Promise<{ profile: Profile }> {
+  return api('/api/profile/links', { method: 'PUT', body: JSON.stringify({ visibility, links }) })
 }
 
 export function updateStatus(status: string): Promise<{ profile: Profile }> {

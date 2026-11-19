@@ -1916,3 +1916,88 @@ button {
   font-size: var(--fs-xs);
   opacity: 0.75;
 }
+
+/* --- Perfil: Redes, estado, espacio personal y tablón (versión 3) ------------ */
+
+.networks {
+  margin: 0;
+}
+
+.networks__group + .networks__group {
+  margin-top: var(--space-2);
+}
+
+.networks dt {
+  font-weight: bold;
+}
+
+.networks dd {
+  margin: 2px 0 0;
+}
+
+.networks__name {
+  display: block;
+  color: var(--c-link);
+}
+
+.networks__detail {
+  display: block;
+}
+
+.networks__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.status-editor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.status-editor input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid #b9c5d3;
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.wall__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.networks-editor__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.5fr) 72px 72px auto;
+  gap: var(--space-1);
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.networks-editor__row input,
+.networks-editor__row select {
+  width: 100%;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid #b9c5d3;
+  border-radius: var(--radius);
+}
+
+.networks-editor__row .field__error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+@media (max-width: 759px) {
+  .networks-editor__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

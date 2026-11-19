@@ -26,6 +26,8 @@ class UserModel extends ShieldUserModel
             'bio_visibility',
             'status_visibility',
             'avatar_visibility',
+            'networks_visibility',
+            'links_visibility',
             'digest',
             'digest_sent_at',
         ];

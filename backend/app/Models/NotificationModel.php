@@ -13,6 +13,7 @@ class NotificationModel extends Model
         'photo_tag', 'photo_comment',
         'friend_request', 'friend_accepted', 'invitation_accepted',
         'event_invite', 'event_comment', 'event_reminder',
+        'wall_post',
     ];
 
     /**
@@ -20,7 +21,7 @@ class NotificationModel extends Model
      */
     public const GROUPS = [
         'photos'  => ['photo_tag', 'photo_comment'],
-        'friends' => ['friend_request', 'friend_accepted', 'invitation_accepted'],
+        'friends' => ['friend_request', 'friend_accepted', 'invitation_accepted', 'wall_post'],
         'events'  => ['event_invite', 'event_comment', 'event_reminder'],
     ];
 
@@ -37,19 +38,20 @@ class NotificationModel extends Model
         'event_invite'        => 'te ha invitado a un evento',
         'event_comment'       => 'ha comentado en un evento',
         'event_reminder'      => 'te recuerda un evento de mañana',
+        'wall_post'           => 'ha escrito en tu tablón',
     ];
 
     protected $table         = 'notifications';
     protected $returnType    = 'array';
     protected $useTimestamps = true;
     protected $updatedField  = '';
-    protected $allowedFields = ['user_id', 'actor_id', 'type', 'photo_id', 'photo_tag_id', 'photo_comment_id', 'friend_request_id', 'event_id', 'event_comment_id', 'read_at'];
+    protected $allowedFields = ['user_id', 'actor_id', 'type', 'photo_id', 'photo_tag_id', 'photo_comment_id', 'friend_request_id', 'event_id', 'event_comment_id', 'wall_post_id', 'read_at'];
     protected $dateFormat    = 'datetime';
 
     /**
      * Avisa a un usuario de algo que ha hecho otro (nunca de lo que hace él mismo).
      *
-     * @param array<string, int> $refs photo_id, photo_tag_id, photo_comment_id, friend_request_id, event_id o event_comment_id
+     * @param array<string, int> $refs photo_id, photo_tag_id, photo_comment_id, friend_request_id, event_id, event_comment_id o wall_post_id
      */
     public function notify(int $userId, int $actorId, string $type, array $refs = []): void
     {

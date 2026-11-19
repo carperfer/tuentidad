@@ -198,10 +198,12 @@ Secciones que faltaban respecto a las capturas de `docs/sourceimages/`.
 
 ### Sprint 13 — Perfil
 
-- Escribir el estado desde el propio perfil
-- Tablón: los amigos escriben en tu perfil; borran sus mensajes el autor y el dueño del perfil
-- Redes: estudios, trayectoria profesional y colegios con sus años, y enlaces a redes sociales; cada apartado con su privacidad
-- Espacio personal: los vídeos de la persona en su perfil, con paginador
+- [x] Escribir el estado desde el propio perfil (caja de estado editable)
+- [x] Tablón: el dueño y sus amigos escriben en el perfil; borran un mensaje su autor y el dueño, que recibe un aviso («ha escrito en tu tablón»). En el perfil propio, «Responder» lleva al perfil de quien escribió
+- [x] Redes: estudios universitarios, trayectoria profesional y colegios con sus años («2006-actualmente», «Hasta 2001») y enlaces a redes sociales conocidas (Instagram, X, TikTok…); cada apartado con su privacidad, solo para amigos por defecto. Se editan en «Mi cuenta»
+- [x] Espacio personal: los vídeos de la persona en su perfil, uno a uno con paginador «1 de N»; «Mis vídeos» en las acciones del perfil propio
+- [x] Las secciones nuevas entran en la exportación de datos, se borran con la cuenta y aparecen en la política de privacidad
+- [x] Tests: 143 de backend y 69 de frontend; prueba en el navegador con dos usuarios
 
 ## Seguimiento obligatorio de prompts
 

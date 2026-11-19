@@ -83,6 +83,11 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `PUT /api/profile`                                | Sí     | Actualizar datos personales, estado, biografía y visibilidad (`public`, `friends` o `private`)                                                                     |
 | `PUT /api/profile/status`                         | Sí     | Cambiar solo el estado (`status`), desde la barra «¿Cómo va todo?»                                                                                                 |
 | `PUT /api/profile/settings`                       | Sí     | Ajustes de la cuenta: emails de resumen (`digest`: `none`, `daily` o `weekly`) |
+| `PUT /api/profile/networks`                       | Sí     | «Redes»: estudios, trayectoria profesional y colegios con sus años (`items`, hasta 20) y su privacidad (`visibility`); sustituye la lista |
+| `PUT /api/profile/links`                          | Sí     | Enlaces a redes sociales conocidas (`links`, hasta 8) y su privacidad (`visibility`); sustituye la lista |
+| `GET /api/users/{id}/wall`                        | Sí     | Tablón de un usuario, de 10 en 10 (`?before=<id>`); solo él y sus amigos |
+| `POST /api/users/{id}/wall`                       | Sí     | Escribir en el tablón (`body`, hasta 1000 caracteres); avisa al dueño |
+| `DELETE /api/wall-posts/{id}`                     | Sí     | Borrar un mensaje del tablón: su autor o el dueño del tablón |
 | `POST /api/profile/avatar`                        | Sí     | Subir foto JPG, PNG o WebP de hasta 2 MB (máximo 4000 × 4000 px)                                                                                                   |
 | `GET /api/dashboard`                              | Sí     | Resumen de amistades e invitaciones propias                                                                                                                        |
 | `GET /api/account/export`                         | Sí     | Descarga en JSON de todos los datos de la cuenta (RGPD) |

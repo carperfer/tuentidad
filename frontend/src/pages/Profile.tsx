@@ -15,6 +15,10 @@ import { getProfile, type Profile as ProfileView, type Relationship } from '../a
 import { Alert } from '../components/Alert'
 import { FriendsGrid } from '../components/people/FriendsGrid'
 import { ProfilePhoto } from '../components/ProfileSidebar'
+import { PersonalSpace } from '../components/profile/PersonalSpace'
+import { ProfileNetworks } from '../components/profile/ProfileNetworks'
+import { StatusEditor } from '../components/profile/StatusEditor'
+import { WallModule } from '../components/profile/WallModule'
 import { TaggedPhotosModule } from '../components/TaggedPhotosModule'
 import { Avatar } from '../components/ui/Avatar'
 import { Columns } from '../components/ui/Columns'
@@ -120,6 +124,7 @@ export function Profile() {
       left={
         <>
           <ProfilePhoto profile={profile} className="profile-photo--profile" />
+          <ProfileNetworks profile={profile} />
           <Module title="Información">
             <dl className="info-list">
               {profile.birthdate && (
@@ -233,6 +238,9 @@ export function Profile() {
               <Link to={`/perfil/${profile.id}/fotos`} className="button">
                 Mis álbumes de fotos <Counter value={albumCount} />
               </Link>
+              <Link to="/videos" className="button">
+                Mis vídeos
+              </Link>
             </>
           )}
           {profile.relationship === 'friend' && (
@@ -286,7 +294,8 @@ export function Profile() {
         </div>
       </header>
 
-      {profile.status && (
+      {own && <StatusEditor key={profile.status_updated_at ?? ''} profile={profile} onChange={setProfile} />}
+      {!own && profile.status && (
         <p className="status-box">
           {profile.status}{' '}
           {profile.status_updated_at && (
@@ -297,6 +306,8 @@ export function Profile() {
         </p>
       )}
 
+      {social && <PersonalSpace userId={profile.id} own={own} firstName={profile.first_name} />}
+
       {tagged && (own || tagged.total > 0) && (
         <TaggedPhotosModule
           name={own ? null : profile.first_name}
@@ -306,7 +317,9 @@ export function Profile() {
         />
       )}
 
-      {!social && <p className="status">Solo sus amigos pueden ver sus fotos y su lista de amigos.</p>}
+      {social && <WallModule userId={profile.id} own={own} firstName={profile.first_name} />}
+
+      {!social && <p className="status">Solo sus amigos pueden ver sus fotos, sus vídeos, su tablón y su lista de amigos.</p>}
     </Columns>
   )
 }

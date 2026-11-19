@@ -5,6 +5,7 @@ import { getProfile, updateProfile, uploadAvatar, type Profile, type ProfileData
 import { useAuth } from '../auth/context'
 import { AccountData } from '../components/AccountData'
 import { DigestSettings } from '../components/DigestSettings'
+import { NetworksEditor } from '../components/profile/NetworksEditor'
 import { Alert } from '../components/Alert'
 import { Field } from '../components/Field'
 import { ProfilePhoto } from '../components/ProfileSidebar'
@@ -191,6 +192,7 @@ export function ProfileEdit() {
           </button>
         </form>
       </Module>
+      <NetworksEditor profile={profile} onSaved={setProfile} />
       <DigestSettings initial={profile.digest ?? 'none'} />
       <AccountData />
     </Columns>

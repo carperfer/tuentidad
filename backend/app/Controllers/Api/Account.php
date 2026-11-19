@@ -54,6 +54,8 @@ class Account extends ApiController
                     'bio'       => $user->bio_visibility,
                     'status'    => $user->status_visibility,
                     'avatar'    => $user->avatar_visibility,
+                    'networks'  => $user->networks_visibility ?? 'friends',
+                    'links'     => $user->links_visibility ?? 'friends',
                 ],
                 'email_digest' => $user->digest ?? 'none',
                 'created_at'   => $user->created_at?->format('Y-m-d H:i:s'),
@@ -98,6 +100,24 @@ class Account extends ApiController
                 ->join('users AS other', "other.id = IF(messages.sender_id = {$userId}, messages.recipient_id, messages.sender_id)", 'inner', false)
                 ->groupStart()->where('messages.sender_id', $userId)->orWhere('messages.recipient_id', $userId)->groupEnd()
                 ->orderBy('messages.id')
+                ->get()->getResultArray(),
+            'networks' => $db->table('profile_networks')
+                ->select('kind, name, detail, start_year, end_year')
+                ->where('user_id', $userId)
+                ->orderBy('position')
+                ->get()->getResultArray(),
+            'social_links' => array_column($db->table('profile_links')->select('url')->where('user_id', $userId)->orderBy('position')->get()->getResultArray(), 'url'),
+            'wall_posts_written' => $db->table('wall_posts')
+                ->select("CONCAT(owner.first_name, ' ', owner.last_name) AS profile, wall_posts.body, wall_posts.created_at", false)
+                ->join('users AS owner', 'owner.id = wall_posts.profile_id')
+                ->where('wall_posts.author_id', $userId)
+                ->orderBy('wall_posts.id')
+                ->get()->getResultArray(),
+            'wall_posts_received' => $db->table('wall_posts')
+                ->select("CONCAT(author.first_name, ' ', author.last_name) AS author, wall_posts.body, wall_posts.created_at", false)
+                ->join('users AS author', 'author.id = wall_posts.author_id')
+                ->where('wall_posts.profile_id', $userId)
+                ->orderBy('wall_posts.id')
                 ->get()->getResultArray(),
             'videos' => $db->table('videos')
                 ->select("title, CONCAT('https://www.youtube.com/watch?v=', youtube_id) AS url, created_at", false)

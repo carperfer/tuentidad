@@ -10,6 +10,7 @@ import {
   type NotificationGroup,
   type NotificationType,
 } from '../api/notifications'
+import { useAuth } from '../auth/context'
 import { Alert } from '../components/Alert'
 import { UserCard } from '../components/UserCard'
 import { Avatar } from '../components/ui/Avatar'
@@ -27,6 +28,7 @@ const TEXT: Record<NotificationType, string> = {
   event_invite: 'te ha invitado a',
   event_comment: 'ha comentado en',
   event_reminder: 'te recuerda que mañana es',
+  wall_post: 'ha escrito en tu tablón',
 }
 
 const FILTERS: { group: NotificationGroup | null; label: string }[] = [
@@ -36,15 +38,17 @@ const FILTERS: { group: NotificationGroup | null; label: string }[] = [
   { group: 'friends', label: 'Amistad' },
 ]
 
-function target(notification: Notification): string {
+function target(notification: Notification, userId: number | undefined): string {
   if (notification.photo) return `/albumes/${notification.photo.album_id}/fotos/${notification.photo.id}`
   if (notification.event) return `/eventos/${notification.event.id}`
   if (notification.type === 'friend_request') return '/gente'
+  if (notification.type === 'wall_post') return `/perfil/${userId}`
   return `/perfil/${notification.actor.id}`
 }
 
 /** Centro de avisos: todos los tipos, con filtros, paginación y marcado como leídos. */
 export function Notifications() {
+  const { user } = useAuth()
   const [group, setGroup] = useState<NotificationGroup | null>(null)
   const [notifications, setNotifications] = useState<Notification[] | null>(null)
   const [nextBefore, setNextBefore] = useState<number | null>(null)
@@ -150,7 +154,7 @@ export function Notifications() {
                     }
                     aside={
                       notification.photo && (
-                        <Link to={target(notification)} tabIndex={-1} aria-hidden="true" onClick={() => open(notification)}>
+                        <Link to={target(notification, user?.id)} tabIndex={-1} aria-hidden="true" onClick={() => open(notification)}>
                           <img className="notification-list__thumb" src={notification.photo.thumb_url} alt="" loading="lazy" />
                         </Link>
                       )
@@ -160,7 +164,7 @@ export function Notifications() {
                       <Link to={`/perfil/${notification.actor.id}`} className="person-name">
                         {notification.actor.first_name} {notification.actor.last_name}
                       </Link>{' '}
-                      <Link to={target(notification)} onClick={() => open(notification)}>
+                      <Link to={target(notification, user?.id)} onClick={() => open(notification)}>
                         {TEXT[notification.type]}
                         {notification.event && ` «${notification.event.title}»`}
                       </Link>

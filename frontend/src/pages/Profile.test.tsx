@@ -43,6 +43,8 @@ function friendRoutes(overrides = {}) {
         total: 14,
       },
     }),
+    'GET /api/users/2/videos': () => ({ body: { videos: [], next_before: null, total: 0 } }),
+    'GET /api/users/2/wall': () => ({ body: { posts: [], next_before: null } }),
     ...overrides,
   }
 }
@@ -105,7 +107,7 @@ describe('Profile', () => {
 
     expect(await screen.findByText('Solicitud de amistad enviada.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Cancelar solicitud' })).toBeInTheDocument()
-    expect(screen.getByText('Solo sus amigos pueden ver sus fotos y su lista de amigos.')).toBeInTheDocument()
+    expect(screen.getByText('Solo sus amigos pueden ver sus fotos, sus vídeos, su tablón y su lista de amigos.')).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Fotos' })).not.toBeInTheDocument()
   })
 
@@ -117,6 +119,8 @@ describe('Profile', () => {
       'GET /api/users/1/albums': () => ({ body: { albums: [] } }),
       'GET /api/users/1/friends?limit=6': () => ({ body: { friends: [], total: 0 } }),
       'GET /api/users/1/tagged-photos?limit=10': () => ({ body: { photos: [], total: 0 } }),
+      'GET /api/users/1/videos': () => ({ body: { videos: [], next_before: null, total: 0 } }),
+      'GET /api/users/1/wall': () => ({ body: { posts: [], next_before: null } }),
     })
     renderProfile('/perfil/1')
 

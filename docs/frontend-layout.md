@@ -443,7 +443,7 @@ Primitivos compartidos: Module, Avatar, Button, Dropdown, Pager, MediaObject, Co
 - [x] Layout de tres columnas con sus dos puntos de corte.
 - [x] Topbar sticky en el orden original (Inicio, Perfil, Mensajes, Gente, Vídeos) con badge de mensajes sin leer junto a «Mensajes»; los avisos van en la tarjeta de usuario de Inicio.
 - [x] Primitivos: `Avatar` (tamaños), `Button`, `Dropdown`, `Pager`, `MediaObject` e indicador de conexión (punto verde con texto oculto) en el chat.
-- [x] Plantillas: Inicio, Perfil ajeno, Perfil propio.
+- [x] Plantillas: Inicio, Perfil ajeno, Perfil propio, con «Redes», caja de estado (editable en el propio), «Espacio personal» con paginador y «Tablón» con «Responder».
 - [x] Módulos «Eventos» y, debajo, «Calendario» (Hoy / Mañana / Esta semana, con «Crear evento») en Inicio. Sin «Eventos patrocinados».
 - [x] Chat: dock inferior siempre visible con «Chat (n)» (lista de amigos) y los iconos de las conversaciones, ventana flotante y módulo en Inicio; a pantalla completa en móvil. Sin «Ajustes» hasta que haya ajustes de chat.
 - [x] Footer (sin selector de idioma: solo castellano por ahora).
