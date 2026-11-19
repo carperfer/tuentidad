@@ -183,8 +183,8 @@ export class ChatService {
     this.update({ conversations: { ...this.state.conversations, [friendId]: [...current, ...added] } })
   }
 
-  /** Al leer una conversación, sus mensajes dejan de contar como no leídos. */
-  private markRead(friendId: number): void {
+  /** Al leer una conversación (aquí o en Mensajes), sus mensajes dejan de contar como no leídos. */
+  markRead(friendId: number): void {
     const contact = this.state.contacts.find((item) => item.id === friendId)
     if (!contact || contact.unread === 0) return
     this.update({

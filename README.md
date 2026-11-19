@@ -120,8 +120,13 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `POST /api/notifications/read`                    | Sí     | Marcar todos los avisos como leídos |
 | `POST /api/notifications/{id}/read`               | Sí     | Marcar un aviso como leído |
 | `GET /api/chat`                                   | Sí     | Estado del chat: amigos (primero los conectados), mensajes sin leer de cada uno y totales. Marca al usuario como conectado (2 min) |
-| `GET /api/chat/{id}/messages`                     | Sí     | Últimos 50 mensajes con un amigo; con `?after=<id>`, solo los posteriores. Marca como leídos los recibidos |
+| `GET /api/chat/conversations`                     | Sí     | Bandeja de Mensajes: conversaciones con amigos, con el último mensaje y los no leídos |
+| `GET /api/chat/{id}/messages`                     | Sí     | Últimos 50 mensajes con un amigo; con `?after=<id>`, los posteriores, y con `?before=<id>`, los 50 anteriores. Marca como leídos los recibidos |
 | `POST /api/chat/{id}/messages`                    | Sí     | Enviar un mensaje a un amigo (`body`, hasta 1000 caracteres) |
+| `GET /api/videos`                                 | Sí     | Vídeos tuyos y de tus amigos, de 10 en 10 (`?before=<id>`) |
+| `GET /api/users/{id}/videos`                      | Sí     | Vídeos de un usuario (solo él y sus amigos), con `total` |
+| `POST /api/videos`                                | Sí     | Compartir un vídeo de YouTube (`url`, `title`); solo se guarda el id del vídeo |
+| `DELETE /api/videos/{id}`                         | Sí     | Borrar un vídeo propio |
 | `GET /api/events`                                 | Sí     | Eventos propios y a los que estás invitado: próximos y pasados de 20 en 20 (`?past_offset=n`, `past_more`) |
 | `POST /api/events`                                | Sí     | Crear un evento (`title`, `place`, `description`, `starts_at` en ISO UTC, `invite`: ids de amigos). Avisa a los invitados |
 | `GET /api/events/{id}`                            | Sí     | Evento con invitados, respuestas y comentarios (solo quien organiza y sus invitados). Marca como leídos sus avisos |

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes, useLocation } from 'react-router'
 import { describe, expect, it } from 'vitest'
@@ -29,7 +29,10 @@ describe('Topbar', () => {
 
     const nav = await screen.findByRole('navigation', { name: 'Principal' })
     expect(screen.getByRole('link', { name: 'Perfil' })).toHaveClass('active')
-    expect(nav).not.toHaveTextContent('Mensajes')
+    // Orden del Tuenti original; Avisos y Chat no están en la barra
+    expect(within(nav).getAllByRole('link').map((link) => link.textContent)).toEqual(['Inicio', 'Perfil', 'Mensajes', 'Gente', 'Vídeos'])
+    expect(within(nav).getByRole('link', { name: 'Mensajes' })).toHaveAttribute('href', '/mensajes')
+    expect(screen.getByRole('banner')).not.toHaveTextContent(/Avisos|Chat/)
     expect(screen.getByRole('link', { name: /Subir fotos/ })).toHaveAttribute('href', '/subir-fotos')
 
     await user.type(screen.getByRole('searchbox', { name: 'Buscar personas' }), 'Bea{Enter}')

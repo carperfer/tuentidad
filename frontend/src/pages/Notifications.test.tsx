@@ -53,11 +53,11 @@ describe('Notifications', () => {
       '/albumes/5/fotos/10',
     )
     expect(screen.getByRole('link', { name: 'te ha enviado una solicitud de amistad' })).toHaveAttribute('href', '/gente')
-    expect(screen.getByRole('link', { name: /Avisos 2 sin leer/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Avisos (2) sin leer' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Marcar todos como leídos' }))
 
-    await waitFor(() => expect(screen.getByRole('link', { name: 'Avisos' })).not.toHaveTextContent('sin leer'))
+    await waitFor(() => expect(screen.getByRole('link', { name: 'Avisos (0)' })).toBeInTheDocument())
     expect(screen.queryByText('(nuevo)')).not.toBeInTheDocument()
   })
 
@@ -83,8 +83,8 @@ describe('Notifications', () => {
     const user = userEvent.setup()
     renderNotifications()
 
-    // Como con RequireAuth en la app, se espera a la sesión (la topbar) antes de usar la página
-    await screen.findByRole('link', { name: 'Avisos' })
+    // Como con RequireAuth en la app, se espera a la sesión (la tarjeta de usuario) antes de usar la página
+    await screen.findByRole('link', { name: /^Avisos \(/ })
     await user.click(await screen.findByRole('button', { name: 'Eventos' }))
     expect(await screen.findByText('No tienes avisos de este tipo.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Eventos', pressed: true })).toBeInTheDocument()
@@ -99,7 +99,7 @@ describe('Notifications', () => {
     expect(await screen.findByText('Otra página')).toBeInTheDocument()
   })
 
-  it('shows the unread count in the topbar and the new tags in the user card', async () => {
+  it('shows the unread count and the new tags in the user card', async () => {
     mockApi({
       'GET /api/auth/me': () => ({ body: { user: ana } }),
       'GET /api/notifications/unread': () => ({ body: { unread: { ...noUnread, total: 3, photo_tag: 2, photo_comment: 1 } } }),
@@ -107,7 +107,7 @@ describe('Notifications', () => {
     })
     renderNotifications()
 
-    expect(await screen.findByRole('link', { name: 'Avisos 3 sin leer' })).toHaveAttribute('href', '/avisos')
+    expect(await screen.findByRole('link', { name: 'Avisos (3) sin leer' })).toHaveAttribute('href', '/avisos')
     expect(screen.getByRole('link', { name: '2 etiquetas nuevas' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '1 comentario nuevo' })).toBeInTheDocument()
     expect(screen.getByText(/No tienes avisos/)).toBeInTheDocument()

@@ -3,6 +3,7 @@ import { Layout } from './components/Layout'
 import { RequireAuth, RequireGuest } from './components/RequireAuth'
 import { Album } from './pages/Album'
 import { Albums } from './pages/Albums'
+import { Conversation } from './pages/Conversation'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Friends } from './pages/Friends'
 import { Event } from './pages/Event'
@@ -13,6 +14,7 @@ import { Privacy } from './pages/legal/Privacy'
 import { Terms } from './pages/legal/Terms'
 import { Home } from './pages/Home'
 import { Landing } from './pages/Landing'
+import { Messages } from './pages/Messages'
 import { NotFound } from './pages/NotFound'
 import { Notifications } from './pages/Notifications'
 import { People } from './pages/People'
@@ -23,6 +25,7 @@ import { Register } from './pages/Register'
 import { ResetPassword } from './pages/ResetPassword'
 import { TaggedPhotos } from './pages/TaggedPhotos'
 import { UploadPhotos } from './pages/UploadPhotos'
+import { Videos } from './pages/Videos'
 
 export function App() {
   return (
@@ -91,6 +94,30 @@ export function App() {
           element={
             <RequireAuth>
               <EventForm />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="mensajes"
+          element={
+            <RequireAuth>
+              <Messages />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="mensajes/:id"
+          element={
+            <RequireAuth>
+              <Conversation />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="videos"
+          element={
+            <RequireAuth>
+              <Videos />
             </RequireAuth>
           }
         />

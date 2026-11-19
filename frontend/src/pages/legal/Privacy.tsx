@@ -40,6 +40,12 @@ export function Privacy() {
           legal: la ejecución del servicio.
         </li>
         <li>
+          <strong>Vídeos:</strong> los enlaces de YouTube que compartes y su título, que solo ven tus amigos. La página no
+          carga nada de YouTube hasta que pulsas para reproducir un vídeo; entonces se reproduce desde
+          youtube-nocookie.com y Google recibe los datos técnicos de esa reproducción. Base legal: la ejecución del
+          servicio.
+        </li>
+        <li>
           <strong>Eventos:</strong> los eventos que organizas, a quién invitas, tus respuestas y tus comentarios. Solo los
           ven quien organiza y sus invitados. Si dejas ver tu fecha de nacimiento a tus amigos, tu cumpleaños aparece en
           su calendario. Si dices que vas o que quizás vas, te enviamos un recordatorio por email el día antes. Base

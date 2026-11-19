@@ -62,6 +62,10 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->post('photos/(:num)/comments', 'Photos::comment/$1');
         $routes->delete('photo-comments/(:num)', 'Photos::deleteComment/$1');
         $routes->get('users/(:num)/tagged-photos', 'Photos::tagged/$1');
+        $routes->get('videos', 'Videos::feed');
+        $routes->post('videos', 'Videos::create');
+        $routes->delete('videos/(:num)', 'Videos::delete/$1');
+        $routes->get('users/(:num)/videos', 'Videos::ofUser/$1');
         $routes->get('calendar', 'Events::calendar');
         $routes->get('events', 'Events::index');
         $routes->post('events', 'Events::create');
@@ -74,6 +78,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->post('events/(:num)/comments', 'Events::comment/$1');
         $routes->delete('event-comments/(:num)', 'Events::deleteComment/$1');
         $routes->get('chat', 'Chat::status');
+        $routes->get('chat/conversations', 'Chat::conversations');
         $routes->get('chat/(:num)/messages', 'Chat::messages/$1');
         $routes->post('chat/(:num)/messages', 'Chat::send/$1');
         $routes->get('notifications', 'Notifications::index');

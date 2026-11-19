@@ -99,6 +99,11 @@ class Account extends ApiController
                 ->groupStart()->where('messages.sender_id', $userId)->orWhere('messages.recipient_id', $userId)->groupEnd()
                 ->orderBy('messages.id')
                 ->get()->getResultArray(),
+            'videos' => $db->table('videos')
+                ->select("title, CONCAT('https://www.youtube.com/watch?v=', youtube_id) AS url, created_at", false)
+                ->where('user_id', $userId)
+                ->orderBy('id')
+                ->get()->getResultArray(),
             'events_organized' => $this->withIntIds($db->table('events')
                 ->select('id, title, place, description, starts_at, created_at')
                 ->where('user_id', $userId)

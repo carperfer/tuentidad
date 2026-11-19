@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { useAuth } from '../auth/context'
 import { useUnreadCounts } from '../lib/useUnreadCounts'
 import { Avatar } from './ui/Avatar'
+import { Counter } from './ui/Module'
 
 type UserCardProps = {
   friendsCount?: number
@@ -36,6 +37,17 @@ export function UserCard({ friendsCount, pendingRequests = 0 }: UserCardProps) {
           </div>
         </div>
         <ul className="notifications">
+          <li className={unread && unread.total > 0 ? 'notifications__new' : undefined}>
+            <Link to="/avisos">
+              Avisos <Counter value={unread?.total ?? 0} />
+              {unread && unread.total > 0 && (
+                <>
+                  {' '}
+                  <span className="visually-hidden">sin leer</span>
+                </>
+              )}
+            </Link>
+          </li>
           {tags > 0 && (
             <li className="notifications__new">
               <Link to="/avisos">{tags === 1 ? '1 etiqueta nueva' : `${tags} etiquetas nuevas`}</Link>
