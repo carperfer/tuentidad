@@ -205,6 +205,14 @@ Secciones que faltaban respecto a las capturas de `docs/sourceimages/`.
 - [x] Las secciones nuevas entran en la exportación de datos, se borran con la cuenta y aparecen en la política de privacidad
 - [x] Tests: 143 de backend y 69 de frontend; prueba en el navegador con dos usuarios
 
+### Mejoras del tablón
+
+- [x] Hilos de respuestas: «Responder» abre una caja bajo el mensaje; las respuestas cuelgan del mensaje principal (un nivel) y, si hay más de 3, se ven las últimas con «Ver las N respuestas». Aviso `wall_reply` a quien empezó el hilo
+- [x] Emoticonos: botón ☺ con una paleta de emojis que se insertan donde está el cursor
+- [x] Enlaces: se convierten en enlaces y el primero muestra un cuadro con foto, título y resumen que el servidor lee de la página (Open Graph, Twitter Cards o `<title>` y la descripción). Vista previa mientras se escribe, con ✕ para quitarla. La foto se guarda reducida en el servidor (la CSP sigue sin permitir imágenes de fuera) y la petición se protege contra SSRF
+- [x] Privacidad: la política explica que el servidor visita los enlaces; las tarjetas sin mensajes se borran
+- [x] Tests: 152 de backend y 73 de frontend, con hilos, emojis (utf8mb4 también en la base de datos de tests) y tarjetas
+
 ## Seguimiento obligatorio de prompts
 
 En cada sprint:

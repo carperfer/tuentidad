@@ -11,6 +11,7 @@ export type NotificationType =
   | 'event_comment'
   | 'event_reminder'
   | 'wall_post'
+  | 'wall_reply'
 
 export type NotificationGroup = 'photos' | 'friends' | 'events'
 
@@ -20,6 +21,8 @@ export type Notification = {
   actor: Person
   photo: { id: number; album_id: number; thumb_url: string } | null
   event: { id: number; title: string } | null
+  /** Tablón en el que está el mensaje (wall_post y wall_reply). */
+  wall: { profile_id: number } | null
   created_at: string
   read: boolean
 }

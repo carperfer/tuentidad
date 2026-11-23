@@ -85,9 +85,11 @@ El contenedor `frontend` instala las dependencias al arrancar en su propio volum
 | `PUT /api/profile/settings`                       | Sí     | Ajustes de la cuenta: emails de resumen (`digest`: `none`, `daily` o `weekly`) |
 | `PUT /api/profile/networks`                       | Sí     | «Redes»: estudios, trayectoria profesional y colegios con sus años (`items`, hasta 20) y su privacidad (`visibility`); sustituye la lista |
 | `PUT /api/profile/links`                          | Sí     | Enlaces a redes sociales conocidas (`links`, hasta 8) y su privacidad (`visibility`); sustituye la lista |
-| `GET /api/users/{id}/wall`                        | Sí     | Tablón de un usuario, de 10 en 10 (`?before=<id>`); solo él y sus amigos |
-| `POST /api/users/{id}/wall`                       | Sí     | Escribir en el tablón (`body`, hasta 1000 caracteres); avisa al dueño |
-| `DELETE /api/wall-posts/{id}`                     | Sí     | Borrar un mensaje del tablón: su autor o el dueño del tablón |
+| `GET /api/users/{id}/wall`                        | Sí     | Tablón de un usuario, de 10 en 10 (`?before=<id>`), cada mensaje con sus respuestas y la tarjeta de su enlace; solo él y sus amigos |
+| `POST /api/users/{id}/wall`                       | Sí     | Escribir en el tablón (`body`, hasta 1000 caracteres); con `parent_id`, responder en el hilo de ese mensaje; `link_preview: false` publica sin tarjeta. Avisa al dueño y, en las respuestas, a quien empezó el hilo |
+| `DELETE /api/wall-posts/{id}`                     | Sí     | Borrar un mensaje del tablón: su autor o el dueño del tablón (con su hilo de respuestas) |
+| `POST /api/link-previews`                         | Sí     | Tarjeta (título, resumen, web y foto) del primer enlace de `url`, leída por el servidor; `null` si no se puede leer |
+| `GET /api/link-previews/{id}/image`               | Sí     | Foto reducida de una tarjeta de enlace |
 | `POST /api/profile/avatar`                        | Sí     | Subir foto JPG, PNG o WebP de hasta 2 MB (máximo 4000 × 4000 px)                                                                                                   |
 | `GET /api/dashboard`                              | Sí     | Resumen de amistades e invitaciones propias                                                                                                                        |
 | `GET /api/account/export`                         | Sí     | Descarga en JSON de todos los datos de la cuenta (RGPD) |

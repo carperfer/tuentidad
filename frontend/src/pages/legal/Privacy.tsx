@@ -33,8 +33,16 @@ export function Privacy() {
         <li>
           <strong>Amigos, fotos, etiquetas y comentarios:</strong> tus amistades y solicitudes, los álbumes y fotos que
           subes (solo los ven tus amigos; al subirlas se eliminan sus metadatos, como la ubicación), las etiquetas en
-          las que sales (puedes quitarlas tú), los comentarios que escribes y los mensajes del tablón (los ven la persona
-          y sus amigos; los borran su autor y el dueño del tablón). Base legal: la ejecución del servicio.
+          las que sales (puedes quitarlas tú), los comentarios que escribes y los mensajes del tablón y sus respuestas
+          (los ven la persona y sus amigos; los borran su autor y el dueño del tablón). Base legal: la ejecución del
+          servicio.
+        </li>
+        <li>
+          <strong>Enlaces en el tablón:</strong> si un mensaje lleva un enlace, nuestro servidor visita esa página para
+          mostrar su título, su resumen y su foto, y guarda una copia reducida de la foto. Así quien lee el tablón no
+          carga nada de la otra web; esa web solo ve una visita de nuestro servidor, nunca tus datos. Puedes quitar la
+          vista previa antes de publicar, y se borra cuando ya no la usa ningún mensaje. Base legal: la ejecución del
+          servicio.
         </li>
         <li>
           <strong>Chat:</strong> los mensajes que envías y recibes, que solo ven las dos personas de la conversación, y

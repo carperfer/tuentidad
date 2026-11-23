@@ -36,6 +36,7 @@ export const noUnread = {
   event_comment: 0,
   event_reminder: 0,
   wall_post: 0,
+  wall_reply: 0,
 }
 
 const defaults: Record<string, Handler> = {

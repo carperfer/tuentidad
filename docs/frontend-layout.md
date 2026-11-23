@@ -228,6 +228,8 @@ Hay **dos variantes de cabecera** (las capturas muestran ambas generaciones de d
 ### 7.3 `Composer` (escribir en el tablón)
 
 - Caja gris con borde; avatar del usuario actual (~32 px) a la izquierda; textarea de una línea "Escribe aquí…" que se expande al enfocar y muestra botón de enviar.
+- A la derecha de la caja, botón ☺ con la paleta de emoticonos. Si el texto lleva un enlace, debajo aparece su tarjeta (foto 120×90, título en azul, resumen de dos líneas y web en gris) con una ✕ para quitarla.
+- Las respuestas de un mensaje van sangradas debajo, con una línea azul clara a la izquierda, avatar de 32 px y su propia caja compacta al pulsar **Responder**.
 
 ### 7.4 `WallPost` / `FeedItem`
 

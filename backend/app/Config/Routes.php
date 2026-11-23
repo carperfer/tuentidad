@@ -50,6 +50,8 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function (R
         $routes->get('users/(:num)/wall', 'Wall::index/$1');
         $routes->post('users/(:num)/wall', 'Wall::create/$1');
         $routes->delete('wall-posts/(:num)', 'Wall::delete/$1');
+        $routes->post('link-previews', 'LinkPreviews::create');
+        $routes->get('link-previews/(:num)/image', 'LinkPreviews::image/$1');
         $routes->post('profile/avatar', 'Profiles::uploadAvatar');
         $routes->get('users/(:num)/albums', 'Albums::index/$1');
         $routes->post('albums', 'Albums::create');

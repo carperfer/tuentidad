@@ -2,6 +2,8 @@
 
 namespace Config;
 
+use App\Libraries\LinkPreviewer;
+use App\Libraries\PhotoProcessor;
 use CodeIgniter\Config\BaseService;
 
 /**
@@ -29,4 +31,16 @@ class Services extends BaseService
      *     return new \CodeIgniter\Example();
      * }
      */
+
+    /**
+     * Lector de páginas para las tarjetas de los enlaces del tablón.
+     */
+    public static function linkPreviewer(bool $getShared = true): LinkPreviewer
+    {
+        if ($getShared) {
+            return static::getSharedInstance('linkPreviewer');
+        }
+
+        return new LinkPreviewer(new PhotoProcessor(WRITEPATH . 'uploads/link-previews'));
+    }
 }

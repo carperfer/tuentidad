@@ -20,6 +20,7 @@ export function UserCard({ friendsCount, pendingRequests = 0 }: UserCardProps) {
   const events = (unread?.event_invite ?? 0) + (unread?.event_comment ?? 0) + (unread?.event_reminder ?? 0)
   const friends = (unread?.friend_accepted ?? 0) + (unread?.invitation_accepted ?? 0)
   const wall = unread?.wall_post ?? 0
+  const replies = unread?.wall_reply ?? 0
 
   return (
     <section className="module user-card" aria-label="Tu cuenta">
@@ -74,6 +75,11 @@ export function UserCard({ friendsCount, pendingRequests = 0 }: UserCardProps) {
           {wall > 0 && (
             <li className="notifications__new">
               <Link to={`/perfil/${user.id}`}>{wall === 1 ? '1 mensaje en tu tablón' : `${wall} mensajes en tu tablón`}</Link>
+            </li>
+          )}
+          {replies > 0 && (
+            <li className="notifications__new">
+              <Link to="/avisos">{replies === 1 ? '1 respuesta a tus mensajes' : `${replies} respuestas a tus mensajes`}</Link>
             </li>
           )}
           {events > 0 && (

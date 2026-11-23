@@ -29,6 +29,7 @@ const TEXT: Record<NotificationType, string> = {
   event_comment: 'ha comentado en',
   event_reminder: 'te recuerda que mañana es',
   wall_post: 'ha escrito en tu tablón',
+  wall_reply: 'ha respondido a tu mensaje en un tablón',
 }
 
 const FILTERS: { group: NotificationGroup | null; label: string }[] = [
@@ -42,6 +43,7 @@ function target(notification: Notification, userId: number | undefined): string 
   if (notification.photo) return `/albumes/${notification.photo.album_id}/fotos/${notification.photo.id}`
   if (notification.event) return `/eventos/${notification.event.id}`
   if (notification.type === 'friend_request') return '/gente'
+  if (notification.wall) return `/perfil/${notification.wall.profile_id}`
   if (notification.type === 'wall_post') return `/perfil/${userId}`
   return `/perfil/${notification.actor.id}`
 }

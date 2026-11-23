@@ -27,7 +27,8 @@ class Notifications extends ApiController
         }
 
         $query = $this->visible()
-            ->select('notifications.id AS notification_id, notifications.type, notifications.photo_id, notifications.event_id, notifications.created_at, notifications.read_at, photos.album_id, events.title AS event_title, ' . self::PERSON_COLUMNS)
+            ->select('notifications.id AS notification_id, notifications.type, notifications.photo_id, notifications.event_id, notifications.created_at, notifications.read_at, photos.album_id, events.title AS event_title, wall_posts.profile_id AS wall_profile_id, ' . self::PERSON_COLUMNS)
+            ->join('wall_posts', 'wall_posts.id = notifications.wall_post_id', 'left')
             ->join('users', 'users.id = notifications.actor_id')
             ->join('welcome_profiles', 'welcome_profiles.user_id = users.id', 'left')
             ->orderBy('notifications.id', 'DESC')
@@ -54,6 +55,8 @@ class Notifications extends ApiController
                 'thumb_url' => "/api/photos/{$row['photo_id']}/thumb",
             ],
             'event'      => $row['event_id'] === null ? null : ['id' => (int) $row['event_id'], 'title' => $row['event_title']],
+            // Tablón en el que está el mensaje
+            'wall'       => $row['wall_profile_id'] === null ? null : ['profile_id' => (int) $row['wall_profile_id']],
             'created_at' => $row['created_at'],
             'read'       => $row['read_at'] !== null,
         ], $rows);

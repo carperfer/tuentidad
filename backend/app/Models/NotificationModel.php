@@ -13,7 +13,7 @@ class NotificationModel extends Model
         'photo_tag', 'photo_comment',
         'friend_request', 'friend_accepted', 'invitation_accepted',
         'event_invite', 'event_comment', 'event_reminder',
-        'wall_post',
+        'wall_post', 'wall_reply',
     ];
 
     /**
@@ -21,7 +21,7 @@ class NotificationModel extends Model
      */
     public const GROUPS = [
         'photos'  => ['photo_tag', 'photo_comment'],
-        'friends' => ['friend_request', 'friend_accepted', 'invitation_accepted', 'wall_post'],
+        'friends' => ['friend_request', 'friend_accepted', 'invitation_accepted', 'wall_post', 'wall_reply'],
         'events'  => ['event_invite', 'event_comment', 'event_reminder'],
     ];
 
@@ -39,6 +39,7 @@ class NotificationModel extends Model
         'event_comment'       => 'ha comentado en un evento',
         'event_reminder'      => 'te recuerda un evento de mañana',
         'wall_post'           => 'ha escrito en tu tablón',
+        'wall_reply'          => 'ha respondido a tu mensaje en un tablón',
     ];
 
     protected $table         = 'notifications';

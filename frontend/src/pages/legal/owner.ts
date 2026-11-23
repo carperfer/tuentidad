@@ -7,5 +7,5 @@ export const OWNER = {
   taxId: '[NIF]',
   address: '[Dirección postal]',
   email: '[Email de contacto]',
-  updated: '18 de noviembre de 2026',
+  updated: '20 de noviembre de 2026',
 }

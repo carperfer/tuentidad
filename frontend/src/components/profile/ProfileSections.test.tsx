@@ -79,7 +79,7 @@ describe('Perfil: Redes, estado, espacio personal y tablón', () => {
       'GET /api/users/2/wall': () => ({ body: { posts: [], next_before: null } }),
       'POST /api/users/2/wall': () => ({
         status: 201,
-        body: { post: { id: 5, author: { ...ana, avatar_url: null }, body: '¡Felicidades!', created_at: '2026-11-19 10:00:00', can_delete: true } },
+        body: { post: { id: 5, author: { ...ana, avatar_url: null }, body: '¡Felicidades!', created_at: '2026-11-19 10:00:00', can_delete: true, parent_id: null, link_preview: null, replies: [] } },
       }),
       'DELETE /api/wall-posts/5': () => ({ body: { message: 'Mensaje borrado.' } }),
     })

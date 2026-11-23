@@ -1,22 +1,26 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { errorMessage, fieldErrors } from '../../api/client'
-import { deleteWallPost, listWall, writeOnWall, type WallPost } from '../../api/wall'
+import { deleteWallPost, listWall, writeOnWall, type WallPost, type WallReply } from '../../api/wall'
 import { useAuth } from '../../auth/context'
 import { formatLong } from '../../lib/dates'
+import { linkify } from '../../lib/links'
 import { Alert } from '../Alert'
-import { Avatar } from '../ui/Avatar'
+import { Avatar, type AvatarSize } from '../ui/Avatar'
 import { MediaObject } from '../ui/MediaObject'
 import { Module } from '../ui/Module'
+import { LinkPreviewCard } from '../wall/LinkPreviewCard'
+import { WallComposer } from '../wall/WallComposer'
 
-/** «Tablón» del perfil: caja para escribir y mensajes de la persona y sus amigos (guía §7.3 y §7.4). */
+/** Respuestas que se ven de un hilo antes de pulsar «Ver todas». */
+const VISIBLE_REPLIES = 3
+
+/** «Tablón» del perfil: caja para escribir y mensajes de la persona y sus amigos con sus hilos de respuestas (guía §7.3 y §7.4). */
 export function WallModule({ userId, own, firstName }: { userId: number; own: boolean; firstName: string }) {
   const { user } = useAuth()
   const [posts, setPosts] = useState<WallPost[] | null>(null)
   const [nextBefore, setNextBefore] = useState<number | null>(null)
-  const [body, setBody] = useState('')
   const [error, setError] = useState('')
-  const [sending, setSending] = useState(false)
 
   useEffect(() => {
     listWall(userId)
@@ -27,26 +31,37 @@ export function WallModule({ userId, own, firstName }: { userId: number; own: bo
       .catch((caught: unknown) => setError(errorMessage(caught)))
   }, [userId])
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (body.trim() === '') return
-    setSending(true)
+  async function publish(body: string, linkPreview: boolean) {
     setError('')
     try {
-      const { post } = await writeOnWall(userId, body)
+      const { post } = await writeOnWall(userId, { body, linkPreview })
       setPosts((current) => [post, ...(current ?? [])])
-      setBody('')
     } catch (caught) {
       setError(fieldErrors(caught).body ?? errorMessage(caught))
-    } finally {
-      setSending(false)
+      throw caught
+    }
+  }
+
+  async function reply(parent: WallPost, body: string, linkPreview: boolean) {
+    setError('')
+    try {
+      const { post } = await writeOnWall<WallReply>(userId, { body, parentId: parent.id, linkPreview })
+      setPosts((current) => current?.map((item) => (item.id === parent.id ? { ...item, replies: [...item.replies, post] } : item)) ?? null)
+    } catch (caught) {
+      setError(fieldErrors(caught).body ?? errorMessage(caught))
+      throw caught
     }
   }
 
   async function handleDelete(id: number) {
     try {
       await deleteWallPost(id)
-      setPosts((current) => current?.filter((post) => post.id !== id) ?? null)
+      setPosts(
+        (current) =>
+          current
+            ?.filter((post) => post.id !== id)
+            .map((post) => ({ ...post, replies: post.replies.filter((item) => item.id !== id) })) ?? null,
+      )
     } catch (caught) {
       setError(errorMessage(caught))
     }
@@ -65,23 +80,12 @@ export function WallModule({ userId, own, firstName }: { userId: number; own: bo
 
   return (
     <Module title="Tablón" className="wall">
-      <form className="composer" onSubmit={handleSubmit}>
-        <Avatar src={user?.avatar_url} name={user?.first_name ?? ''} size={32} decorative />
-        <label className="visually-hidden" htmlFor={`wall-${userId}`}>
-          {own ? 'Escribe en tu tablón' : `Escribe en el tablón de ${firstName}`}
-        </label>
-        <textarea
-          id={`wall-${userId}`}
-          rows={2}
-          maxLength={1000}
-          placeholder="Escribe aquí…"
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-        />
-        <button type="submit" className="button" disabled={sending || body.trim() === ''}>
-          Publicar
-        </button>
-      </form>
+      <WallComposer
+        id={`wall-${userId}`}
+        label={own ? 'Escribe en tu tablón' : `Escribe en el tablón de ${firstName}`}
+        leading={<Avatar src={user?.avatar_url} name={user?.first_name ?? ''} size={32} decorative />}
+        onSubmit={publish}
+      />
       {error && <Alert>{error}</Alert>}
       {posts === null ? (
         !error && <p className="status">Cargando tablón…</p>
@@ -91,38 +95,7 @@ export function WallModule({ userId, own, firstName }: { userId: number; own: bo
         <ul className="media-list">
           {posts.map((post) => (
             <li key={post.id}>
-              <MediaObject
-                media={
-                  <Link to={`/perfil/${post.author.id}`} tabIndex={-1} aria-hidden="true">
-                    <Avatar src={post.author.avatar_url} name={post.author.first_name} size={40} decorative />
-                  </Link>
-                }
-                aside={
-                  <span className="wall__actions">
-                    {own && post.author.id !== user?.id && <Link to={`/perfil/${post.author.id}`}>Responder</Link>}
-                    {post.can_delete && (
-                      <button
-                        type="button"
-                        className="link-button"
-                        aria-label={`Borrar el mensaje de ${post.author.first_name}`}
-                        onClick={() => handleDelete(post.id)}
-                      >
-                        Borrar
-                      </button>
-                    )}
-                  </span>
-                }
-              >
-                <p className="feed__line">
-                  <Link to={`/perfil/${post.author.id}`} className="person-name">
-                    {post.author.first_name} {post.author.last_name}
-                  </Link>{' '}
-                  <time className="muted" dateTime={post.created_at}>
-                    {formatLong(post.created_at)}
-                  </time>
-                </p>
-                <p className="comment__body">{post.body}</p>
-              </MediaObject>
+              <WallThread post={post} userId={userId} onReply={reply} onDelete={handleDelete} />
             </li>
           ))}
         </ul>
@@ -135,5 +108,114 @@ export function WallModule({ userId, own, firstName }: { userId: number; own: bo
         </p>
       )}
     </Module>
+  )
+}
+
+function WallThread({
+  post,
+  userId,
+  onReply,
+  onDelete,
+}: {
+  post: WallPost
+  userId: number
+  onReply: (parent: WallPost, body: string, linkPreview: boolean) => Promise<void>
+  onDelete: (id: number) => void
+}) {
+  const { user } = useAuth()
+  const [replying, setReplying] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const hidden = expanded ? 0 : Math.max(0, post.replies.length - VISIBLE_REPLIES)
+  const replies = post.replies.slice(hidden)
+
+  return (
+    <>
+      <WallEntry entry={post} avatarSize={40} onDelete={onDelete} onReply={() => setReplying(true)} />
+      {(post.replies.length > 0 || replying) && (
+        <div className="wall__thread">
+          {hidden > 0 && (
+            <button type="button" className="link-button wall__more" onClick={() => setExpanded(true)}>
+              Ver las {post.replies.length} respuestas
+            </button>
+          )}
+          {replies.length > 0 && (
+            <ul className="wall__replies">
+              {replies.map((item) => (
+                <li key={item.id}>
+                  <WallEntry entry={item} avatarSize={32} onDelete={onDelete} onReply={() => setReplying(true)} />
+                </li>
+              ))}
+            </ul>
+          )}
+          {replying && (
+            <WallComposer
+              id={`wall-${userId}-reply-${post.id}`}
+              label={`Responde a ${post.author.first_name}`}
+              placeholder="Escribe una respuesta…"
+              submitLabel="Responder"
+              leading={<Avatar src={user?.avatar_url} name={user?.first_name ?? ''} size={24} decorative />}
+              autoFocus
+              compact
+              onSubmit={(body, linkPreview) => onReply(post, body, linkPreview)}
+            />
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
+function WallEntry({
+  entry,
+  avatarSize,
+  onReply,
+  onDelete,
+}: {
+  entry: WallReply
+  avatarSize: AvatarSize
+  onReply: () => void
+  onDelete: (id: number) => void
+}) {
+  return (
+    <MediaObject
+      media={
+        <Link to={`/perfil/${entry.author.id}`} tabIndex={-1} aria-hidden="true">
+          <Avatar src={entry.author.avatar_url} name={entry.author.first_name} size={avatarSize} decorative />
+        </Link>
+      }
+      aside={
+        <span className="wall__actions">
+          <button
+            type="button"
+            className="link-button"
+            aria-label={`Responder al mensaje de ${entry.author.first_name}`}
+            onClick={onReply}
+          >
+            Responder
+          </button>
+          {entry.can_delete && (
+            <button
+              type="button"
+              className="link-button"
+              aria-label={`Borrar el mensaje de ${entry.author.first_name}`}
+              onClick={() => onDelete(entry.id)}
+            >
+              Borrar
+            </button>
+          )}
+        </span>
+      }
+    >
+      <p className="feed__line">
+        <Link to={`/perfil/${entry.author.id}`} className="person-name">
+          {entry.author.first_name} {entry.author.last_name}
+        </Link>{' '}
+        <time className="muted" dateTime={entry.created_at}>
+          {formatLong(entry.created_at)}
+        </time>
+      </p>
+      <p className="comment__body">{linkify(entry.body)}</p>
+      {entry.link_preview && <LinkPreviewCard preview={entry.link_preview} />}
+    </MediaObject>
   )
 }

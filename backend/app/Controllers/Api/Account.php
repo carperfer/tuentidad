@@ -3,6 +3,7 @@
 namespace App\Controllers\Api;
 
 use App\Libraries\PhotoProcessor;
+use App\Models\LinkPreviewModel;
 use App\Models\UserModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use RuntimeException;
@@ -107,18 +108,18 @@ class Account extends ApiController
                 ->orderBy('position')
                 ->get()->getResultArray(),
             'social_links' => array_column($db->table('profile_links')->select('url')->where('user_id', $userId)->orderBy('position')->get()->getResultArray(), 'url'),
-            'wall_posts_written' => $db->table('wall_posts')
-                ->select("CONCAT(owner.first_name, ' ', owner.last_name) AS profile, wall_posts.body, wall_posts.created_at", false)
+            'wall_posts_written' => $this->withReplyFlag($db->table('wall_posts')
+                ->select("CONCAT(owner.first_name, ' ', owner.last_name) AS profile, wall_posts.parent_id IS NOT NULL AS is_reply, wall_posts.body, wall_posts.created_at", false)
                 ->join('users AS owner', 'owner.id = wall_posts.profile_id')
                 ->where('wall_posts.author_id', $userId)
                 ->orderBy('wall_posts.id')
-                ->get()->getResultArray(),
-            'wall_posts_received' => $db->table('wall_posts')
-                ->select("CONCAT(author.first_name, ' ', author.last_name) AS author, wall_posts.body, wall_posts.created_at", false)
+                ->get()->getResultArray()),
+            'wall_posts_received' => $this->withReplyFlag($db->table('wall_posts')
+                ->select("CONCAT(author.first_name, ' ', author.last_name) AS author, wall_posts.parent_id IS NOT NULL AS is_reply, wall_posts.body, wall_posts.created_at", false)
                 ->join('users AS author', 'author.id = wall_posts.author_id')
                 ->where('wall_posts.profile_id', $userId)
                 ->orderBy('wall_posts.id')
-                ->get()->getResultArray(),
+                ->get()->getResultArray()),
             'videos' => $db->table('videos')
                 ->select("title, CONCAT('https://www.youtube.com/watch?v=', youtube_id) AS url, created_at", false)
                 ->where('user_id', $userId)
@@ -193,6 +194,7 @@ class Account extends ApiController
 
         auth()->logout();
         $this->deleteFiles($filenames, $avatar);
+        model(LinkPreviewModel::class)->deleteUnused();
 
         return $this->message('Tu cuenta y todos tus datos se han borrado.');
     }
@@ -207,6 +209,16 @@ class Account extends ApiController
     private function withIntIds(array $rows, string $column): array
     {
         return array_map(static fn (array $row): array => [...$row, $column => (int) $row[$column]], $rows);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $rows Mensajes del tablón
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function withReplyFlag(array $rows): array
+    {
+        return array_map(static fn (array $row): array => [...$row, 'is_reply' => (bool) $row['is_reply']], $rows);
     }
 
     /**
